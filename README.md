@@ -10,4 +10,4 @@ The main documentation for this project can be found in the wiki here https://gi
 
 My thanks to Adafruit for the ADS1X15 a/d drivers from here, https://github.com/adafruit/Adafruit_ADS1X15
 
-I have made this an open source project with the hope that it maybe useful to others and if found useful that others will get involved and broaden the scope of the project. Please feel free to make suggestions, report bugs or provide positive or negative feedback. I am new to using the Beaglebone, Git and Python so suggestions on how to use features of Beaglebone, Git and Python that I might not be aware of could also be useful.
+I have made this an open source project with the hope that it maybe useful to others and if found useful that others will get involved and broaden the scope of the project. Please feel free to make suggestions, report bugs or provide positive or negative feedback. I am new to using the Beaglebone, Git and Python so suggestions on how to use features of the Beaglebone, Git and Python that I might not be aware of could also be useful.
