@@ -10,23 +10,23 @@ AtoD2 = AtoD.ADS1x15(address=0x4A,ic=0x01, debug=True)
 class Readings:
   """ get and manipulates readings from the real world"""
 
-  real = config['calibrate']['real']
   measured = config['calibrate']['measured']
+  displayed = config['calibrate']['displayed']
   avoffset = 0.0
   for i in range(1,numcells+1):
-    avoffset = avoffset + real[i]-measured[i]
+    avoffset = avoffset + measured[i]-displayed[i]
   avoffset = avoffset/numcells
 
 
   ratio = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
   for i in range(1, numcells+1):
-    ratio[i] = real[i]/(measured[i]+avoffset)
+    ratio[i] = measured[i]/(displayed[i]+avoffset)
   calvolts = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-  realdelta = config['calibrate']['realdelta']
   measureddelta = config['calibrate']['measureddelta']
+  displayeddelta = config['calibrate']['displayeddelta']
 
-  calvolts = [realdelta[i] - measureddelta[i] for i in range(numcells+1)]
+  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
   deltav = [0.0, 3.25, 3.25, 3.25, 3.25, 3.25, 3.25, 3.25, 3.25]
   rawvolts = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   batvolts = [0.0, 3.25, 6.5, 9.75, 13.00, 16.25, 19.50, 22.75, 26.00]
