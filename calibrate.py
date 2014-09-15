@@ -32,6 +32,10 @@ def calibrate():
       printvoltage = ''
       for i in range(numcells+1):
         printvoltage = printvoltage + str(round(batdata.batvolts[i],3)).ljust(5,'0') + ' '
+      printvoltage = printvoltage + '\n'
+      for i in range(1, numcells+1):
+        printvoltage = printvoltage + str(round(batdata.batvolts[i]-batdata.batvolts[i-1],3)).ljust(5,'0') + ' '
+      printvoltage = printvoltage +'\n'
       print (printvoltage)
 
 
