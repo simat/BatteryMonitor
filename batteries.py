@@ -27,6 +27,8 @@ logsummary= summary.Summary()
 summary = logsummary.summary
 
 def deamon(soc=0):
+  """ Main loop, gets battery data, gets summary.py to do logging"""
+  
   prevtime = logsummary.currenttime
   prevbatvoltage = batdata.batvoltsav[numcells]
   soc = soc * 1000
@@ -43,7 +45,7 @@ def deamon(soc=0):
 #          printvoltage = printvoltage + str(round(batdata.batvolts[i],3)).ljust(5,'0') + ' '
 #        print (printvoltage)
         batdata.getraw()
-        if batdata.batvoltsav[numcells] >= 27.6 and prevbatvoltage < 27.6:
+        if batdata.batvoltsav[numcells] >= 27.6 and prevbatvoltage < 27.6:  # reset SOC counter?
           batdata.soc = 0.0
         else:
           batdata.soc = batdata.soc + batdata.batcurrentav*(batdata.sampletime-batdata.oldsampletime)/3600
