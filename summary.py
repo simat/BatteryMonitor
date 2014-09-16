@@ -43,7 +43,7 @@ class Summary:
     self.prevtime = time.localtime()
     try:
       self.summaryfile = SafeConfigParser()
-      self.summaryfile.read('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/summary')
+      self.summaryfile.read(config['files']['summaryfile'])
       self.summary = {}
       for section in self.summaryfile.sections():
         self.summary[section] = {}
@@ -70,6 +70,8 @@ class Summary:
 
 
   def update(self, summary, batdata):
+    """ Update 'current' section of summary data with 'batdata' and write realtime log """
+    
     summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
     if batdata.batcurrentav < 10000:
@@ -111,6 +113,8 @@ class Summary:
     self.logfile.write(currentdata)
 
   def updatesection(self, summary, section, source):
+    """ Update 'summary' section 'section' with data from 'source' """
+    
     summary[section]['deltav'][1] = max(summary[section]['deltav'][1], summary[source]['deltav'][1])
     summary[section]['deltav'][2] = max(summary[section]['deltav'][2], summary[source]['deltav'][2])
     summary[section]['deltav'][0] = min(summary[section]['deltav'][0], summary[source]['deltav'][0])
@@ -125,17 +129,19 @@ class Summary:
     summary[section]['timestamp'] = summary['current']['timestamp']
 
   def writesummary(self):
+    """ Write summary file """
+    
     for section in self.summaryfile.sections():
       for option in self.summaryfile.options(section):
         self.summaryfile.set(section, option, str(self.summary[section][option]))
-    of = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/summary','w')
+    of = open(config['files']['summaryfile'],'w')
     self.summaryfile.write(of)
     of.close()
 
-  def writehour(self, data):
-    hoursummaryfile=open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/hoursummary','a')
-    hoursummaryfile.write(data)
-    hoursummaryfile.close()
+#  def writehour(self, data):
+#    hoursummaryfile=open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/hoursummary','a')
+#    hoursummaryfile.write(data)
+#    hoursummaryfile.close()
 #    logsummary.set('alltime', 'maxvoltages') = round(max(literal_eval(logsummary.get('currentday','maxvoltages')),literal_eval(logsummary.get(),2)
 #    logsummary.set('alltime', 'minvoltages') = round(min(literal_eval(logsummary.get('currentday','minvoltages')),batdata.batvoltsav[8]),2)
 #    logsummary.set('alltime', 'ah') = round(max(literal_eval(logsummary.get('currentday','ah'))[1], batdata.soc/1000),2)
@@ -145,6 +151,7 @@ class Summary:
 
 
   def writeperiod(self, file, data):
+    """ Append 'data' to 'file' for previous period """
     periodfile=open(config['files'][file],'a')
     writestr=''
     y = self.summaryfile.items(data)
@@ -155,22 +162,32 @@ class Summary:
     periodfile.close()
  
   def starthour(self, summary):
+    """ Start new hour """
+    
     summary['hour'] = deepcopy(summary['current'])
 
   def startday(self, summary):
+    """ Start new Day """
+    
     self.writeperiod('daysummaryfile', 'currentday')
     summary['prevday'] = deepcopy(summary['currentday'])
     summary['currentday'] = deepcopy(summary['current'])
 
   def startmonth(self, summary):
+    """ Start new month """
+    
     self.writeperiod('monthsummaryfile', 'monthtodate')
     summary['monthtodate'] = deepcopy(summary['current'])
 
   def startyear(self, summary):
+    """ Start new year """
+    
     self.writeperiod('yearsummaryfile', 'yeartodate')
     summary['yeartodate'] = deepcopy(summary['current'])
 
   def close(self):
+    """ Close logging file ready for exit """
+    
     self.logfile.close()
 
 
