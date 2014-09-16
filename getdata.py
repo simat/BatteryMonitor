@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# *****BatteryMonitor Getdata from battery cells*****
+# *****BatteryMonitor Getdata from battery cells getdata.py*****
 # Copyright (C) 2014 Simon Richard Matthews
 # Project loaction https://github.com/simat/BatteryMonitor
 # This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@ AtoD2 = AtoD.ADS1x15(address=0x4A,ic=0x01, debug=True)
 
 class Readings:
   """ get and manipulates readings from the real world"""
-
+  
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
   avoffset = 0.0
@@ -54,6 +54,8 @@ class Readings:
 
 
   def getatod(self):
+    """ Get data for A/Ds, calibrate, covert and place in list variables"""
+    
     self.oldsampletime=self.sampletime
     sleeptime = max(config['sampling']['sampletime'] - (time.time()-self.oldsampletime), 0.0)
 #	    print sleeptime
@@ -83,7 +85,7 @@ class Readings:
 
 
   def getraw(self):
-    """ gets raw battery data from A to Ds, voltage results in volts, current in milliamps"""
+    """ gets battery data, do averaging, voltage results in volts, current in milliamps"""
     self.getatod()
 
     samplesav = config['sampling']['samplesav']
