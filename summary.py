@@ -171,6 +171,6 @@ class Summary:
     summary['yeartodate'] = deepcopy(summary['current'])
 
   def close(self):
-    logsummary.logfile.close()
+    self.logfile.close()
 
 
