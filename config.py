@@ -19,6 +19,7 @@ from ConfigParser import SafeConfigParser
 class Config:
   def __init__(self):
     configfile = SafeConfigParser()
+#    print configfile
     configfile.read('battery.cfg')
     self.config = {}
     for section in configfile.sections():

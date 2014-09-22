@@ -18,10 +18,16 @@ from config import config
 numcells = config['battery']['numcells']
 import time
 import ADS1x15 as AtoD
-AtoD0 = AtoD.ADS1x15(ic=0x01, debug=True)
-AtoD1 = AtoD.ADS1x15(address=0x49,ic=0x01, debug=True)
-AtoD2 = AtoD.ADS1x15(address=0x4A,ic=0x01, debug=True)
+for i in config['AtoDs']:
+  exec(i + '=' + config['AtoDs'][i])
 
+vin = []
+for i in sorted(config['VoltageInputs']):
+  vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
+#  vin = vin + [config['VoltageInputs'][i]]
+for i in config['CurrentInputs']:
+  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval') 
+ 
 class Readings:
   """ get and manipulates readings from the real world"""
   
@@ -33,20 +39,21 @@ class Readings:
   avoffset = avoffset/numcells
 
 
-  ratio = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  ratio = [ 1.0 for i in range(numcells+1)]
   for i in range(1, numcells+1):
     ratio[i] = measured[i]/(displayed[i]+avoffset)
-  calvolts = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  calvolts = [ 0.0 for i in range(numcells+1)]
 
   measureddelta = config['calibrate']['measureddelta']
   displayeddelta = config['calibrate']['displayeddelta']
 
   calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
-  deltav = [0.0, 3.25, 3.25, 3.25, 3.25, 3.25, 3.25, 3.25, 3.25]
-  rawvolts = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  batvolts = [0.0, 3.25, 6.5, 9.75, 13.00, 16.25, 19.50, 22.75, 26.00]
-  uncalvolts = [0.0, 3.25, 6.5, 9.75, 13.00, 16.25, 19.50, 22.75, 26.00]
-  batvoltsav = [0.0, 3.25, 6.5, 9.75, 13.00, 16.25, 19.50, 22.75, 26.00]
+  deltav = [ 3.25 for i in range(numcells+1)]
+  deltav[0] = 0.0
+  rawvolts = [ 0.0 for i in range(numcells+1)]
+  batvolts = [ i*3.25 for i in range(numcells+1)]
+  uncalvolts = [ i*3.25 for i in range(numcells+1)]
+  batvoltsav = [ i*3.25 for i in range(numcells+1)]
   rawcurrent = 0.0
   batcurrent = 0.0
   batcurrentav = 0.0
@@ -62,12 +69,9 @@ class Readings:
     time.sleep(sleeptime)
     self.sampletime = time.time()
 
-    self.rawvolts[0] = AtoD2.readADCSingleEnded(channel=2, pga=2048, sps=250)/1000 # 0 volts
-
-    for i in range(4):
-      self.rawvolts[i+1] = AtoD0.readADCSingleEnded(channel=i, pga=2048, sps=250)/1000 # A to D 1 to 4 in volts
-      self.rawvolts[i+5] = AtoD1.readADCSingleEnded(channel=i, pga=2048, sps=250)/1000 # A to D 5 to 8 in volts
-    self.rawcurrent = AtoD2.readADCDifferential(chP=0, chN=1, pga=256, sps=250) # Battery current in counts
+    for i in range(len(vin)):
+      self.rawvolts[i+1] = eval(vin[i])/1000 # A to D 1 to 4 in volts
+    self.rawcurrent = eval(config['CurrentInputs']['ibat']) # Battery current in counts
     self.batcurrent = self.rawcurrent*256.0/50.0  # current in mv
     self.batcurrent = self.batcurrent*250.0/50.0 # current in mamp
     self.batvolts[0] = self.rawvolts[0]
