@@ -21,6 +21,7 @@ import ADS1x15 as AtoD
 for i in config['AtoDs']:
   exec(i + '=' + config['AtoDs'][i])
 
+# compile analog capture code to save CPU time
 vin = []
 for i in sorted(config['VoltageInputs']):
   vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]

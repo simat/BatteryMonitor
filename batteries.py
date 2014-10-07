@@ -25,6 +25,13 @@ from getdata import Readings
 batdata = Readings()
 logsummary= summary.Summary()
 summary = logsummary.summary
+import Adafruit_BBIO.GPIO as GPIO
+# Initialise and compile alarms
+for i in config['alarms']:
+  exec(config['alarms'][i][0])
+  config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec') 
+  config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec') 
+
 
 def deamon(soc=0):
   """ Main loop, gets battery data, gets summary.py to do logging"""
@@ -50,6 +57,18 @@ def deamon(soc=0):
         else:
           batdata.soc = batdata.soc + batdata.batcurrentav*(batdata.sampletime-batdata.oldsampletime)/3600
       prevbatvoltage = batdata.batvoltsav[numcells]
+# check alarms
+      minvolts = 5.0
+      maxvolts = 0.0
+      for i in range(1,numcells):
+        minvolts = min(batdata.batvoltsav[i],minvolts)
+        maxvolts = max(batdata.batvoltsav[i],maxvolts)
+      for i in config['alarms']:
+        if config['alarms'][i][1] > minvolts:
+          exec(config['alarms'][i][2])
+        if config['alarms'][i][3] < maxvolts:
+          exec(config['alarms'][i][4])
+# update summaries
       logsummary.update(summary, batdata)
       if logsummary.currenttime[4] <> logsummary.prevtime[4]:  # new minute
         logsummary.updatesection(summary, 'hour', 'current')

@@ -77,8 +77,9 @@ class Summary:
     if batdata.batcurrentav < 10000:
       summary['current']['minnoload'][numcells] = summary['current']['minvoltages'][numcells]
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
-    summary['current']['ah'][1] = round(batdata.soc/1000,2)
-    summary['current']['ah'][0] = summary['current']['ah'][1]
+    summary['current']['ah'][2] = round(batdata.soc/1000,2)
+    summary['current']['ah'][0] = summary['current']['ah'][2]
+    summary['current']['ah'][1] = summary['current']['ah'][2]
     summary['current']['amps'][1] = round(batdata.batcurrentav/1000, 1)
     summary['current']['amps'][0] = summary['current']['amps'][1]
     vprint=''
@@ -98,7 +99,8 @@ class Summary:
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
     vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
     vprint = vprint + str(summary['current']['deltav'][0]) + ' '
-    logdata = vprint + str(round(batdata.batcurrentav/1000,1)) + ' ' + str(round(batdata.soc/1000,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
+    logdata = vprint + str(round(batdata.batcurrentav/1000,1)) + \
+              ' ' + str(round(batdata.soc/1000,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
     self.currenttime = time.localtime()
@@ -115,18 +117,23 @@ class Summary:
   def updatesection(self, summary, section, source):
     """ Update 'summary' section 'section' with data from 'source' """
     
-    summary[section]['deltav'][1] = max(summary[section]['deltav'][1], summary[source]['deltav'][1])
-    summary[section]['deltav'][2] = max(summary[section]['deltav'][2], summary[source]['deltav'][2])
-    summary[section]['deltav'][0] = min(summary[section]['deltav'][0], summary[source]['deltav'][0])
-    summary[section]['ah'][1] = max(summary[section]['ah'][1], summary[source]['ah'][1])
-    summary[section]['ah'][0] = min(summary[section]['ah'][0], summary[source]['ah'][0])
-    summary[section]['amps'][1] = max(summary[section]['amps'][1], summary[source]['amps'][1])
-    summary[section]['amps'][0] = min(summary[section]['amps'][0], summary[source]['amps'][0])     
+    section = summary[section]
+    source = summary[source]
+    section['deltav'][1] = max(section['deltav'][1], source['deltav'][1])
+    section['deltav'][2] = max(section['deltav'][2], source['deltav'][2])
+    section['deltav'][0] = min(section['deltav'][0], source['deltav'][0])
+    section['ah'][2] = max(section['ah'][2], source['ah'][2])
+    section['ah'][0] = min(section['ah'][0], source['ah'][0])
+    section['ah'][1] = (section['ah'][1]*section['ah'][3] + source['ah'][1])
+    section['ah'][3] = section['ah'][3] + 1
+    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 2)
+    section['amps'][1] = max(section['amps'][1], source['amps'][1])
+    section['amps'][0] = min(section['amps'][0], source['amps'][0])     
     for i in range(numcells+1):
-      summary[section]['maxvoltages'][i] = max(summary[section]['maxvoltages'][i], summary[source]['maxvoltages'][i])
-      summary[section]['minvoltages'][i] = min(summary[section]['minvoltages'][i], summary[source]['minvoltages'][i])
-      summary[section]['minnoload'][i] = min(summary[section]['minnoload'][i], summary[source]['minnoload'][i])
-    summary[section]['timestamp'] = summary['current']['timestamp']
+      section['maxvoltages'][i] = max(section['maxvoltages'][i], source['maxvoltages'][i])
+      section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
+      section['minnoload'][i] = min(section['minnoload'][i], source['minnoload'][i])
+    section['timestamp'] = summary['current']['timestamp']
 
   def writesummary(self):
     """ Write summary file """
@@ -163,7 +170,8 @@ class Summary:
  
   def starthour(self, summary):
     """ Start new hour """
-    
+
+    summary['hour']['ah'][3] = 0 # zero # of samples for av  
     summary['hour'] = deepcopy(summary['current'])
 
   def startday(self, summary):
@@ -171,18 +179,21 @@ class Summary:
     
     self.writeperiod('daysummaryfile', 'currentday')
     summary['prevday'] = deepcopy(summary['currentday'])
+    summary['currentday']['ah'][3] = 0 # zero number of samples for av 
     summary['currentday'] = deepcopy(summary['current'])
 
   def startmonth(self, summary):
     """ Start new month """
     
     self.writeperiod('monthsummaryfile', 'monthtodate')
+    summary['monthtodate']['ah'][3] = 0  # zero number of samples for av 
     summary['monthtodate'] = deepcopy(summary['current'])
 
   def startyear(self, summary):
     """ Start new year """
     
     self.writeperiod('yearsummaryfile', 'yeartodate')
+    summary['yeartodate']['ah'][3] = 0  # zero number of samples for av 
     summary['yeartodate'] = deepcopy(summary['current'])
 
   def close(self):
