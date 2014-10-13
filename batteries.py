@@ -18,13 +18,10 @@
 import sys
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
-import summary
 from config import config
 numcells = config['battery']['numcells']
 from getdata import Readings
 batdata = Readings()
-logsummary= summary.Summary()
-summary = logsummary.summary
 import Adafruit_BBIO.GPIO as GPIO
 # Initialise and compile alarms
 for i in config['alarms']:
@@ -35,7 +32,9 @@ for i in config['alarms']:
 
 def deamon(soc=0):
   """ Main loop, gets battery data, gets summary.py to do logging"""
-  
+  import summary
+  logsummary = summary.Summary()
+  summary = logsummary.summary
   prevtime = logsummary.currenttime
   prevbatvoltage = batdata.batvoltsav[numcells]
   soc = soc * 1000
@@ -61,8 +60,8 @@ def deamon(soc=0):
       minvolts = 5.0
       maxvolts = 0.0
       for i in range(1,numcells):
-        minvolts = min(batdata.batvoltsav[i],minvolts)
-        maxvolts = max(batdata.batvoltsav[i],maxvolts)
+        minvolts = min(batdata.deltav[i],minvolts)
+        maxvolts = max(batdata.deltav[i],maxvolts)
       for i in config['alarms']:
         if config['alarms'][i][1] > minvolts:
           exec(config['alarms'][i][2])
