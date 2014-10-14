@@ -1,6 +1,8 @@
 # Editor Backup files and others
 *~
 *old
+battery.cfg
+testing
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
