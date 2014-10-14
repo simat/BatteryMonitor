@@ -74,14 +74,18 @@ class Summary:
     
     summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
-    if batdata.batcurrentav < 10000:
+    if batdata.batcurrentav < 10.0:
       summary['current']['minnoload'][numcells] = summary['current']['minvoltages'][numcells]
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
-    summary['current']['ah'][2] = round(batdata.soc/1000,2)
+    summary['current']['ah'][2] = round(batdata.soc,2)
     summary['current']['ah'][0] = summary['current']['ah'][2]
     summary['current']['ah'][1] = summary['current']['ah'][2]
-    summary['current']['amps'][1] = round(batdata.batcurrentav/1000, 1)
+    summary['current']['amps'][1] = round(batdata.batcurrentav, 1)
     summary['current']['amps'][0] = summary['current']['amps'][1]
+    if batdata.ah > 0.0:
+      summary['current']['ah'][5] = round(batdata.ah,2)
+    else:
+      summary['current']['ah'][4] = round(batdata.ah,2)      
     vprint=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0    
@@ -90,17 +94,17 @@ class Summary:
       maxmaxvoltage = max(maxmaxvoltage, summary['current']['maxvoltages'][i])
       minmaxvoltage = min(minmaxvoltage, summary['current']['maxvoltages'][i])
       summary['current']['minvoltages'][i] = summary['current']['maxvoltages'][i]
-      if batdata.batcurrentav < 10000:
+      if batdata.batcurrentav < 10.0:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]     
       vprint=vprint + str(round(batdata.deltav[i+1],3)).ljust(5,'0') + ' '
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
-    if batdata.batcurrentav < 10000:
+    if batdata.batcurrentav < 10.0:
       summary['current']['deltav'][1] = summary['current']['deltav'][0]
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
     vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
     vprint = vprint + str(summary['current']['deltav'][0]) + ' '
-    logdata = vprint + str(round(batdata.batcurrentav/1000,1)) + \
-              ' ' + str(round(batdata.soc/1000,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
+    logdata = vprint + str(round(batdata.batcurrentav,1)) + \
+              ' ' + str(round(batdata.soc,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
     self.currenttime = time.localtime()
@@ -127,6 +131,8 @@ class Summary:
     section['ah'][1] = (section['ah'][1]*section['ah'][3] + source['ah'][1])
     section['ah'][3] = section['ah'][3] + 1
     section['ah'][1] = round(section['ah'][1]/section['ah'][3], 2)
+    section['ah'][4] = round(section['ah'][4]+source['ah'][4], 2)
+    section['ah'][5] = round(section['ah'][5]+source['ah'][5], 2)
     section['amps'][1] = max(section['amps'][1], source['amps'][1])
     section['amps'][0] = min(section['amps'][0], source['amps'][0])     
     for i in range(numcells+1):
