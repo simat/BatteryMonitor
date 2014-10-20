@@ -70,7 +70,6 @@ def deamon(soc=0):
           exec(config['alarms'][i][4])
 # update summaries
       logsummary.update(summary, batdata)
-      batdata.ah = 0.0
       if logsummary.currenttime[4] <> logsummary.prevtime[4]:  # new minute
         logsummary.updatesection(summary, 'hour', 'current')
         logsummary.updatesection(summary, 'alltime','current')
@@ -78,6 +77,7 @@ def deamon(soc=0):
         logsummary.updatesection(summary, 'monthtodate', 'current')
         logsummary.updatesection(summary, 'yeartodate', 'current')
         logsummary.writesummary()
+        batdata.ah = 0.0
 
       if logsummary.currenttime[3] <> logsummary.prevtime[3]:  # new hour
         logsummary.starthour(summary)

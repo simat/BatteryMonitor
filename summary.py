@@ -84,8 +84,10 @@ class Summary:
     summary['current']['amps'][0] = summary['current']['amps'][1]
     if batdata.ah > 0.0:
       summary['current']['ah'][5] = round(batdata.ah,2)
+      summary['current']['ah'][4] = 0.0      
     else:
-      summary['current']['ah'][4] = round(batdata.ah,2)      
+      summary['current']['ah'][4] = round(batdata.ah,2)
+      summary['current']['ah'][5] = 0.0      
     vprint=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0    
