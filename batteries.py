@@ -88,7 +88,7 @@ def deamon(soc=0):
       if logsummary.currenttime[1] != logsummary.prevtime[1]: # new month
         logsummary.startmonth(summary)
 
-      if logsummary.currenttime[1] != logsummary.prevtime[1]: # new year
+      if logsummary.currenttime[0] != logsummary.prevtime[0]: # new year
         logsummary.startyear(summary)
 
     except KeyboardInterrupt:
