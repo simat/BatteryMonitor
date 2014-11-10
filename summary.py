@@ -132,7 +132,7 @@ class Summary:
     section['ah'][0] = min(section['ah'][0], source['ah'][0])
     section['ah'][1] = (section['ah'][1]*section['ah'][3] + source['ah'][1])
     section['ah'][3] = section['ah'][3] + 1
-    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 2)
+    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 5)
     section['ah'][4] = round(section['ah'][4]+source['ah'][4], 2)
     section['ah'][5] = round(section['ah'][5]+source['ah'][5], 2)
     section['amps'][1] = max(section['amps'][1], source['amps'][1])
