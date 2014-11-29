@@ -16,6 +16,7 @@
 
 import sys
 import time
+from shutil import copy as filecopy
 from copy import deepcopy
 from ast import literal_eval
 from ConfigParser import SafeConfigParser
@@ -110,9 +111,9 @@ class Summary:
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
     self.currenttime = time.localtime()
-    printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
-    summary['current']['timestamp'] = "'" + printtime + "'"
-    currentdata = printtime + logdata
+    self.printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
+    summary['current']['timestamp'] = "'" + self.printtime + "'"
+    currentdata = self.printtime + logdata
 
 #      currentdata = currentdata + '               '
 #      for i in range(numcells):
@@ -196,6 +197,7 @@ class Summary:
     self.writeperiod('monthsummaryfile', 'monthtodate')
     summary['monthtodate']['ah'][3] = 0  # zero number of samples for av 
     summary['monthtodate'] = deepcopy(summary['current'])
+    filecopy(config['files']['summaryfile'],config['files']['summaryfile']+ self.printtime[0:8])
 
   def startyear(self, summary):
     """ Start new year """
