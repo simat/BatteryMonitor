@@ -94,7 +94,9 @@ class Readings:
     self.getatod()
 
     samplesav = config['sampling']['samplesav']
-    self.batah = self.batcurrentav*(self.sampletime-self.oldsampletime)/(3600/config['sampling']['sampletime'])
+    deltatime=(self.sampletime-self.oldsampletime)/(3600/config['sampling']['sampletime'])
+    self.batah = self.batcurrentav*deltatime
+    self.batahadj = (self.batcurrentav+config['battery']['ahloss'])*deltatime
     self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
     for i in range(1,numcells+1):   
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav

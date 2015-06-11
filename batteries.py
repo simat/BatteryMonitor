@@ -42,6 +42,7 @@ def deamon(soc):
     prevtime = logsummary.currenttime
     prevbatvoltage = batdata.batvoltsav[numcells]
     batdata.soc = soc
+    batdata.socadj = soc
 #    logsummary.startday(summary)
 #    logsummary.starthour(summary)
 
@@ -57,8 +58,10 @@ def deamon(soc):
         
           if batdata.batvoltsav[numcells] >= 27.6 and prevbatvoltage < 27.6:  # reset SOC counter?
             batdata.soc = 0.0
+            batdata.socadj = 0.0
           else:
             batdata.soc = batdata.soc + batdata.batah
+            batdata.socadj = batdata.socadj +batdata.batahadj
           batdata.ah = batdata.ah + batdata.batah
         prevbatvoltage = batdata.batvoltsav[numcells]
 # check alarms
@@ -82,6 +85,7 @@ def deamon(soc):
           logsummary.updatesection(summary, 'yeartodate', 'current')
           logsummary.writesummary()
           batdata.ah = 0.0
+          batdata.ahadj = 0.0
 
         if logsummary.currenttime[3] <> logsummary.prevtime[3]:  # new hour
           logsummary.starthour(summary)

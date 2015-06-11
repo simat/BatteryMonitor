@@ -81,6 +81,7 @@ class Summary:
     summary['current']['ah'][2] = round(batdata.soc,2)
     summary['current']['ah'][0] = summary['current']['ah'][2]
     summary['current']['ah'][1] = summary['current']['ah'][2]
+    summary['current']['ah'][6] = round(batdata.socadj,2)
     summary['current']['amps'][1] = round(batdata.batcurrentav, 1)
     summary['current']['amps'][0] = summary['current']['amps'][1]
     if batdata.ah > 0.0:
@@ -136,6 +137,7 @@ class Summary:
     section['ah'][1] = round(section['ah'][1]/section['ah'][3], 6)
     section['ah'][4] = round(section['ah'][4]+source['ah'][4], 2)
     section['ah'][5] = round(section['ah'][5]+source['ah'][5], 2)
+    section['ah'][6] = source['ah'][6]
     section['amps'][1] = max(section['amps'][1], source['amps'][1])
     section['amps'][0] = min(section['amps'][0], source['amps'][0])     
     for i in range(numcells+1):
