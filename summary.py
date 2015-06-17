@@ -81,7 +81,9 @@ class Summary:
     summary['current']['ah'][2] = round(batdata.soc,2)
     summary['current']['ah'][0] = summary['current']['ah'][2]
     summary['current']['ah'][1] = summary['current']['ah'][2]
-    summary['current']['ah'][6] = round(batdata.socadj,2)
+    summary['current']['dod'][2] = round(batdata.socadj,2)
+    summary['current']['dod'][0] = summary['current']['dod'][2]
+    summary['current']['dod'][1] = summary['current']['dod'][2]
     summary['current']['amps'][1] = round(batdata.batcurrentav, 1)
     summary['current']['amps'][0] = summary['current']['amps'][1]
     if batdata.ah > 0.0:
@@ -133,11 +135,15 @@ class Summary:
     section['ah'][2] = max(section['ah'][2], source['ah'][2])
     section['ah'][0] = min(section['ah'][0], source['ah'][0])
     section['ah'][1] = (section['ah'][1]*section['ah'][3] + source['ah'][1])
-    section['ah'][3] = section['ah'][3] + 1
-    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 6)
     section['ah'][4] = round(section['ah'][4]+source['ah'][4], 2)
     section['ah'][5] = round(section['ah'][5]+source['ah'][5], 2)
-    section['ah'][6] = source['ah'][6]
+    section['dod'][2] = max(section['dod'][2], source['dod'][2])
+    section['dod'][0] = min(section['dod'][0], source['dod'][0])
+    section['dod'][1] = (section['dod'][1]*section['ah'][3] + source['dod'][1])
+    section['ah'][3] += 1
+    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 6)
+    section['dod'][1] = round(section['dod'][1]/section['ah'][3], 6)
+    section['dod'][3] = max(section['dod'][3], source['dod'][3])
     section['amps'][1] = max(section['amps'][1], source['amps'][1])
     section['amps'][0] = min(section['amps'][0], source['amps'][0])     
     for i in range(numcells+1):
@@ -190,7 +196,8 @@ class Summary:
     
     self.writeperiod('daysummaryfile', 'currentday')
     summary['prevday'] = deepcopy(summary['currentday'])
-    summary['currentday']['ah'][3] = 0 # zero number of samples for av 
+    summary['currentday']['ah'][3] = 0 # zero number of samples for av
+    summary['current']['dod'][3] += 1 
     summary['currentday'] = deepcopy(summary['current'])
 
   def startmonth(self, summary):
