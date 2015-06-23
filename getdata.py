@@ -58,8 +58,13 @@ class Readings:
   rawcurrent = 0.0
   batcurrent = 0.0
   batcurrentav = 0.0
+  rawincurrent = 0.0
+  incurrent = 0.0
+  incurrentav = 0.0
   soc = 0.0
   batah = 0.0
+  inah = 0.0
+  inahtot = 0.0
   ah = 0.0
   def getatod(self):
     """ Get data for A/Ds, calibrate, covert and place in list variables"""
@@ -73,8 +78,11 @@ class Readings:
     for i in range(len(vin)):
       self.rawvolts[i+1] = eval(vin[i])/1000 # A to D 1 to 4 in volts
     self.rawcurrent = eval(config['CurrentInputs']['ibat']) # Battery current in counts
-    self.batcurrent = self.rawcurrent*256.0/50.0  # current in mv
-    self.batcurrent = self.batcurrent*250.0/50000.0 # current in amp
+    self.batcurrent = self.rawcurrent*256.0/32767.0  # current in mv
+    self.batcurrent = self.batcurrent*250.0/75.0 # current in amp
+    self.rawincurrent = eval(config['CurrentInputs']['iin']) # Battery current in counts
+    self.incurrent = self.rawincurrent*256.0/32767.0  # current in mv
+    self.incurrent = self.incurrent*100.0/75.0 # current in amp
     self.batvolts[0] = self.rawvolts[0]
     self.uncalvolts[0] = self.rawvolts[0]
     for i in range(1,numcells+1):
@@ -97,7 +105,9 @@ class Readings:
     deltatime=(self.sampletime-self.oldsampletime)/(3600/config['sampling']['sampletime'])
     self.batah = self.batcurrentav*deltatime
     self.batahadj = (self.batcurrentav+config['battery']['ahloss'])*deltatime
+    self.inah = self.incurrentav*deltatime
     self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
+    self.incurrentav = (self.incurrentav*(samplesav-1)+self.incurrent)/samplesav # running av current
     for i in range(1,numcells+1):   
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav
 
