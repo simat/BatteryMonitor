@@ -94,6 +94,14 @@ class Summary:
     else:
       summary['current']['ah'][4] = round(batdata.ah,2)
       summary['current']['ah'][5] = 0.0      
+    if batdata.pwrbat > 0.0:
+      summary['current']['power'][1] = round(batdata.pwrbattot,6)
+      summary['current']['power'][0] = 0.0      
+    else:
+      summary['current']['power'][0] = round(batdata.pwrbattot,6)
+      summary['current']['power'][1] = 0.0      
+    summary['current']['power'][2] = round(batdata.pwrintot,6)     
+
     vprint=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0    
@@ -140,6 +148,9 @@ class Summary:
     section['ah'][4] = round(section['ah'][4]+source['ah'][4], 2)
     section['ah'][5] = round(section['ah'][5]+source['ah'][5], 2)
     section['ah'][6] = round(section['ah'][6]+source['ah'][6], 2)
+    section['power'][0] = round(section['power'][0]+source['power'][0], 6)
+    section['power'][1] = round(section['power'][1]+source['power'][1], 6)
+    section['power'][2] = round(section['power'][2]+source['power'][2], 6)
     section['dod'][2] = max(section['dod'][2], source['dod'][2])
     section['dod'][0] = min(section['dod'][0], source['dod'][0])
     section['dod'][1] = (section['dod'][1]*section['ah'][3] + source['dod'][1])

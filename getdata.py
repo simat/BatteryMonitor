@@ -66,6 +66,11 @@ class Readings:
   inah = 0.0
   inahtot = 0.0
   ah = 0.0
+  pwrbat = 0.0 # battery power units kW
+  pwrbattot = 0.0  # total battery power units kWh
+  pwrin = 0.0  # gross power in units kW
+  pwrintot = 0.0 # total gross power in units kWh
+
   def getatod(self):
     """ Get data for A/Ds, calibrate, covert and place in list variables"""
     
@@ -95,6 +100,7 @@ class Readings:
     self.getatod()
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.batcurrent
+    self.incurrentav = self.incurrent
 
 
   def getraw(self):
@@ -106,6 +112,8 @@ class Readings:
     self.batah = self.batcurrentav*deltatime
     self.batahadj = (self.batcurrentav+config['battery']['ahloss'])*deltatime
     self.inah = self.incurrentav*deltatime
+    self.pwrin = self.inah*self.batvoltsav[config['battery']['numcells']]/1000 # gross input power
+    self.pwrbat = self.batah*self.batvoltsav[config['battery']['numcells']]/1000 # battery power in/out
     self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
     self.incurrentav = (self.incurrentav*(samplesav-1)+self.incurrent)/samplesav # running av current
     for i in range(1,numcells+1):   
