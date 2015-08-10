@@ -81,14 +81,30 @@ class Summary:
     summary['current']['ah'][2] = round(batdata.soc,2)
     summary['current']['ah'][0] = summary['current']['ah'][2]
     summary['current']['ah'][1] = summary['current']['ah'][2]
+    summary['current']['ah'][6] = round(batdata.inahtot,2)  # current from solar etc
+    summary['current']['dod'][2] = round(batdata.socadj,2)
+    summary['current']['dod'][0] = summary['current']['dod'][2]
+    summary['current']['dod'][1] = summary['current']['dod'][2]
     summary['current']['amps'][1] = round(batdata.batcurrentav, 1)
     summary['current']['amps'][0] = summary['current']['amps'][1]
+    summary['current']['amps'][2] = round(batdata.incurrentav, 1)
     if batdata.ah > 0.0:
       summary['current']['ah'][5] = round(batdata.ah,2)
       summary['current']['ah'][4] = 0.0      
     else:
       summary['current']['ah'][4] = round(batdata.ah,2)
       summary['current']['ah'][5] = 0.0      
+    if batdata.pwrbat > 0.0:
+      summary['current']['power'][1] = round(batdata.pwrbattot,6)
+      summary['current']['power'][0] = 0.0      
+    else:
+      summary['current']['power'][0] = round(batdata.pwrbattot,6)
+      summary['current']['power'][1] = 0.0      
+    summary['current']['power'][2] = round(batdata.pwrintot,6)     
+    summary['current']['power'][3] = round(summary['current']['power'][0] - \
+                                     summary['current']['power'][2] + \
+                                     summary['current']['power'][1] ,6 )  # current to loads     
+
     vprint=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0    
@@ -107,6 +123,7 @@ class Summary:
     vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
     vprint = vprint + str(summary['current']['deltav'][0]) + ' '
     logdata = vprint + str(round(batdata.batcurrentav,1)) + \
+              ' ' + str(round(batdata.incurrentav,1)) + \
               ' ' + str(round(batdata.soc,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
@@ -132,12 +149,23 @@ class Summary:
     section['ah'][2] = max(section['ah'][2], source['ah'][2])
     section['ah'][0] = min(section['ah'][0], source['ah'][0])
     section['ah'][1] = (section['ah'][1]*section['ah'][3] + source['ah'][1])
-    section['ah'][3] = section['ah'][3] + 1
-    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 6)
     section['ah'][4] = round(section['ah'][4]+source['ah'][4], 2)
     section['ah'][5] = round(section['ah'][5]+source['ah'][5], 2)
+    section['ah'][6] = round(section['ah'][6]+source['ah'][6], 2)
+    section['power'][0] = round(section['power'][0]+source['power'][0], 6)
+    section['power'][1] = round(section['power'][1]+source['power'][1], 6)
+    section['power'][2] = round(section['power'][2]+source['power'][2], 6)
+    section['power'][3] = round(section['power'][3]+source['power'][3], 6) 
+    section['dod'][2] = max(section['dod'][2], source['dod'][2])
+    section['dod'][0] = min(section['dod'][0], source['dod'][0])
+    section['dod'][1] = (section['dod'][1]*section['ah'][3] + source['dod'][1])
+    section['ah'][3] += 1
+    section['ah'][1] = round(section['ah'][1]/section['ah'][3], 6)
+    section['dod'][1] = round(section['dod'][1]/section['ah'][3], 6)
+    section['dod'][3] = max(section['dod'][3], source['dod'][3])
     section['amps'][1] = max(section['amps'][1], source['amps'][1])
     section['amps'][0] = min(section['amps'][0], source['amps'][0])     
+    section['amps'][2] = min(section['amps'][2], source['amps'][2])
     for i in range(numcells+1):
       section['maxvoltages'][i] = max(section['maxvoltages'][i], source['maxvoltages'][i])
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
@@ -188,7 +216,8 @@ class Summary:
     
     self.writeperiod('daysummaryfile', 'currentday')
     summary['prevday'] = deepcopy(summary['currentday'])
-    summary['currentday']['ah'][3] = 0 # zero number of samples for av 
+    summary['currentday']['ah'][3] = 0 # zero number of samples for av
+    summary['current']['dod'][3] += 1 
     summary['currentday'] = deepcopy(summary['current'])
 
   def startmonth(self, summary):
