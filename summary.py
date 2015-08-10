@@ -101,6 +101,9 @@ class Summary:
       summary['current']['power'][0] = round(batdata.pwrbattot,6)
       summary['current']['power'][1] = 0.0      
     summary['current']['power'][2] = round(batdata.pwrintot,6)     
+    summary['current']['power'][3] = round(summary['current']['power'][0] - \
+                                     summary['current']['power'][2] + \
+                                     summary['current']['power'][1] ,6 )  # current to loads     
 
     vprint=''
     maxmaxvoltage = 0.0
@@ -120,6 +123,7 @@ class Summary:
     vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
     vprint = vprint + str(summary['current']['deltav'][0]) + ' '
     logdata = vprint + str(round(batdata.batcurrentav,1)) + \
+              ' ' + str(round(batdata.incurrentav,1)) + \
               ' ' + str(round(batdata.soc,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
@@ -151,6 +155,7 @@ class Summary:
     section['power'][0] = round(section['power'][0]+source['power'][0], 6)
     section['power'][1] = round(section['power'][1]+source['power'][1], 6)
     section['power'][2] = round(section['power'][2]+source['power'][2], 6)
+    section['power'][3] = round(section['power'][3]+source['power'][3], 6) 
     section['dod'][2] = max(section['dod'][2], source['dod'][2])
     section['dod'][0] = min(section['dod'][0], source['dod'][0])
     section['dod'][1] = (section['dod'][1]*section['ah'][3] + source['dod'][1])
