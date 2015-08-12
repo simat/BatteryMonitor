@@ -91,7 +91,7 @@ class Readings:
     self.batvolts[0] = self.rawvolts[0]
     self.uncalvolts[0] = self.rawvolts[0]
     for i in range(1,numcells+1):
-      self.uncalvolts[i] = self.rawvolts[i]*(2.49+33.2)/2.49 # A/D to battery volts
+      self.uncalvolts[i] = self.rawvolts[i]*(2.49+33.2*2)/2.49 # A/D to battery volts
       self.batvolts[i] = self.uncalvolts[i]*self.ratio[i] +self.avoffset # calibrate values
 
 
