@@ -56,7 +56,7 @@ def deamon(soc):
 #         print (printvoltage)
           batdata.getraw()
         
-          if batdata.batvoltsav[numcells] >= 27.6 and prevbatvoltage < 27.6:  # reset SOC counter?
+          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
             batdata.soc = 0.0
             batdata.socadj = 0.0
             summary['current']['dod'][3] = 0
