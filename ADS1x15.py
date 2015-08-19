@@ -135,7 +135,7 @@ class ADS1x15:
     # whereas new Pis use SMBus 1.  If you see an error like:
     # 'Error accessing 0x48: Check your I2C address '
     # change the SMBus number in the initializer below!
-    self.i2c = Adafruit_I2C(address)
+    self.i2c = Adafruit_I2C(address,busnum)
     self.address = address
     self.debug = debug
 
