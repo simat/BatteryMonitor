@@ -3,10 +3,11 @@
 <head>
 <style>
 #header {
-    background-color:black;
-    color:white;
+#    background-color:black;
+#    color:white;
     text-align:center;
-    padding:5px;
+#    padding:5px;
+    width:500px;
 }
 #bat {
     line-height:30px;
@@ -48,6 +49,10 @@ $highv = 3.6;
 $lowv = 3.0;
 #echo $summary
 $pos = strpos($summary,"[current]");
+
+$pos = strpos($summary,"'",$pos);
+$timestamp = substr($summary,$pos+1);
+$timestamp = strstr($timestamp,"'",true);
 
 function getdat($dataname) { 
    global $summary, $pos;
@@ -94,6 +99,11 @@ $dod = getdat("dod");
 
 </head>
 <body>
+<div id="header">
+<h2>Battery Data Dated</h2>
+<?php
+echo(date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "<br>"); ?>
+</div>
 <div id="bat">
 <table align="left" border="1" cellpadding="1" cellspacing="4" style="height:300px; width:600px">
 	<tbody>
