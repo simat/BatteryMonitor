@@ -30,15 +30,18 @@ for i in config['alarms']:
   config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec') 
 
 
-def deamon(soc):
+def deamon(soc=-1):
   """ Main loop, gets battery data, gets summary.py to do logging"""
 
-  if soc < 0 or soc > config['battery']['capacity']:
-    print "Battery DOD must be between zero and Battery Capacity"
+  if soc > config['battery']['capacity']:
+    print "Battery DOD must be less than Battery Capacity"
   else:
     import summary
     logsummary = summary.Summary()
     summary = logsummary.summary
+    if soc < 0:
+       soc = summary['current']['dod'][0]
+       summary['current']['dod'][3] = 0
     prevtime = logsummary.currenttime
     prevbatvoltage = batdata.batvoltsav[numcells]
     batdata.soc = soc
@@ -56,7 +59,9 @@ def deamon(soc):
 #         print (printvoltage)
           batdata.getraw()
         
-          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
+#          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
+          if batdata.batvoltsav[numcells] >= config['battery']['vreset'] \
+          and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
             batdata.soc = 0.0
             batdata.socadj = 0.0
             summary['current']['dod'][3] = 0
@@ -113,4 +118,8 @@ def deamon(soc):
 
 if __name__ == "__main__":
   print (sys.argv)
-  deamon(float(sys.argv[1]))
+  if len(sys.argv) > 1:
+    deamon(float(sys.argv[1]))
+  else:
+    deamon()
+
