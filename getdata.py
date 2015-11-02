@@ -84,8 +84,10 @@ class Readings:
       self.rawvolts[i+1] = eval(vin[i])/1000 # A to D 1 to 4 in volts
     self.rawcurrent = eval(config['CurrentInputs']['ibat']) # Battery current in counts
     self.batcurrent = self.rawcurrent*256.0/32767.0  # current in mv
-    self.batcurrent = self.batcurrent*config['calibrate']['ibatgain']-config['calibrate']['ibatoffset'] # current in amp
-    self.rawincurrent = eval(config['CurrentInputs']['iin']) # Battery current in counts
+    self.batcurrent = self.batcurrent*config['calibrate']['ibatgain'] \
+                      -config['calibrate']['ibatoffset'] \
+                      +config['calibrate']['pcurrent'] # current in amp  
+    self.rawincurrent = eval(config['CurrentInputs']['iin']) # Solar current in counts
     self.incurrent = self.rawincurrent*256.0/32767.0  # current in mv
     self.incurrent = self.incurrent*config['calibrate']['iingain']-config['calibrate']['iinoffset'] # current in amp
     self.batvolts[0] = self.rawvolts[0]

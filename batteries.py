@@ -18,6 +18,8 @@
 import sys
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
+import time
+from shutil import copy as filecopy
 from config import config
 numcells = config['battery']['numcells']
 from getdata import Readings
@@ -32,13 +34,14 @@ for i in config['alarms']:
 
 def deamon(soc=-1):
   """ Main loop, gets battery data, gets summary.py to do logging"""
-
+  import summary
+  logsummary = summary.Summary()
+  summary = logsummary.summary
+  printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
+  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+ printtime)
   if soc > config['battery']['capacity']:
     print "Battery DOD must be less than Battery Capacity"
   else:
-    import summary
-    logsummary = summary.Summary()
-    summary = logsummary.summary
     if soc < 0:
        soc = summary['current']['dod'][0]
        summary['current']['dod'][3] = 0
@@ -60,7 +63,8 @@ def deamon(soc=-1):
           batdata.getraw()
         
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
-          if batdata.batvoltsav[numcells] >= config['battery']['vreset'] \
+          if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
+          and prevbatvoltage >= config['battery']['vreset'] \
           and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
             batdata.soc = 0.0
             batdata.socadj = 0.0
