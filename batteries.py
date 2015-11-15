@@ -21,6 +21,7 @@ import sys
 import time
 from shutil import copy as filecopy
 from config import config
+from ConfigParser import SafeConfigParser
 numcells = config['battery']['numcells']
 from getdata import Readings
 batdata = Readings()
@@ -38,7 +39,7 @@ def deamon(soc=-1):
   logsummary = summary.Summary()
   summary = logsummary.summary
   printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
-  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+ printtime)
+  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + printtime)
   if soc > config['battery']['capacity']:
     print "Battery DOD must be less than Battery Capacity"
   else:
@@ -66,6 +67,16 @@ def deamon(soc=-1):
           if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
           and prevbatvoltage >= config['battery']['vreset'] \
           and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
+
+            socerr=batdata.socadj/(summary['current']['dod'][3]*24)
+            config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
+            batconfigdata=SafeConfigParser()
+            batconfigdata.read('battery.cfg')
+            batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
+            with open('battery.cfg', 'w') as batconfig:
+              batconfigdata.write(batconfig)
+            batconfig.closed
+
             batdata.soc = 0.0
             batdata.socadj = 0.0
             summary['current']['dod'][3] = 0
