@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+<?php
+//error handler function
+function customError($errno, $errstr) {
+  echo "<b>Error:</b> [$errno] $errstr";
+}
+
+//set error handler
+set_error_handler("customError");
+?>
 <style>
 #body {
     margin-top:0em;
     margin-bottom:0em;
     line-height:1.2em;
+    background-color:black; color:grey;
+
 }
 #header {
     margin-top:0em;
@@ -27,20 +39,28 @@
     height:300px;
     width:<?php echo $batwidth; ?>px;
     float:left;
-    padding:5px;	      
+    padding:5px;
+    color:black;	      
 }
 #batdata {
-    width:350px;
+    margin-top:-0.9em;
+    margin-bottom:0em;
+    width:220px;
     height:300px;
     float:left;
-    padding:10px;	 	 
+    padding:10px;
+    font-size:3.0em;
+    line-height:0.2em;
+#    border: 1px solid white;	 	 
 }
 #footer {
+    margin-top:0em;
+    margin-bottom:0em;
 #    background-color:black;
 #    color:white;
     width:650px;
-#    float: left;
-#    clear:both;
+    float: left;
+    clear:both;
 #    text-align:center;
 #   padding:5px;	 	 
 }
@@ -63,7 +83,18 @@
 </style>
 
 <?php
-$summary = file_get_contents("/batdat/summary");
+$config = file_get_contents("/home/simat/BatteryMonitor/battery.cfg");
+$pos = strpos($config,"summary");
+$pos = strpos($config,"'",$pos);
+$summary = substr($config,$pos+1);
+$summary = strstr($summary,"'",true);
+$summary = file_get_contents($summary);
+# echo $config;
+$pos = strpos($config,"capacity");
+$batcapacity = substr($config,$pos);
+$batcapacity = strstr($batcapacity,"\n",true);
+sscanf($batcapacity, "capacity = %u",$batcapacity);
+# echo $batcapacity;
 $highv = 3.6;
 $lowv = 3.0;
 #echo $summary
@@ -87,6 +118,16 @@ $batvolts = getdat("maxvoltages");
 $deltav = getdat("deltav");
 $amps = getdat("amps");
 $dod = getdat("dod");
+$capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
+if  ($capacity > "75") {
+   $capcolour="green";
+}  elseif ($capacity > "50") {
+      $capcolour="gold";
+}  elseif ($capacity  > "25") {
+      $capcolour="darkorange";
+}  else {
+      $capcolour="red";
+}
 $pos = strpos($summary,"[currentday]", $pos);
 $daymaxv = getdat("maxvoltages");
 $dayminnoloadv = getdat("minnoload");
@@ -94,13 +135,16 @@ $dayminloadv = getdat("minvoltages");
 $dayah = getdat("ah");
 $power = getdat("power");
 
-
 $numbercells = count($batvolts)-1;
 $batwidth = $numbercells*38;
 $batcolour = array_fill(0,$numbercells,"yellow");
-/* */
+
 $minbatvolts = 100.0;
 $dayminmin = 100.0 ;
+$maxbatvolts = 0.0;
+$daymaxmax = 0.0;
+$dayminmax = 100.0 ;
+$daymaxmin = 0.0;
 for ($x = 0; $x < $numbercells; $x++) {
     if ($batvolts[$x] >= $highv) {
        $batcolour[$x] = "red"; }
@@ -147,16 +191,15 @@ for($x = 0; $x < $arrlength; $x++) {
 
 
 ?>
-
-
 </head>
 <body id="body">
+<meta http-equiv="refresh" content="60">
 <div id="header">
 <!-- <p style=font-size:24px; font-weight:900> Karrak Battery Data Dated </p> -->
 <h2> Karrak Battery Data </h2>
 
 <?php
-echo "<p>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</p>"); ?>
+echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>"); ?>
 </div>
 <div id="bat">
 <table align="left" border="1" cellpadding="1" cellspacing="4" style="height:300px; width:<?php echo ($numbercells*38); ?>px">
@@ -187,20 +230,23 @@ echo "<p>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</p>"); ?>
 </table>
 </div>
 <div id="batdata">
-<p><b>Battery Voltage&nbsp;</b><?php echo $batvolts[$numbercells] ."V"?><br>
-<b>Delta Voltage&nbsp;</b><?php echo $deltav[0]."V"?><br>
-<b>Battery Current&nbsp;</b><?php echo $amps[0]."A"?><br>
-<b>Battery DOD&nbsp;</b><?php echo $dod[0]."Ah"?></p>
-
+<p style="text-align:center;font-size:2.0em;line-height:0.0em;color:<?php echo $capcolour?>">
+<?php echo $capacity."%"; ?></p>
+<p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[0]."A"?></p>
+<p><?php echo $dod[0]."Ah"?></p>
+<p><?php echo $batvolts[$numbercells]."V"?></p>
+<p><?php echo $deltav[0]."V"?></p>
 </div>
+
 <div id="footer">
 <h2> Daily Battery Statistics </h2>
-</small><br>
+<!--</small><br>-->
 <b>Daily Battery Charge In&nbsp;</b><?php echo $dayah[4]."Ah"?><br>
 <b>Daily Battery Charge Out&nbsp;</b><?php echo $dayah[5]."Ah"?><br>
 <b>Daily Battery Power In&nbsp;</b><?php echo $power[0]."kWh"?><br>
 <b>Daily Battery Power Out&nbsp;</b><?php echo $power[1]."kWh"?><br>
-<b>Daily Solar Power In&nbsp;</b><?php echo $power[2]."kWh"?></p>
+<b>Daily Solar Power In&nbsp;</b><?php echo $power[2]."kWh"?><br>
+<b>Daily Power Out&nbsp;</b><?php echo $power[3]."kWh"?></p>
 
 
 </div>
