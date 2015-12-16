@@ -62,7 +62,9 @@ class Readings:
   incurrent = 0.0
   incurrentav = 0.0
   soc = 0.0
+  socadj = 0.0
   batah = 0.0
+  batahadj = 0.0
   inah = 0.0
   inahtot = 0.0
   ah = 0.0

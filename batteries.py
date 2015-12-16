@@ -24,7 +24,6 @@ from config import config
 from ConfigParser import SafeConfigParser
 numcells = config['battery']['numcells']
 from getdata import Readings
-batdata = Readings()
 import Adafruit_BBIO.GPIO as GPIO
 # Initialise and compile alarms
 for i in config['alarms']:
@@ -39,6 +38,14 @@ def deamon(soc=-1):
   logsummary = summary.Summary()
   summary = logsummary.summary
   printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
+  while int(printtime) <= int(summary['current']['timestamp']):
+    print(printtime,summary['current']['timestamp'])
+    print "Error: Current time before last sample time"
+    time.sleep(30)
+    printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
+  batdata = Readings()  # initialise batdata after we have valid sys time
+
+ 
   filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + printtime)
   if soc > config['battery']['capacity']:
     print "Battery DOD must be less than Battery Capacity"
@@ -68,7 +75,10 @@ def deamon(soc=-1):
           and prevbatvoltage >= config['battery']['vreset'] \
           and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
 
-            socerr=batdata.socadj/(summary['current']['dod'][3]*24)
+            if summary['current']['dod'][3] == 0.0 :
+              socerr=0
+            else:
+              socerr=batdata.socadj/(summary['current']['dod'][3]*24)
             config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
             batconfigdata=SafeConfigParser()
             batconfigdata.read('battery.cfg')
