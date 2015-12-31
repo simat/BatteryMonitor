@@ -1,7 +1,7 @@
 BatteryMonitor
 ==============
 
-This project provides the information and software to make a low cost ($100-150) and flexible device to monitor and log individual battery cell voltages and other battery data using the Beaglebone Linux computer. For those that don't need or want all the IO and additional memory that the Beaglebone Black offers I see no reason why this project could not be used with the various models of the Raspberry Pi including maybe even the Raspberry Pi Zero which could cut the cost to below $50.
+This project provides the information and software to make a low cost ($100-150) and flexible device to monitor and log individual battery cell voltages and other battery data using the Beaglebone Linux computer. For those that don't need or want all the IO and additional memory that the Beaglebone Black offers I see no reason why this project could not be run on the various models of the Raspberry Pi including maybe even the Raspberry Pi Zero which could cut the cost to below $50.
 
 The primary use for this would be to monitor large Lithium based battery banks of up to 48 volts but it would also be useful for other technologies like Lead Acid batteries. In my case I am using it to monitor and log data from our 24 volt 360ah LiFePO4 battery bank used in our off grid power system.
 
