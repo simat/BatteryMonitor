@@ -15,6 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import sys
+from os import rename
 import time
 from shutil import copy as filecopy
 from copy import deepcopy
@@ -234,6 +235,9 @@ class Summary:
     self.writeperiod('yearsummaryfile', 'yeartodate')
     summary['yeartodate']['ah'][3] = 0  # zero number of samples for av 
     summary['yeartodate'] = deepcopy(summary['current'])
+    self.logfile.close()
+    rename(config['files']['logfile'],config['files']['logfile']+str(int(self.printtime[0:4])-1))
+    self.logfile = open(config['files']['logfile'],'a')
 
   def close(self):
     """ Close logging file ready for exit """
