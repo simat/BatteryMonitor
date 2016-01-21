@@ -51,12 +51,15 @@ def deamon(soc=-1):
     print "Battery DOD must be less than Battery Capacity"
   else:
     if soc < 0:
-       soc = summary['current']['dod'][0]
-       summary['current']['dod'][3] = 0
+       batdata.soc = summary['current']['ah'][0]
+       batdata.socadj = summary['current']['dod'][0]
+    else:
+      batdata.soc = soc
+      batdata.socadj = soc
+      summary['current']['dod'][3] = 0
+
     prevtime = logsummary.currenttime
     prevbatvoltage = batdata.batvoltsav[numcells]
-    batdata.soc = soc
-    batdata.socadj = soc
 #    logsummary.startday(summary)
 #    logsummary.starthour(summary)
 
