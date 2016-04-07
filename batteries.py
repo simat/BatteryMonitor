@@ -51,6 +51,7 @@ def deamon(soc=-1):
     print "Battery DOD must be less than Battery Capacity"
   else:
     if soc < 0:
+<<<<<<< HEAD
        batdata.soc = summary['current']['ah'][0]
        batdata.socadj = summary['current']['dod'][0]
     else:
@@ -58,6 +59,10 @@ def deamon(soc=-1):
       batdata.socadj = soc
       summary['current']['dod'][3] = 0
 
+=======
+       soc = summary['current']['dod'][0]
+    summary['current']['dod'][3] = -100 # flag don't adjust leakage current
+>>>>>>> 9f0f504757a6d3ab78f42d726c78ec134da64275
     prevtime = logsummary.currenttime
     prevbatvoltage = batdata.batvoltsav[numcells]
 #    logsummary.startday(summary)
@@ -78,10 +83,12 @@ def deamon(soc=-1):
           and prevbatvoltage >= config['battery']['vreset'] \
           and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
 
-            if summary['current']['dod'][3] == 0.0 :
+            if summary['current']['dod'][3] <= 0.0 :
               socerr=0
             else:
               socerr=batdata.socadj/(summary['current']['dod'][3]*24)
+              socerr=max(socerr,-0.01)
+              socerr=min(socerr,0.01)
             config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
             batconfigdata=SafeConfigParser()
             batconfigdata.read('battery.cfg')
