@@ -125,7 +125,7 @@ class Summary:
     vprint = vprint + str(summary['current']['deltav'][0]) + ' '
     logdata = vprint + str(round(batdata.batcurrentav,1)) + \
               ' ' + str(round(batdata.incurrentav,1)) + \
-              ' ' + str(round(batdata.soc,2)).ljust(5,'0') + \  #  + '\033[1A'    
+              ' ' + str(round(batdata.soc,2)).ljust(5,'0') + \
               ' ' + str(round(batdata.socadj,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
