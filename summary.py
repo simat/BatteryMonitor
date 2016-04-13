@@ -28,21 +28,13 @@ numcells = config['battery']['numcells']
 class Summary:
   """Handles battery summary data""" 
 
-#  hivolts = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#  lowvolts = [ 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]
-#  summary = {}
-#    self.summary['hour']['minvoltages'] = [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 30.0]
-#    self.summary['hour']['maxvoltages'] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#    self.summary['hour']['ah'] = [100000.0, 0.0]
-#    self.summary['hour']['current'] = [1000.0, -100.0]
-
-
   def __init__(self):
     self.currenttime = time.localtime()
     printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
     self.logfile = open(config['files']['logfile'],'a')
     self.sampletime = time.time()
     self.prevtime = time.localtime()
+
     try:
       self.summaryfile = SafeConfigParser()
       self.summaryfile.read(config['files']['summaryfile'])
@@ -209,7 +201,7 @@ class Summary:
  
   def starthour(self, summary):
     """ Start new hour """
-
+    self.writeperiod('hoursummaryfile', 'hour')
     summary['hour']['ah'][3] = 0 # zero # of samples for av  
     summary['hour'] = deepcopy(summary['current'])
 
