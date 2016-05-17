@@ -48,7 +48,7 @@ class Readings:
   measureddelta = config['calibrate']['measureddelta']
   displayeddelta = config['calibrate']['displayeddelta']
 
-  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
+#  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
   deltav = [ 3.25 for i in range(numcells+1)]
   deltav[0] = 0.0
   rawvolts = [ 0.0 for i in range(numcells+1)]
@@ -125,5 +125,6 @@ class Readings:
 
     self.deltav[0]=round(self.batvolts[0],3)
     for i in range(numcells,0,-1):
-      self.deltav[i]=round((self.batvoltsav[i]-self.batvoltsav[i-1]+self.calvolts[i]),3)
+      self.deltav[i]=round((self.batvoltsav[i]-self.batvoltsav[i-1]-config['calibrate']['delta'][i-1]),3)
+
 
