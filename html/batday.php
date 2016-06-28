@@ -130,6 +130,7 @@ if  ($capacity > "75") {
 }
 $pos = strpos($summary,"[currentday]", $pos);
 $daymaxv = getdat("maxvoltages");
+$daymaxnochargev = getdat("maxnocharge");
 $dayminnoloadv = getdat("minnoload");
 $dayminloadv = getdat("minvoltages");
 $dayah = getdat("ah");
@@ -144,7 +145,10 @@ $dayminmin = 100.0 ;
 $maxbatvolts = 0.0;
 $daymaxmax = 0.0;
 $dayminmax = 100.0 ;
+$daymaxnocharge = 0.0;
+$dayminnocharge = 100.0 ;
 $daymaxmin = 0.0;
+$dayminmin = 100.0 ;
 for ($x = 0; $x < $numbercells; $x++) {
     if ($batvolts[$x] >= $highv) {
        $batcolour[$x] = "red"; }
@@ -154,6 +158,8 @@ for ($x = 0; $x < $numbercells; $x++) {
     $maxbatvolts = max($maxbatvolts,$batvolts[$x]);
     $daymaxmax = max($daymaxmax,$daymaxv[$x]);
     $dayminmax = min($dayminmax,$daymaxv[$x]);
+    $daymaxnocharge = max($daymaxnocharge,$daymaxnochargev[$x]);
+    $dayminnocharge = min($dayminnocharge,$daymaxnochargev[$x]);
     $dayminv[$x] = min($dayminnoloadv[$x],$dayminloadv[$x]);
     $daymaxmin = max($daymaxmin,$dayminv[$x]);
     $dayminmin = min($dayminmin,$dayminv[$x]);
@@ -161,6 +167,7 @@ for ($x = 0; $x < $numbercells; $x++) {
 
 $batvoltstype = array_fill(0,$numbercells+1,"middle");
 $batmaxtype = array_fill(0,$numbercells+1,"middle");
+$batnochargetype = array_fill(0,$numbercells+1,"middle");
 $batmintype = array_fill(0,$numbercells+1,"middle");
 
 for ($x = 0; $x < $numbercells; $x++) {
@@ -174,6 +181,11 @@ for ($x = 0; $x < $numbercells; $x++) {
        $batmaxtype[$x] = "highest"; }
     if ($daymaxv[$x] == $dayminmax) {
        $batmaxtype[$x] = "lowest"; }
+
+    if ($daymaxnochargev[$x] == $daymaxnocharge) {
+       $batnochargetype[$x] = "highest"; }
+    if ($daymaxnochargev[$x] == $dayminnocharge) {
+       $batnochargetype[$x] = "lowest"; }
 
     if ($dayminv[$x] == $daymaxmin) {
        $batmintype[$x] = "highest"; }
@@ -210,6 +222,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 			echo ('<td style="background-color:' . $batcolour[$x] . ';text-align:center">');
 			echo ('<p> <span style="font-size:2.0em">' . ($x+1) . '</span><br>');
 			echo ('<span id= "' . $batmaxtype[$x] . '"> <span style="font-size:0.8em">' . $daymaxv[$x] . 'V </span></span><br>');
+			echo ('<span id= "' . $batnochargetype[$x] . '"> <span style="font-size:0.8em">' . $daymaxnochargev[$x] . 'V </span></span><br>');
 			echo ('<span id= "' . $batvoltstype[$x] . '">' . $batvolts[$x] .'V </span><br>');
 			echo ('<span id= "' . $batmintype[$x] . '"> <span style="font-size:0.8em">' . $dayminv[$x] . 'V </span></span><br>');
 			echo ('</p></td>');
@@ -221,6 +234,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 			echo ('<td style="background-color:' . $batcolour[$x] . ';text-align:center">');
 			echo ('<p> <span style="font-size:2.0em">' . ($x+1) . '</span><br>');
 			echo ('<span id= "' . $batmaxtype[$x] . '"> <span style="font-size:0.8em">' . $daymaxv[$x] . 'V </span></span><br>');
+			echo ('<span id= "' . $batnochargetype[$x] . '"> <span style="font-size:0.8em">' . $daymaxnochargev[$x] . 'V </span></span><br>');
 			echo ('<span id= "' . $batvoltstype[$x] . '">' . $batvolts[$x] .'V </span><br>');
 			echo ('<span id= "' . $batmintype[$x] . '"> <span style="font-size:0.8em">' . $dayminv[$x] . 'V </span></span><br>');
 			echo ('</p></td>');
