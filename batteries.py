@@ -145,6 +145,7 @@ def deamon(soc=-1):
       except KeyboardInterrupt:
         sys.stdout.write('\n')
         logsummary.close()
+        sys.exit(9)
         break
 
 if __name__ == "__main__":
