@@ -207,7 +207,7 @@ for($x = 0; $x < $arrlength; $x++) {
 <body id="body">
 <meta http-equiv="refresh" content="60">
 <div id="header">
-<!-- <p style=font-size:24px; font-weight:900> Karrak Battery Data Dated </p> -->
+<!-- <p style=font-size:24px; font-weight:900> Geoff's Battery Data Dated </p> -->
 <h2> Karrak Battery Data </h2>
 
 <?php
