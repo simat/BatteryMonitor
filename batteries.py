@@ -16,6 +16,7 @@
 
 #!/usr/bin/python
 import sys
+
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
 import time
@@ -28,7 +29,9 @@ import Adafruit_BBIO.GPIO as GPIO
 # Initialise and compile alarms
 for i in config['alarms']:
   exec(config['alarms'][i][0])
+  config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec') 
   config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec') 
+  config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec') 
   config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec') 
 
 
@@ -57,7 +60,6 @@ def deamon(soc=-1):
       batdata.soc = soc
       batdata.socadj = soc
       summary['current']['dod'][3] = 0
-      soc = summary['current']['dod'][0]
     summary['current']['dod'][3] = -100 # flag don't adjust leakage current
     prevtime = logsummary.currenttime
     prevbatvoltage = batdata.batvoltsav[numcells]
@@ -110,10 +112,13 @@ def deamon(soc=-1):
         for i in range(1,numcells):
           minvolts = min(batdata.deltav[i],minvolts)
           maxvolts = max(batdata.deltav[i],maxvolts)
+
         for i in config['alarms']:
-          if config['alarms'][i][1] > minvolts:
+          exec(config['alarms'][i][1])
+          if test:
             exec(config['alarms'][i][2])
-          if config['alarms'][i][3] < maxvolts:
+          exec(config['alarms'][i][3])
+          if test:
             exec(config['alarms'][i][4])
 # update summaries
         logsummary.update(summary, batdata)
