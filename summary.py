@@ -68,9 +68,9 @@ class Summary:
     
     summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
-    if batdata.batcurrentav > -config['battery']['ilowcurrent']:
+    if batdata.currentav[0] > -config['battery']['ilowcurrent']:
       summary['current']['maxnocharge'][numcells] = summary['current']['maxvoltages'][numcells]
-    if batdata.batcurrentav < config['battery']['ilowcurrent']:
+    if batdata.currentav[0] < config['battery']['ilowcurrent']:
       summary['current']['minnoload'][numcells] = summary['current']['minvoltages'][numcells]
     summary['current']['ah'][2] = round(batdata.soc,2)
     summary['current']['ah'][0] = summary['current']['ah'][2]
@@ -79,9 +79,9 @@ class Summary:
     summary['current']['dod'][2] = round(batdata.socadj,2)
     summary['current']['dod'][0] = summary['current']['dod'][2]
     summary['current']['dod'][1] = summary['current']['dod'][2]
-    summary['current']['amps'][1] = round(batdata.batcurrentav, 1)
-    summary['current']['amps'][0] = summary['current']['amps'][1]
-    summary['current']['amps'][2] = round(batdata.incurrentav, 1)
+#    summary['current']['amps'][1] = round(batdata.currentav[0], 1)
+#    summary['current']['amps'][0] = summary['current']['amps'][1]
+#    summary['current']['amps'][2] = round(batdata.currentav[1], 1)
     if batdata.ah > 0.0:
       summary['current']['ah'][5] = round(batdata.ah,2)
       summary['current']['ah'][4] = 0.0      
@@ -107,20 +107,26 @@ class Summary:
       maxmaxvoltage = max(maxmaxvoltage, summary['current']['maxvoltages'][i])
       minmaxvoltage = min(minmaxvoltage, summary['current']['maxvoltages'][i])
       summary['current']['minvoltages'][i] = summary['current']['maxvoltages'][i]
-      if batdata.batcurrentav > -config['battery']['ilowcurrent']:
+      if batdata.currentav[0] > -config['battery']['ilowcurrent']:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]  
-      if batdata.batcurrentav < config['battery']['ilowcurrent']:
+      if batdata.currentav[0] < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]     
       vprint=vprint + str(round(batdata.deltav[i+1],3)).ljust(5,'0') + ' '
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
-    if batdata.batcurrentav < config['battery']['ilowcurrent']:
+    if batdata.currentav[0] < config['battery']['ilowcurrent']:
       summary['current']['deltav'][1] = summary['current']['deltav'][0]
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
     vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
     vprint = vprint + str(summary['current']['deltav'][0]) + ' '
-    logdata = vprint + str(round(batdata.batcurrentav,1)) + \
-              ' ' + str(round(batdata.incurrentav,1)) + \
-              ' ' + str(round(batdata.soc,2)).ljust(5,'0') + \
+
+    for i in range(batdata.numiins):
+      summary['current']['currentmax'][i] = round(batdata.currentav[i],1)
+      summary['current']['currentmin'][i] = round(batdata.currentav[i],1)
+      vprint = vprint + str(round(batdata.currentav[i],1)) + ' '
+      summary['current']['powermax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells],0)
+      summary['current']['powermin'][i] = summary['current']['powermax'][i]
+     
+    logdata = vprint + str(round(batdata.soc,2)).ljust(5,'0') + \
               ' ' + str(round(batdata.socadj,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
@@ -160,9 +166,14 @@ class Summary:
     section['ah'][1] = round(section['ah'][1]/section['ah'][3], 6)
     section['dod'][1] = round(section['dod'][1]/section['ah'][3], 6)
     section['dod'][3] = max(section['dod'][3], source['dod'][3])
-    section['amps'][1] = max(section['amps'][1], source['amps'][1])
-    section['amps'][0] = min(section['amps'][0], source['amps'][0])     
-    section['amps'][2] = min(section['amps'][2], source['amps'][2])
+#    section['amps'][1] = max(section['amps'][1], source['amps'][1])
+#    section['amps'][0] = min(section['amps'][0], source['amps'][0])     
+#    section['amps'][2] = min(section['amps'][2], source['amps'][2])
+    for i in range(len(config['CurrentInputs'])):
+      section['currentmax'][i] = max(section['currentmax'][i], source['currentmax'][i])
+      section['currentmin'][i] = min(section['currentmin'][i], source['currentmin'][i])
+      section['powermax'][i] = max(section['powermax'][i], source['powermax'][i])
+      section['powermin'][i] = min(section['powermin'][i], source['powermin'][i])
     for i in range(numcells+1):
       section['maxvoltages'][i] = max(section['maxvoltages'][i], source['maxvoltages'][i])
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])

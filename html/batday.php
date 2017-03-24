@@ -116,7 +116,7 @@ function getdat($dataname) {
 
 $batvolts = getdat("maxvoltages");
 $deltav = getdat("deltav");
-$amps = getdat("amps");
+$amps = getdat("currentmax");
 $dod = getdat("dod");
 $capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
 if  ($capacity > "75") {

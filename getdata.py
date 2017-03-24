@@ -26,8 +26,11 @@ vin = []
 for i in sorted(config['VoltageInputs']):
   vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
 #  vin = vin + [config['VoltageInputs'][i]]
+#for i in config['CurrentInputs']:
+#  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval') 
+iin = []
 for i in config['CurrentInputs']:
-  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval') 
+  iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
  
 class Readings:
   """ get and manipulates readings from the real world"""
@@ -55,12 +58,16 @@ class Readings:
   batvolts = [ i*3.25 for i in range(numcells+1)]
   uncalvolts = [ i*3.25 for i in range(numcells+1)]
   batvoltsav = [ i*3.25 for i in range(numcells+1)]
-  rawcurrent = 0.0
-  batcurrent = 0.0
-  batcurrentav = 0.0
-  rawincurrent = 0.0
-  incurrent = 0.0
-  incurrentav = 0.0
+
+  numiins = len(iin)
+  current = [ 0.0 for i in range(numiins)]
+  currentav = [ 0.0 for i in range(len(iin))]
+#  rawcurrent = 0.0
+#  batcurrent = 0.0
+#  batcurrentav = 0.0
+#  rawincurrent = 0.0
+#  incurrent = 0.0
+#  incurrentav = 0.0
   soc = 0.0
   socadj = 0.0
   batah = 0.0
@@ -84,14 +91,18 @@ class Readings:
 
     for i in range(len(vin)):
       self.rawvolts[i+1] = eval(vin[i])/1000 # A to D 1 to 4 in volts
-    self.rawcurrent = eval(config['CurrentInputs']['ibat']) # Battery current in counts
-    self.batcurrent = self.rawcurrent*256.0/32767.0  # current in mv
-    self.batcurrent = self.batcurrent*config['calibrate']['ibatgain'] \
-                      -config['calibrate']['ibatoffset'] \
-                      +config['calibrate']['pcurrent'] # current in amp  
-    self.rawincurrent = eval(config['CurrentInputs']['iin']) # Solar current in counts
-    self.incurrent = self.rawincurrent*256.0/32767.0  # current in mv
-    self.incurrent = self.incurrent*config['calibrate']['iingain']-config['calibrate']['iinoffset'] # current in amp
+#    self.rawcurrent = eval(config['CurrentInputs']['ibat']) # Battery current in counts
+#    self.batcurrent = self.rawcurrent*256.0/32767.0  # current in mv
+#    self.batcurrent = self.batcurrent*config['calibrate']['ibatgain'] \
+#                      -config['calibrate']['ibatoffset'] \
+#                      +config['calibrate']['pcurrent'] # current in amp  
+#    self.rawincurrent = eval(config['CurrentInputs']['iin']) # Solar current in counts
+#    self.incurrent = self.rawincurrent*256.0/32767.0  # current in mv
+#    self.incurrent = self.incurrent*config['calibrate']['iingain']-config['calibrate']['iinoffset'] # current in amp
+    for i in range(len(iin)):
+      self.current[i] = eval(iin[i])*config['calibrate']['currentgain'][i] \
+                        -config['calibrate']['currentoffset'][i]
+
     self.batvolts[0] = self.rawvolts[0]
     self.uncalvolts[0] = self.rawvolts[0]
     for i in range(1,numcells+1):
@@ -103,8 +114,10 @@ class Readings:
     self.sampletime = time.time()
     self.getatod()
     self.batvoltsav = self.batvolts
-    self.batcurrentav = self.batcurrent
-    self.incurrentav = self.incurrent
+#    self.batcurrentav = self.batcurrent
+#    self.incurrentav = self.incurrent
+    for i in range(0,len(iin)):
+     self.currentav[i] = self.current[i]
 
 
   def getraw(self):
@@ -113,13 +126,16 @@ class Readings:
 
     samplesav = config['sampling']['samplesav']
     deltatime=(self.sampletime-self.oldsampletime)/(3600/config['sampling']['sampletime'])
-    self.batah = self.batcurrentav*deltatime
-    self.batahadj = (self.batcurrentav+config['battery']['ahloss'])*deltatime
-    self.inah = self.incurrentav*deltatime
+    self.batah = self.currentav[0]*deltatime
+    self.batahadj = (self.currentav[0]+config['battery']['ahloss'])*deltatime
+    self.inah = self.currentav[1]*deltatime
     self.pwrin = self.inah*self.batvoltsav[config['battery']['numcells']]/1000 # gross input power
     self.pwrbat = self.batah*self.batvoltsav[config['battery']['numcells']]/1000 # battery power in/out
-    self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
-    self.incurrentav = (self.incurrentav*(samplesav-1)+self.incurrent)/samplesav # running av current
+#    self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
+#    self.incurrentav = (self.incurrentav*(samplesav-1)+self.incurrent)/samplesav # running av current
+    for i in range(0,len(iin)):
+     self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
+
     for i in range(1,numcells+1):   
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav
 
