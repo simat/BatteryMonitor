@@ -29,7 +29,7 @@ for i in sorted(config['VoltageInputs']):
 #for i in config['CurrentInputs']:
 #  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval') 
 iin = []
-for i in config['CurrentInputs']:
+for i in sorted(config['CurrentInputs']):
   iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
  
 class Readings:
