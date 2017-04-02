@@ -117,17 +117,17 @@ class Summary:
       summary['current']['deltav'][1] = summary['current']['deltav'][0]
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
     vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
-    vprint = vprint + str(summary['current']['deltav'][0]) + ' '
+    vprint = vprint + str(summary['current']['deltav'][0]).ljust(5,'0') + ' '
 
     for i in range(batdata.numiins):
       summary['current']['currentmax'][i] = round(batdata.currentav[i],1)
       summary['current']['currentmin'][i] = round(batdata.currentav[i],1)
-      vprint = vprint + str(round(batdata.currentav[i],1)) + ' '
+      vprint = vprint + str(round(batdata.currentav[i],1)).ljust(5,'0') + ' '
       summary['current']['powermax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells],0)
       summary['current']['powermin'][i] = summary['current']['powermax'][i]
      
-    logdata = vprint + str(round(batdata.soc,2)).ljust(5,'0') + \
-              ' ' + str(round(batdata.socadj,2)).ljust(5,'0') + '\n'  #  + '\033[1A'    
+    logdata = vprint + str(round(batdata.soc,2)).ljust(6,'0') + \
+              ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
     self.currenttime = time.localtime()
