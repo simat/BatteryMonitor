@@ -21,7 +21,7 @@ import sys
 #from Adafruit_I2C import Adafruit_I2C
 import time
 from shutil import copy as filecopy
-from config import config
+from config import loadconfig, config
 from ConfigParser import SafeConfigParser
 numcells = config['battery']['numcells']
 from getdata import Readings
@@ -123,6 +123,7 @@ def deamon(soc=-1):
 # update summaries
         logsummary.update(summary, batdata)
         if logsummary.currenttime[4] <> logsummary.prevtime[4]:  # new minute
+          loadconfig()
           logsummary.updatesection(summary, 'hour', 'current')
           logsummary.updatesection(summary, 'alltime','current')
           logsummary.updatesection(summary, 'currentday','current')

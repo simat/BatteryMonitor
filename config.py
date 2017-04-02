@@ -16,18 +16,15 @@
 from ast import literal_eval
 from ConfigParser import SafeConfigParser
 
-class Config:
-  def __init__(self):
+config ={}
+def loadconfig():
     configfile = SafeConfigParser()
-#    print configfile
     configfile.read('battery.cfg')
-    self.config = {}
     for section in configfile.sections():
-      self.config[section] = {}
+      config[section] = {}
       for key, val in configfile.items(section):
-        self.config[section][key] = literal_eval(val)
+        config[section][key] = literal_eval(val)
 
+loadconfig()
 
-config = Config()
-config = config.config
 
