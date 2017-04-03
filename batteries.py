@@ -79,7 +79,7 @@ def deamon(soc=-1):
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
           if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
           and prevbatvoltage >= config['battery']['vreset'] \
-          and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
+          and batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
 
             if summary['current']['dod'][3] <= 0.0 :
               socerr=0
