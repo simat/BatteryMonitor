@@ -98,3 +98,5 @@ def main():
     except KeyboardInterrupt:
       break
 
+if __name__ == "__main__":
+  main()
