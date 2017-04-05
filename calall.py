@@ -75,6 +75,10 @@ def getv():
   print config['calibrate']['delta']
   
 def main():
+  print 'Usage: Pressing just the [Enter] key will display the latest voltage readings, type ^C to exit'
+  print '       Press any other key to change the voltage calibration of all the voltage reading'
+  print '       Make sure the Battery Monitoring software is running otherwise the summary file will not be current'   
+
   avvolts=[]
   while True:
     try:
