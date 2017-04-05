@@ -45,11 +45,11 @@ def deamon(soc=-1):
     print(printtime,summary['current']['timestamp'])
     print "Error: Current time before last sample time"
     time.sleep(30)
-    printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
+    printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
   batdata = Readings()  # initialise batdata after we have valid sys time
 
- 
-  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + printtime)
+  print str(printtime)
+  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
   if soc > config['battery']['capacity']:
     print "Battery DOD must be less than Battery Capacity"
   else:
