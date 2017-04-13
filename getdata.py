@@ -63,6 +63,8 @@ class Readings:
   numiins = len(iin)
   current = [ 0.0 for i in range(numiins)]
   currentav = [ 0.0 for i in range(len(iin))]
+  kWhin = [ 0.0 for i in range(len(iin))]
+  kWhout = [ 0.0 for i in range(len(iin))]
 #  rawcurrent = 0.0
 #  batcurrent = 0.0
 #  batcurrentav = 0.0
@@ -134,8 +136,15 @@ class Readings:
     self.pwrbat = self.batah*self.batvoltsav[config['battery']['numcells']]/1000 # battery power in/out
 #    self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
 #    self.incurrentav = (self.incurrentav*(samplesav-1)+self.incurrent)/samplesav # running av current
+
     for i in range(0,len(iin)):
-     self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
+      self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
+      if self.currentav[i] < 0:
+        self.kWhin[i] = self.currentav[i]*deltatime
+        self.kWhout[i] = 0
+      else:
+        self.kWhout[i] = self.currentav[i]*deltatime
+        self.kWhin[i] = 0
 
     for i in range(1,numcells+1):   
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav

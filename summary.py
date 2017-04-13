@@ -120,11 +120,17 @@ class Summary:
     vprint = vprint + str(summary['current']['deltav'][0]).ljust(5,'0') + ' '
 
     for i in range(batdata.numiins):
-      summary['current']['currentmax'][i] = round(batdata.currentav[i],1)
-      summary['current']['currentmin'][i] = round(batdata.currentav[i],1)
+      if batdata.currentav[i] > 0:
+        summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
+      else:
+        summary['current']['iinmax'][i] = round(batdata.currentav[i],1)
       vprint = vprint + str(round(batdata.currentav[i],1)).ljust(5,'0') + ' '
-      summary['current']['powermax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells],0)
-      summary['current']['powermin'][i] = summary['current']['powermax'][i]
+      if batdata.currentav[i] > 0:
+        summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      else:
+        summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      summary['current']['kwhin'][i] = round(batdata.kWhin[i],5)
+      summary['current']['kwhout'][i] = round(batdata.kWhout[i],5)
      
     logdata = vprint + str(round(batdata.soc,2)).ljust(6,'0') + \
               ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'    
@@ -170,10 +176,12 @@ class Summary:
 #    section['amps'][0] = min(section['amps'][0], source['amps'][0])     
 #    section['amps'][2] = min(section['amps'][2], source['amps'][2])
     for i in range(len(config['CurrentInputs'])):
-      section['currentmax'][i] = max(section['currentmax'][i], source['currentmax'][i])
-      section['currentmin'][i] = min(section['currentmin'][i], source['currentmin'][i])
-      section['powermax'][i] = max(section['powermax'][i], source['powermax'][i])
-      section['powermin'][i] = min(section['powermin'][i], source['powermin'][i])
+      section['ioutmax'][i] = max(section['ioutmax'][i], source['ioutmax'][i])
+      section['iinmax'][i] = min(section['iinmax'][i], source['iinmax'][i])
+      section['kwoutmax'][i] = max(section['kwoutmax'][i], source['kwoutmax'][i])
+      section['kwinmax'][i] = min(section['kwinmax'][i], source['kwinmax'][i])
+      section['kwhin'][i] = round(source['kwhin'][i]+section['kwhin'][i], 5)
+      section['kwhout'][i] = round(source['kwhout'][i]+section['kwhout'][i], 5)
     for i in range(numcells+1):
       section['maxvoltages'][i] = max(section['maxvoltages'][i], source['maxvoltages'][i])
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
