@@ -120,10 +120,8 @@ class Summary:
     vprint = vprint + str(summary['current']['deltav'][0]).ljust(5,'0') + ' '
 
     for i in range(batdata.numiins):
-      if batdata.currentav[i] > 0:
-        summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
-      else:
-        summary['current']['iinmax'][i] = round(batdata.currentav[i],1)
+      summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
+      summary['current']['iinmax'][i] = summary['current']['ioutmax'][i]
       vprint = vprint + str(round(batdata.currentav[i],1)).ljust(5,'0') + ' '
       if batdata.currentav[i] > 0:
         summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
