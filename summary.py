@@ -123,10 +123,8 @@ class Summary:
       summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
       summary['current']['iinmax'][i] = summary['current']['ioutmax'][i]
       vprint = vprint + str(round(batdata.currentav[i],1)).ljust(5,'0') + ' '
-      if batdata.currentav[i] > 0:
-        summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
-      else:
-        summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       summary['current']['kwhin'][i] = round(batdata.kWhin[i],5)
       summary['current']['kwhout'][i] = round(batdata.kWhout[i],5)
      
