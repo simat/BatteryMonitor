@@ -116,7 +116,7 @@ function getdat($dataname) {
 
 $batvolts = getdat("maxvoltages");
 $deltav = getdat("deltav");
-$amps = getdat("currentmax");
+$amps = getdat("ioutmax");
 $dod = getdat("dod");
 $capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
 if  ($capacity > "75") {
@@ -205,7 +205,7 @@ for($x = 0; $x < $arrlength; $x++) {
 ?>
 </head>
 <body id="body">
-<meta http-equiv="refresh" content="60">
+<!-- <meta http-equiv="refresh" content="60"> -->
 <div id="header">
 <!-- <p style=font-size:24px; font-weight:900> Geoff's Battery Data Dated </p> -->
 <h2> Karrak Battery Data </h2>
