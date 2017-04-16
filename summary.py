@@ -128,9 +128,9 @@ class Summary:
       else:
         summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
-      summary['current']['kwhin'][i] = 0.0
+      batdata.kWhin[i] = 0.0
       summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
-      summary['current']['kwhout'][i] = 0.0
+      batdata.kWhout[i] = 0.0
     
     logdata = vprint + str(round(batdata.soc,2)).ljust(6,'0') + \
               ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'    
