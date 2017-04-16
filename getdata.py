@@ -140,11 +140,9 @@ class Readings:
     for i in range(0,len(iin)):
       self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
       if self.currentav[i] < 0:
-        self.kWhin[i] = self.currentav[i]*deltatime
-        self.kWhout[i] = 0
+        self.kWhin[i] = self.kWhin[i]+self.currentav[i]*deltatime*batdata.batvoltsav[numcells]/1000
       else:
-        self.kWhout[i] = self.currentav[i]*deltatime
-        self.kWhin[i] = 0
+        self.kWhout[i] = self.kWhout[i]+self.currentav[i]*deltatime*batdata.batvoltsav[numcells]/1000
 
     for i in range(1,numcells+1):   
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav

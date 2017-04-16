@@ -120,18 +120,18 @@ class Summary:
     vprint = vprint + str(summary['current']['deltav'][0]).ljust(5,'0') + ' '
 
     for i in range(batdata.numiins):
-      if batdata.currentav[i] > 0:
-        summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
-      else:
-        summary['current']['iinmax'][i] = round(batdata.currentav[i],1)
+      summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
+      summary['current']['iinmax'][i] = summary['current']['ioutmax'][i]
       vprint = vprint + str(round(batdata.currentav[i],1)).ljust(5,'0') + ' '
       if batdata.currentav[i] > 0:
         summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       else:
         summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
-      summary['current']['kwhin'][i] = round(batdata.kWhin[i],5)
-      summary['current']['kwhout'][i] = round(batdata.kWhout[i],5)
-     
+      summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
+      summary['current']['kwhin'][i] = 0.0
+      summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
+      summary['current']['kwhout'][i] = 0.0
+    
     logdata = vprint + str(round(batdata.soc,2)).ljust(6,'0') + \
               ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'    
     sys.stdout.write(logdata)  #  + '\033[1A'
