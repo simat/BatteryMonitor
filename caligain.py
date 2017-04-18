@@ -64,7 +64,7 @@ def geti():
     summaryfile.read(config['files']['summaryfile'])
   except IOError:
     pass
-  iin=literal_eval(summaryfile.get('current','currentmax'))
+  iin=literal_eval(summaryfile.get('current','ioutmax'))
   iprint = ''
   for i in range(numiin):
     iprint = iprint + str(i+1) + '=' + str(iin[i]).ljust(5,'0') + ', '
