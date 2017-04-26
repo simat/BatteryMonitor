@@ -88,15 +88,18 @@ def main():
       if len(what)>0:
         avi=getavi()
         reali = input("Input " + what + " multimeter reading ")
-        what=int(what)
-        config['calibrate']['currentgain'][what-1] = config['calibrate']['currentgain'][what-1]*reali/avi[what-1]
-        print 'Recalculated gain: ' + str(config['calibrate']['currentgain'])
-        batconfigdata=SafeConfigParser()
-        batconfigdata.read('battery.cfg')
-        batconfigdata.set('calibrate','currentgain',str(config['calibrate']['currentgain']))
-        with open('battery.cfg', 'w') as batconfig:
-          batconfigdata.write(batconfig)
-        batconfig.closed
+        if reali == 0:
+          print "Input Error: Zero not valid current input"
+        else:
+          what=int(what)
+          config['calibrate']['currentgain'][what-1] = config['calibrate']['currentgain'][what-1]*reali/avi[what-1]
+          print 'Recalculated gain: ' + str(config['calibrate']['currentgain'])
+          batconfigdata=SafeConfigParser()
+          batconfigdata.read('battery.cfg')
+          batconfigdata.set('calibrate','currentgain',str(config['calibrate']['currentgain']))
+          with open('battery.cfg', 'w') as batconfig:
+            batconfigdata.write(batconfig)
+          batconfig.closed
 
 
 
