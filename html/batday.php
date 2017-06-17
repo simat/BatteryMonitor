@@ -88,6 +88,10 @@ $pos = strpos($config,"summary");
 $pos = strpos($config,"'",$pos);
 $summary = substr($config,$pos+1);
 $summary = strstr($summary,"'",true);
+$pos = strpos($config,"name");
+$pos = strpos($config,"'",$pos);
+$batname = substr($config,$pos+1);
+$batname = strstr($summary,"'",true);
 $summary = file_get_contents($summary);
 # echo $config;
 $pos = strpos($config,"capacity");
@@ -208,9 +212,10 @@ for($x = 0; $x < $arrlength; $x++) {
 <!-- <meta http-equiv="refresh" content="60"> -->
 <div id="header">
 <!-- <p style=font-size:24px; font-weight:900> Geoff's Battery Data Dated </p> -->
-<h2> Karrak Battery Data </h2>
+<!-- <h2> Karrak Battery Data </h2> -->
 
 <?php
+echo "<h2>" . $batname." Battery Data </h2>"
 echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>"); ?>
 </div>
 <div id="bat">
