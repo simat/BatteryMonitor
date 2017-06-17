@@ -215,7 +215,7 @@ for($x = 0; $x < $arrlength; $x++) {
 <!-- <h2> Karrak Battery Data </h2> -->
 
 <?php
-echo "<h2>" . $batname." Battery Data </h2>"
+echo ("<h2>" . $batname." Battery Data </h2>");
 echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>"); ?>
 </div>
 <div id="bat">
