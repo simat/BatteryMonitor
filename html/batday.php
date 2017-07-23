@@ -91,7 +91,7 @@ $summary = strstr($summary,"'",true);
 $pos = strpos($config,"name");
 $pos = strpos($config,"'",$pos);
 $batname = substr($config,$pos+1);
-$batname = strstr($summary,"'",true);
+$batname = strstr($batname,"'",true);
 $summary = file_get_contents($summary);
 # echo $config;
 $pos = strpos($config,"capacity");
@@ -210,6 +210,9 @@ for($x = 0; $x < $arrlength; $x++) {
 </head>
 <body id="body">
 <!-- <meta http-equiv="refresh" content="60"> -->
+<meta http-equiv=cache-control" content="no-cache">
+<meta http-equiv=cache-control" content="no-cache">
+<meta http-equiv=pragma" content="no-cache">
 <div id="header">
 <!-- <p style=font-size:24px; font-weight:900> Geoff's Battery Data Dated </p> -->
 <!-- <h2> Karrak Battery Data </h2> -->
