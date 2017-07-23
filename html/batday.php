@@ -49,8 +49,8 @@ set_error_handler("customError");
     height:300px;
     float:left;
     padding:10px;
-    font-size:3.0em;
-    line-height:0.2em;
+    font-size:2.5em;
+    line-height:0.0em;
 #    border: 1px solid white;	 	 
 }
 #footer {
@@ -255,6 +255,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <p style="text-align:center;font-size:2.0em;line-height:0.0em;color:<?php echo $capcolour?>">
 <?php echo $capacity."%"; ?></p>
 <p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[0]."A"?></p>
+<p style="font-size:0.5em;line-height:0.0;"><?php echo "In ".$amps[1]."A Out ".$amps[2]."A"?></p>
 <p><?php echo $dod[0]."Ah"?></p>
 <p><?php echo $batvolts[$numbercells]."V"?></p>
 <p><?php echo $deltav[0]."V"?></p>
