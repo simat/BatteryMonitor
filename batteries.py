@@ -116,6 +116,7 @@ def deamon(soc=-1):
         for i in config['alarms']:
           exec(config['alarms'][i][1])
           if test:
+#            sys.stderr.write('Alarm 1 triggered')
             exec(config['alarms'][i][2])
           exec(config['alarms'][i][3])
           if test:
