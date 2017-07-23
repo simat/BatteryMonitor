@@ -21,7 +21,7 @@ import sys
 #from Adafruit_I2C import Adafruit_I2C
 import time
 from shutil import copy as filecopy
-from config import config
+from config import loadconfig, config
 from ConfigParser import SafeConfigParser
 numcells = config['battery']['numcells']
 from getdata import Readings
@@ -45,11 +45,11 @@ def deamon(soc=-1):
     print(printtime,summary['current']['timestamp'])
     print "Error: Current time before last sample time"
     time.sleep(30)
-    printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
+    printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
   batdata = Readings()  # initialise batdata after we have valid sys time
 
- 
-  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + printtime)
+  print str(printtime)
+  filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
   if soc > config['battery']['capacity']:
     print "Battery DOD must be less than Battery Capacity"
   else:
@@ -79,7 +79,7 @@ def deamon(soc=-1):
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
           if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
           and prevbatvoltage >= config['battery']['vreset'] \
-          and batdata.batcurrentav < config['battery']['ireset']:  # reset SOC counter?
+          and batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
 
             if summary['current']['dod'][3] <= 0.0 :
               socerr=0
@@ -124,6 +124,7 @@ def deamon(soc=-1):
 # update summaries
         logsummary.update(summary, batdata)
         if logsummary.currenttime[4] <> logsummary.prevtime[4]:  # new minute
+          loadconfig()
           logsummary.updatesection(summary, 'hour', 'current')
           logsummary.updatesection(summary, 'alltime','current')
           logsummary.updatesection(summary, 'currentday','current')
@@ -135,6 +136,11 @@ def deamon(soc=-1):
           batdata.inahtot = 0.0
           batdata.pwrbattot = 0.0
           batdata.pwrintot = 0.0
+          for i in range(batdata.numiins):
+            batdata.kWhin[i] = 0.0
+            batdata.kWhout[i] = 0.0
+
+
 
         if logsummary.currenttime[3] <> logsummary.prevtime[3]:  # new hour
           logsummary.starthour(summary)
