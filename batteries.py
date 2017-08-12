@@ -84,7 +84,7 @@ def deamon(soc=-1):
             if summary['current']['dod'][3] <= 0.0 :
               socerr=0
             else:
-              socerr=batdata.socadj/(summary['current']['dod'][3]*24)
+              socerr=batdata.socadj/(float(summary['current']['dod'][3])*24.0)
               socerr=max(socerr,-0.01)
               socerr=min(socerr,0.01)
             config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
