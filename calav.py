@@ -21,10 +21,13 @@ from shutil import copy as filecopy
 from copy import deepcopy
 from ast import literal_eval
 from ConfigParser import SafeConfigParser
-from config import config
+from config import loadconfig
+config ={}
+config =loadconfig()
 numcells = config['battery']['numcells']
 voltages = []
 avv = []
+
 
 summaryfile = SafeConfigParser()
 
@@ -79,6 +82,8 @@ def main():
   while True:
     try:
       avvolts=avv()
+      config ={}
+      config =loadconfig()
 #      time.sleep(60.0)
       what = raw_input(">")
       if len(what)>0:
