@@ -87,7 +87,7 @@ def deamon(soc=-1):
               socerr=batdata.socadj/(float(summary['current']['dod'][3])*24.0)
               socerr=max(socerr,-0.01)
               socerr=min(socerr,0.01)
-            config['battery']['ahloss']=config['battery']['ahloss']+socerr/2
+            config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
             batconfigdata=SafeConfigParser()
             batconfigdata.read('battery.cfg')
             batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
