@@ -21,7 +21,7 @@ from shutil import copy as filecopy
 from copy import deepcopy
 from ast import literal_eval
 from ConfigParser import SafeConfigParser
-from config import config
+from config import config,loadconfig
 numcells = config['battery']['numcells']
 voltages = []
 avv = []
@@ -88,6 +88,8 @@ def main():
   avvolts=[]
   while True:
     try:
+
+      loadconfig()
       avvolts=avv()
 #      time.sleep(60.0)
       what = raw_input(">")
