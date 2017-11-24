@@ -18,9 +18,8 @@
 from config import config
 numcells = config['battery']['numcells']
 import time
-import ADS1x15 as AtoD
-for i in config['AtoDs']:
-  exec(i + '=' + config['AtoDs'][i])
+exec(config['files']['interface'])
+#from x import Raw
 
 # compile analog capture code to save CPU time
 vin = []
@@ -28,14 +27,17 @@ for i in sorted(config['VoltageInputs']):
   vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
 #  vin = vin + [config['VoltageInputs'][i]]
 #for i in config['CurrentInputs']:
-#  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval') 
+#  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
 iin = []
 for i in sorted(config['CurrentInputs']):
   iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
- 
+
+
 class Readings:
   """ get and manipulates readings from the real world"""
-  
+
+  rawdata = Raw()
+
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
   avoffset = 0.0
@@ -62,9 +64,9 @@ class Readings:
 
   numiins = len(iin)
   current = [ 0.0 for i in range(numiins)]
-  currentav = [ 0.0 for i in range(len(iin))]
-  kWhin = [ 0.0 for i in range(len(iin))]
-  kWhout = [ 0.0 for i in range(len(iin))]
+  currentav = [ 0.0 for i in range(numiins)]
+  kWhin = [ 0.0 for i in range(numiins)]
+  kWhout = [ 0.0 for i in range(numiins)]
 #  rawcurrent = 0.0
 #  batcurrent = 0.0
 #  batcurrentav = 0.0
@@ -83,49 +85,37 @@ class Readings:
   pwrin = 0.0  # gross power in units kW
   pwrintot = 0.0 # total gross power in units kWh
 
-  def getatod(self):
-    """ Get data for A/Ds, calibrate, covert and place in list variables"""
-    
+  def getvi(self):
+    """ Get raw data """
     self.oldsampletime=self.sampletime
     sleeptime = max(config['sampling']['sampletime'] - (time.time()-self.oldsampletime), 0.0)
-#	    print sleeptime
+  #	    print sleeptime
     time.sleep(sleeptime)
     self.sampletime = time.time()
-
-    for i in range(len(vin)):
-      self.rawvolts[i+1] = eval(vin[i])/1000 # A to D 1 to 4 in volts
-#    self.rawcurrent = eval(config['CurrentInputs']['ibat']) # Battery current in counts
-#    self.batcurrent = self.rawcurrent*256.0/32767.0  # current in mv
-#    self.batcurrent = self.batcurrent*config['calibrate']['ibatgain'] \
-#                      -config['calibrate']['ibatoffset'] \
-#                      +config['calibrate']['pcurrent'] # current in amp  
-#    self.rawincurrent = eval(config['CurrentInputs']['iin']) # Solar current in counts
-#    self.incurrent = self.rawincurrent*256.0/32767.0  # current in mv
-#    self.incurrent = self.incurrent*config['calibrate']['iingain']-config['calibrate']['iinoffset'] # current in amp
-    for i in range(len(iin)):
-      self.current[i] = eval(iin[i])*config['calibrate']['currentgain'][i] \
+    self.rawdata.x()
+    for i in range(self.numiins):
+      self.current[i] = self.rawdata.rawi[i]*config['calibrate']['currentgain'][i] \
                         -config['calibrate']['currentoffset'][i]
-
-    self.batvolts[0] = self.rawvolts[0]
-    self.uncalvolts[0] = self.rawvolts[0]
+    self.batvolts[0] = self.rawdata.rawv[0]
+    self.uncalvolts[0] = self.rawdata.rawv[0]
     for i in range(1,numcells+1):
-      self.uncalvolts[i] = self.rawvolts[i]*config['calibrate']['batvgain'] # A/D to battery volts
+      self.uncalvolts[i] = self.rawdata.rawv[i]*config['calibrate']['batvgain'] # A/D to battery volts
       self.batvolts[i] = self.uncalvolts[i]*self.ratio[i] +self.avoffset # calibrate values
-#      print self.uncalvolts[i], self.batvolts[i]
+#    print (self.uncalvolts, self.batvolts, self.current)
 
   def __init__(self):
     self.sampletime = time.time()
-    self.getatod()
+    self.getvi()
     self.batvoltsav = self.batvolts
-#    self.batcurrentav = self.batcurrent
-#    self.incurrentav = self.incurrent
+    self.batcurrentav = self.current[0]
+    self.incurrentav = self.current[1]
     for i in range(0,len(iin)):
      self.currentav[i] = self.current[i]
-
+#    print (self.batvoltsav, self.current)
 
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
-    self.getatod()
+    self.getvi()
 
     samplesav = config['sampling']['samplesav']
     deltatime=(self.sampletime-self.oldsampletime)/(3600/config['sampling']['sampletime'])
@@ -134,21 +124,17 @@ class Readings:
     self.inah = self.currentav[1]*deltatime
     self.pwrin = self.inah*self.batvoltsav[config['battery']['numcells']]/1000 # gross input power
     self.pwrbat = self.batah*self.batvoltsav[config['battery']['numcells']]/1000 # battery power in/out
-#    self.batcurrentav = (self.batcurrentav*(samplesav-1)+self.batcurrent)/samplesav # running av current
-#    self.incurrentav = (self.incurrentav*(samplesav-1)+self.incurrent)/samplesav # running av current
 
-    for i in range(0,len(iin)):
+    for i in range(0,self.numiins):
       self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
       if self.currentav[i] < 0:
         self.kWhin[i] = self.kWhin[i]+self.currentav[i]*deltatime*self.batvoltsav[numcells]/1000
       else:
         self.kWhout[i] = self.kWhout[i]+self.currentav[i]*deltatime*self.batvoltsav[numcells]/1000
 
-    for i in range(1,numcells+1):   
+    for i in range(1,numcells+1):
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav
-
+#    print (self.batvoltsav, self.currentav)
     self.deltav[0]=round(self.batvolts[0],3)
     for i in range(numcells,0,-1):
       self.deltav[i]=round((self.batvoltsav[i]-self.batvoltsav[i-1]-config['calibrate']['delta'][i-1]),3)
-
-

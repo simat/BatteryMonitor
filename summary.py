@@ -20,18 +20,18 @@ import time
 from shutil import copy as filecopy
 from copy import deepcopy
 from ast import literal_eval
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from config import config
 numcells = config['battery']['numcells']
 
 
 class Summary:
-  """Handles battery summary data""" 
+  """Handles battery summary data"""
 
   def __init__(self):
     self.currenttime = time.localtime()
     printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
-    self.logfile = open(config['files']['logfile'],'a',0)
+    self.logfile = open(config['files']['logfile'],'a')
     self.sampletime = time.time()
     self.prevtime = time.localtime()
 
@@ -65,7 +65,6 @@ class Summary:
 
   def update(self, summary, batdata):
     """ Update 'current' section of summary data with 'batdata' and write realtime log """
-    
     summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
     if batdata.currentav[0] > -config['battery']['ilowcurrent']:
@@ -84,33 +83,33 @@ class Summary:
 #    summary['current']['amps'][2] = round(batdata.currentav[1], 1)
     if batdata.ah > 0.0:
       summary['current']['ah'][5] = round(batdata.ah,2)
-      summary['current']['ah'][4] = 0.0      
+      summary['current']['ah'][4] = 0.0
     else:
       summary['current']['ah'][4] = round(batdata.ah,2)
-      summary['current']['ah'][5] = 0.0      
+      summary['current']['ah'][5] = 0.0
     if batdata.pwrbat > 0.0:
       summary['current']['power'][1] = round(batdata.pwrbattot,6)
-      summary['current']['power'][0] = 0.0      
+      summary['current']['power'][0] = 0.0
     else:
       summary['current']['power'][0] = round(batdata.pwrbattot,6)
-      summary['current']['power'][1] = 0.0      
-    summary['current']['power'][2] = round(batdata.pwrintot,6)     
+      summary['current']['power'][1] = 0.0
+    summary['current']['power'][2] = round(batdata.pwrintot,6)
     summary['current']['power'][3] = round(summary['current']['power'][0] - \
                                      summary['current']['power'][2] + \
-                                     summary['current']['power'][1] ,6 )  # current to loads     
+                                     summary['current']['power'][1] ,6 )  # current to loads
 
     vprint=''
     maxmaxvoltage = 0.0
-    minmaxvoltage = 5.0    
+    minmaxvoltage = 5.0
     for i in range(numcells):
       summary['current']['maxvoltages'][i] = round(batdata.deltav[i+1],3)
       maxmaxvoltage = max(maxmaxvoltage, summary['current']['maxvoltages'][i])
       minmaxvoltage = min(minmaxvoltage, summary['current']['maxvoltages'][i])
       summary['current']['minvoltages'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] > -config['battery']['ilowcurrent']:
-        summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]  
+        summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] < config['battery']['ilowcurrent']:
-        summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]     
+        summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
       vprint=vprint + str(round(batdata.deltav[i+1],3)).ljust(5,'0') + ' '
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
     if batdata.currentav[0] < config['battery']['ilowcurrent']:
@@ -129,9 +128,9 @@ class Summary:
         summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
       summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
-    
+
     logdata = vprint + str(round(batdata.soc,2)).ljust(6,'0') + \
-              ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'    
+              ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'
     sys.stdout.write(logdata)  #  + '\033[1A'
     self.prevtime = self.currenttime
     self.currenttime = time.localtime()
@@ -141,13 +140,13 @@ class Summary:
 
 #      currentdata = currentdata + '               '
 #      for i in range(numcells):
-#        currentdata = currentdata + str(round(batdata.uncalvolts[i+1]-batdata.uncalvolts[i],3)) + ' ' 
+#        currentdata = currentdata + str(round(batdata.uncalvolts[i+1]-batdata.uncalvolts[i],3)) + ' '
 #      currentdata = currentdata + '\n'
     self.logfile.write(currentdata)
 
   def updatesection(self, summary, section, source):
     """ Update 'summary' section 'section' with data from 'source' """
-    
+
     section = summary[section]
     source = summary[source]
     section['deltav'][1] = max(section['deltav'][1], source['deltav'][1])
@@ -162,7 +161,7 @@ class Summary:
     section['power'][0] = round(section['power'][0]+source['power'][0], 6)
     section['power'][1] = round(section['power'][1]+source['power'][1], 6)
     section['power'][2] = round(section['power'][2]+source['power'][2], 6)
-    section['power'][3] = round(section['power'][3]+source['power'][3], 6) 
+    section['power'][3] = round(section['power'][3]+source['power'][3], 6)
     section['dod'][2] = max(section['dod'][2], source['dod'][2])
     section['dod'][0] = min(section['dod'][0], source['dod'][0])
     section['dod'][1] = (section['dod'][1]*section['ah'][3] + source['dod'][1])
@@ -171,7 +170,7 @@ class Summary:
     section['dod'][1] = round(section['dod'][1]/section['ah'][3], 6)
     section['dod'][3] = max(section['dod'][3], source['dod'][3])
 #    section['amps'][1] = max(section['amps'][1], source['amps'][1])
-#    section['amps'][0] = min(section['amps'][0], source['amps'][0])     
+#    section['amps'][0] = min(section['amps'][0], source['amps'][0])
 #    section['amps'][2] = min(section['amps'][2], source['amps'][2])
     for i in range(len(config['CurrentInputs'])):
       section['ioutmax'][i] = max(section['ioutmax'][i], source['ioutmax'][i])
@@ -189,7 +188,7 @@ class Summary:
 
   def writesummary(self):
     """ Write summary file """
-    
+
     for section in self.summaryfile.sections():
       for option in self.summaryfile.options(section):
         self.summaryfile.set(section, option, str(self.summary[section][option]))
@@ -219,35 +218,35 @@ class Summary:
     writestr = writestr + "\n"
     periodfile.write(writestr)
     periodfile.close()
- 
+
   def starthour(self, summary):
     """ Start new hour """
     self.writeperiod('hoursummaryfile', 'hour')
-    summary['hour']['ah'][3] = 0 # zero # of samples for av  
+    summary['hour']['ah'][3] = 0 # zero # of samples for av
     summary['hour'] = deepcopy(summary['current'])
 
   def startday(self, summary):
     """ Start new Day """
-    
+
     self.writeperiod('daysummaryfile', 'currentday')
     summary['prevday'] = deepcopy(summary['currentday'])
     summary['currentday']['ah'][3] = 0 # zero number of samples for av
-    summary['current']['dod'][3] += 1 
+    summary['current']['dod'][3] += 1
     summary['currentday'] = deepcopy(summary['current'])
 
   def startmonth(self, summary):
     """ Start new month """
-    
+
     self.writeperiod('monthsummaryfile', 'monthtodate')
-    summary['monthtodate']['ah'][3] = 0  # zero number of samples for av 
+    summary['monthtodate']['ah'][3] = 0  # zero number of samples for av
     summary['monthtodate'] = deepcopy(summary['current'])
     filecopy(config['files']['summaryfile'],config['files']['summaryfile']+ self.printtime[0:8])
 
   def startyear(self, summary):
     """ Start new year """
-    
+
     self.writeperiod('yearsummaryfile', 'yeartodate')
-    summary['yeartodate']['ah'][3] = 0  # zero number of samples for av 
+    summary['yeartodate']['ah'][3] = 0  # zero number of samples for av
     summary['yeartodate'] = deepcopy(summary['current'])
     self.logfile.close()
     rename(config['files']['logfile'],config['files']['logfile']+str(int(self.printtime[0:4])-1))
@@ -255,7 +254,5 @@ class Summary:
 
   def close(self):
     """ Close logging file ready for exit """
-    
+
     self.logfile.close()
-
-
