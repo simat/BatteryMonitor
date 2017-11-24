@@ -22,10 +22,10 @@ import sys
 import time
 from shutil import copy as filecopy
 from config import loadconfig, config
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 numcells = config['battery']['numcells']
 from getdata import Readings
-import Adafruit_BBIO.GPIO as GPIO
+#import Adafruit_BBIO.GPIO as GPIO
 # Initialise and compile alarms
 for i in config['alarms']:
   exec(config['alarms'][i][0])
@@ -43,15 +43,15 @@ def deamon(soc=-1):
   printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
   while int(printtime) <= int(summary['current']['timestamp']):
     print(printtime,summary['current']['timestamp'])
-    print "Error: Current time before last sample time"
+    print ("Error: Current time before last sample time")
     time.sleep(30)
     printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
   batdata = Readings()  # initialise batdata after we have valid sys time
 
-  print str(printtime)
+  print (str(printtime))
   filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
   if soc > config['battery']['capacity']:
-    print "Battery DOD must be less than Battery Capacity"
+    print ("Battery DOD must be less than Battery Capacity")
   else:
     if soc < 0:
        batdata.soc = summary['current']['ah'][0]
@@ -80,7 +80,7 @@ def deamon(soc=-1):
 #          print batdata.socadj/(float(summary['current']['dod'][3])*24.0)
           if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
           and prevbatvoltage >= config['battery']['vreset'] \
-          and summary['current']['dod'][3] <> 0 \
+          and summary['current']['dod'][3] != 0 \
           and -batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
 
             if summary['current']['dod'][3] <= 0 :
@@ -125,7 +125,7 @@ def deamon(soc=-1):
             exec(config['alarms'][i][4])
 # update summaries
         logsummary.update(summary, batdata)
-        if logsummary.currenttime[4] <> logsummary.prevtime[4]:  # new minute
+        if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
           loadconfig()
           logsummary.updatesection(summary, 'hour', 'current')
           logsummary.updatesection(summary, 'alltime','current')
@@ -144,7 +144,7 @@ def deamon(soc=-1):
 
 
 
-        if logsummary.currenttime[3] <> logsummary.prevtime[3]:  # new hour
+        if logsummary.currenttime[3] != logsummary.prevtime[3]:  # new hour
           logsummary.starthour(summary)
 
         if logsummary.currenttime[3] < logsummary.prevtime[3]: # newday
