@@ -26,7 +26,7 @@ class Raw:
 
   def x(self):
     """ Get data from BMS board"""
-    ser = serial.Serial('/dev/ttyUSB0')  # open serial port
+    ser = serial.Serial(config['files']['usbport'])  # open serial port
     ser.timeout = 3
     command = bytes.fromhex('DD A5 03 00 FF FD 77')
     dat = self.getbmsdat(ser,command)

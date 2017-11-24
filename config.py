@@ -14,7 +14,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from ast import literal_eval
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 config ={}
 def loadconfig():
