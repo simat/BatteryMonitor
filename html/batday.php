@@ -95,21 +95,15 @@ $batname = substr($config,$pos+1);
 $batname = strstr($batname,"'",true);
 
 $summary = file_get_contents($summary);
-echo $config;
 $pos = strpos($config,"capacity");
 $batcapacity = substr($config,$pos);
-$batcapacity = strstr($batcapacity,"\n",true);
 sscanf($batcapacity, "capacity = %u",$batcapacity);
-# echo $batcapacity;
 $pos = strpos($config,"overvoltage",$pos);
 $highv = substr($config,$pos);
-$highv = strstr($batcapacity,"\n",true);
-$pos = strpos($config,"undervoltage",$pos);
+sscanf($highv, "overvoltage = %f",$highv);
+$pos = strpos($config,"undervoltage");
 $lowv = substr($config,$pos);
-$lowv = strstr($batcapacity,"\n",true);
-$highv = 3.6;
-$lowv = 3.0;
-#echo $summary
+sscanf($lowv, "undervoltage = %f",$lowv);
 $pos = strpos($summary,"[current]");
 
 $pos = strpos($summary,"'",$pos);
