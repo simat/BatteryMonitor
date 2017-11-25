@@ -40,7 +40,7 @@ set_error_handler("customError");
     width:<?php echo $batwidth; ?>px;
     float:left;
     padding:5px;
-    color:black;	      
+    color:black;
 }
 #batdata {
     margin-top:-0.9em;
@@ -51,7 +51,7 @@ set_error_handler("customError");
     padding:10px;
     font-size:2.5em;
     line-height:0.0em;
-#    border: 1px solid white;	 	 
+#    border: 1px solid white;
 }
 #footer {
     margin-top:0em;
@@ -62,7 +62,7 @@ set_error_handler("customError");
     float: left;
     clear:both;
 #    text-align:center;
-#   padding:5px;	 	 
+#   padding:5px;
 }
 
 #highest {
@@ -83,22 +83,30 @@ set_error_handler("customError");
 </style>
 
 <?php
-$config = file_get_contents("/home/simat/BatteryMonitor/battery.cfg");
+$config = file_get_contents("/home/simat/gadgets/bms/BatteryMonitor/battery.cfg");
 $pos = strpos($config,"summary");
 $pos = strpos($config,"'",$pos);
 $summary = substr($config,$pos+1);
 $summary = strstr($summary,"'",true);
-$pos = strpos($config,"name");
+$pos = strpos($config,"[battery]",$pos);
+$pos = strpos($config,"name",$pos);
 $pos = strpos($config,"'",$pos);
 $batname = substr($config,$pos+1);
 $batname = strstr($batname,"'",true);
+
 $summary = file_get_contents($summary);
-# echo $config;
+echo $config;
 $pos = strpos($config,"capacity");
 $batcapacity = substr($config,$pos);
 $batcapacity = strstr($batcapacity,"\n",true);
 sscanf($batcapacity, "capacity = %u",$batcapacity);
 # echo $batcapacity;
+$pos = strpos($config,"overvoltage",$pos);
+$highv = substr($config,$pos);
+$highv = strstr($batcapacity,"\n",true);
+$pos = strpos($config,"undervoltage",$pos);
+$lowv = substr($config,$pos);
+$lowv = strstr($batcapacity,"\n",true);
 $highv = 3.6;
 $lowv = 3.0;
 #echo $summary
@@ -108,7 +116,7 @@ $pos = strpos($summary,"'",$pos);
 $timestamp = substr($summary,$pos+1);
 $timestamp = strstr($timestamp,"'",true);
 
-function getdat($dataname) { 
+function getdat($dataname) {
    global $summary, $pos;
    $pos = strpos($summary, $dataname, $pos);
    $pos = strpos($summary,"[",$pos);
@@ -225,7 +233,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <table align="left" border="1" cellpadding="1" cellspacing="4" style="height:300px; width:<?php echo ($numbercells*38); ?>px">
 	<tbody>
 		<tr>
-<?php for ($x = ($numbercells/2); $x < $numbercells; $x++) { 
+<?php for ($x = ($numbercells/2); $x < $numbercells; $x++) {
 
 			echo ('<td style="background-color:' . $batcolour[$x] . ';text-align:center">');
 			echo ('<p> <span style="font-size:2.0em">' . ($x+1) . '</span><br>');
@@ -237,7 +245,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 } ?>
 		</tr>
 		<tr>
-<?php for ($x = $numbercells/2-1; $x >= 0; $x--) { 
+<?php for ($x = $numbercells/2-1; $x >= 0; $x--) {
 
 			echo ('<td style="background-color:' . $batcolour[$x] . ';text-align:center">');
 			echo ('<p> <span style="font-size:2.0em">' . ($x+1) . '</span><br>');
@@ -274,4 +282,4 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 
 </div>
 </body>
-</html> 
+</html>
