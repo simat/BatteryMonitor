@@ -3,6 +3,8 @@
 <head>
 
 <?php
+//Replace location of battery config file with the location on your system
+$config = file_get_contents("/home/simat/gadgets/bms/BatteryMonitor/battery.cfg");
 //error handler function
 function customError($errno, $errstr) {
   echo "<b>Error:</b> [$errno] $errstr";
@@ -83,7 +85,6 @@ set_error_handler("customError");
 </style>
 
 <?php
-$config = file_get_contents("/home/simat/gadgets/bms/BatteryMonitor/battery.cfg");
 $pos = strpos($config,"summary");
 $pos = strpos($config,"'",$pos);
 $summary = substr($config,$pos+1);
