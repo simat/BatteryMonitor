@@ -21,16 +21,6 @@ import time
 exec(config['files']['interface'])
 #from x import Raw
 
-# compile analog capture code to save CPU time
-vin = []
-for i in sorted(config['VoltageInputs']):
-  vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
-#  vin = vin + [config['VoltageInputs'][i]]
-#for i in config['CurrentInputs']:
-#  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
-iin = []
-for i in sorted(config['CurrentInputs']):
-  iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
 
 
 class Readings:
@@ -40,19 +30,11 @@ class Readings:
 
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
-  avoffset = 0.0
-  for i in range(1,numcells+1):
-    avoffset = avoffset + measured[i]-displayed[i]
-  avoffset = avoffset/numcells
-
 
   ratio = [ 1.0 for i in range(numcells+1)]
   for i in range(1, numcells+1):
-    ratio[i] = measured[i]/(displayed[i]+avoffset)
+    ratio[i] = measured[i]/displayed[i]
   calvolts = [ 0.0 for i in range(numcells+1)]
-
-  measureddelta = config['calibrate']['measureddelta']
-  displayeddelta = config['calibrate']['displayeddelta']
 
 #  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
   deltav = [ 3.25 for i in range(numcells+1)]
@@ -62,7 +44,7 @@ class Readings:
   uncalvolts = [ i*3.25 for i in range(numcells+1)]
   batvoltsav = [ i*3.25 for i in range(numcells+1)]
 
-  numiins = len(iin)
+  numiins = len(rawdata.iin)
   current = [ 0.0 for i in range(numiins)]
   currentav = [ 0.0 for i in range(numiins)]
   kWhin = [ 0.0 for i in range(numiins)]
@@ -100,7 +82,7 @@ class Readings:
     self.uncalvolts[0] = self.rawdata.rawv[0]
     for i in range(1,numcells+1):
       self.uncalvolts[i] = self.rawdata.rawv[i]*config['calibrate']['batvgain'] # A/D to battery volts
-      self.batvolts[i] = self.uncalvolts[i]*self.ratio[i] +self.avoffset # calibrate values
+      self.batvolts[i] = self.uncalvolts[i]*self.ratio[i] # calibrate values
 #    print (self.uncalvolts, self.batvolts, self.current)
 
   def __init__(self):
