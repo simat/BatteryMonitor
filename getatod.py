@@ -16,10 +16,12 @@
 
 
 from config import config
+#import smbus
+#from Adafruit_I2C import Adafruit_I2C
 import ADS1x15 as AtoD
 for i in config['AtoDs']:
   exec(i + '=' + config['AtoDs'][i])
-  
+
 class Raw:
   # compile analog capture code to save CPU time
   vin = []
@@ -33,11 +35,12 @@ class Raw:
     iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
 
   rawi = [0.0 for i in iin]
-  rawv = [ 0.0 for i in vin]
+  rawv = [ 0.0 for i in range(len(vin)+1)]
+
   def x(self):
     """ Get data for A/Ds, calibrate, covert and place in list variables"""
 
-    for i in range(len(vin)):
-      self.rawv[i+1] = eval(vin[i])/1000 # A to D 1 to 4 in volts
-    for i in range(len(iin)):
-      self.rawi[i] = eval(iin[i])
+    for i in range(len(self.vin)):
+      self.rawv[i+1] = eval(self.vin[i])/1000 # A to D 1 to 4 in volts
+    for i in range(len(self.iin)):
+      self.rawi[i] = eval(self.iin[i])
