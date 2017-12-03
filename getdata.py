@@ -91,7 +91,7 @@ class Readings:
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.current[0]
     self.incurrentav = self.current[1]
-    for i in range(0,len(iin)):
+    for i in range(0,self.len(iin)):
      self.currentav[i] = self.current[i]
 #    print (self.batvoltsav, self.current)
 
