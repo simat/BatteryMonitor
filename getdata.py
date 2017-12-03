@@ -1,3 +1,4 @@
+
 #!/usr/bin/python
 # *****BatteryMonitor Getdata from battery cells getdata.py*****
 # Copyright (C) 2014 Simon Richard Matthews
@@ -91,7 +92,7 @@ class Readings:
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.current[0]
     self.incurrentav = self.current[1]
-    for i in range(0,self.len(iin)):
+    for i in range(0,self.numiins):
      self.currentav[i] = self.current[i]
 #    print (self.batvoltsav, self.current)
 

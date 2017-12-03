@@ -17,6 +17,9 @@
 #!/usr/bin/python
 import sys
 
+#import Adafruit_BBIO.GPIO as GPIO
+
+
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
 import time
@@ -29,10 +32,10 @@ from getdata import Readings
 # Initialise and compile alarms
 for i in config['alarms']:
   exec(config['alarms'][i][0])
-  config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec') 
-  config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec') 
-  config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec') 
-  config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec') 
+  config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
+  config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec')
+  config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
+  config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
 
 
 def deamon(soc=-1):
@@ -75,7 +78,7 @@ def deamon(soc=-1):
 #            printvoltage = printvoltage + str(round(batdata.batvolts[i],3)).ljust(5,'0') + ' '
 #         print (printvoltage)
           batdata.getraw()
-        
+
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
 #          print batdata.socadj/(float(summary['current']['dod'][3])*24.0)
           if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
@@ -168,4 +171,3 @@ if __name__ == "__main__":
     deamon(float(sys.argv[1]))
   else:
     deamon()
-
