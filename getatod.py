@@ -18,7 +18,7 @@
 from config import config
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
-import ADS1x15 as AtoD
+import Adafruit_ADS1x15
 for i in config['AtoDs']:
   exec(i + '=' + config['AtoDs'][i])
 

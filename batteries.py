@@ -17,11 +17,11 @@
 #!/usr/bin/python
 import sys
 
-#import Adafruit_BBIO.GPIO as GPIO
+import Adafruit_GPIO as GPIO
 
 
 #import smbus
-#from Adafruit_I2C import Adafruit_I2C
+#import Adafruit_ADS1x15
 import time
 from shutil import copy as filecopy
 from config import loadconfig, config
