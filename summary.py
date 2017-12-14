@@ -31,7 +31,7 @@ class Summary:
   def __init__(self):
     self.currenttime = time.localtime()
     printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
-    self.logfile = open(config['files']['logfile'],'a')
+    self.logfile = open(config['files']['logfile'],'a',buffering=1)
     self.sampletime = time.time()
     self.prevtime = time.localtime()
 
