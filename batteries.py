@@ -16,10 +16,6 @@
 
 #!/usr/bin/python
 import sys
-
-import Adafruit_GPIO as GPIO
-
-
 #import smbus
 #import Adafruit_ADS1x15
 import time
@@ -28,14 +24,8 @@ from config import loadconfig, config
 from configparser import SafeConfigParser
 numcells = config['battery']['numcells']
 from getdata import Readings
+exec(config['files']['alarms'])  # import alarm code
 #import Adafruit_BBIO.GPIO as GPIO
-# Initialise and compile alarms
-for i in config['alarms']:
-  exec(config['alarms'][i][0])
-  config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
-  config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec')
-  config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
-  config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
 
 
 def deamon(soc=-1):
@@ -50,6 +40,7 @@ def deamon(soc=-1):
     time.sleep(30)
     printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
   batdata = Readings()  # initialise batdata after we have valid sys time
+  alarms = Alarms() # initialise alarms
 
   print (str(printtime))
   filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
@@ -112,20 +103,7 @@ def deamon(soc=-1):
           batdata.pwrintot = batdata.pwrintot + batdata.pwrin
         prevbatvoltage = batdata.batvoltsav[numcells]
 # check alarms
-        minvolts = 5.0
-        maxvolts = 0.0
-        for i in range(1,numcells):
-          minvolts = min(batdata.deltav[i],minvolts)
-          maxvolts = max(batdata.deltav[i],maxvolts)
-
-        for i in config['alarms']:
-          exec(config['alarms'][i][1])
-          if test:
-#            sys.stderr.write('Alarm 1 triggered')
-            exec(config['alarms'][i][2])
-          exec(config['alarms'][i][3])
-          if test:
-            exec(config['alarms'][i][4])
+        alarms.scanalarms
 # update summaries
         logsummary.update(summary, batdata)
         if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
