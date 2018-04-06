@@ -101,7 +101,7 @@ class Readings:
     self.getvi()
 
     samplesav = config['sampling']['samplesav']
-    deltatime=(self.sampletime-self.oldsampletime)/(3600/config['sampling']['sampletime'])
+    deltatime=(self.sampletime-self.oldsampletime)/3600
     self.batah = self.currentav[0]*deltatime
     self.batahadj = (self.currentav[0]+config['battery']['ahloss'])*deltatime
     self.inah = self.currentav[1]*deltatime
