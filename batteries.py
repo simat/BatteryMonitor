@@ -23,6 +23,23 @@ from shutil import copy as filecopy
 from config import loadconfig, config
 from configparser import SafeConfigParser
 numcells = config['battery']['numcells']
+
+import logging
+#logging.config.fileConfig('battery.cfg')
+#logger = logging.getLogger('batlogger')
+#logger.setlevel(logging.DEBUG)
+#errfile=logging.FileHandler([config][errfile])
+#errfile.setLevel(logging.DEBUG)
+
+# create formatter
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+#errfile.setFormatter(formatter)
+
+# add ch to logger
+#logger.addHandler(errfile)
+
 from getdata import Readings
 exec(config['files']['alarms'])  # import alarm code
 #import Adafruit_BBIO.GPIO as GPIO
@@ -103,7 +120,7 @@ def deamon(soc=-1):
           batdata.pwrintot = batdata.pwrintot + batdata.pwrin
         prevbatvoltage = batdata.batvoltsav[numcells]
 # check alarms
-        alarms.scanalarms
+        alarms.scanalarms(batdata)
 # update summaries
         logsummary.update(summary, batdata)
         if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
