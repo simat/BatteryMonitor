@@ -14,7 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
+import time
 import serial
 import binascii
 from config import config
@@ -35,12 +35,24 @@ class Raw:
   line1 = [ 0 for i in range(20)]
   rawi = [0.0, 0.0, 0.0]
   rawv = [ 0.0 for i in range(numcells+1)]
+  ser = serial.Serial(config['files']['usbport'])  # open serial port
+  ser.timeout = 3
+
 
   def getbmsdat(self,port,command):
     """ Issue BMS command and return data as byte data """
     """ assumes data port is open and configured """
-    port.write(command)
-    reply = port.read(4)
+    for i in range(5):
+      try:
+        port.write(command)
+        reply = port.read(4)
+#        raise serial.serialutil.SerialException('hithere')
+        break
+      except serial.serialutil.SerialException as err:
+        errfile=open(config['files']['errfile'],'at')
+        errfile.write(time.strftime("%Y%m%d%H%M%S ", time.localtime())+str(err.args)+'\n')
+        errfile.close()
+
   #  print (reply)
     x = int.from_bytes(reply[3:5], byteorder = 'big')
 #    print (x)
@@ -51,11 +63,9 @@ class Raw:
 
   def x(self):
     """ Get data from BMS board"""
-    ser = serial.Serial(config['files']['usbport'])  # open serial port
-    ser.timeout = 3
     command = bytes.fromhex('DD A5 03 00 FF FD 77')
-    dat = self.getbmsdat(ser,command)
-    self.rawi[0] = int.from_bytes(dat[2:4], byteorder = 'big')
+    dat = self.getbmsdat(self.ser,command)
+    self.rawi[0] = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
 #    print (self.rawi)
 #    self.line1 = [ 0 for i in range(int(len(dat)))]
 #    for i in range(0,int(len(dat))):
@@ -67,9 +77,8 @@ class Raw:
 
 
   # voltages
-    x = 'DD A5 04 00 FF FC 77'
     command = bytes.fromhex('DD A5 04 00 FF FC 77')
-    voltages = self.getbmsdat(ser,command)
+    voltages = self.getbmsdat(self.ser,command)
     for i in range(0,numcells):
       self.rawv[i+1] = int.from_bytes(voltages[i*2:i*2+2], byteorder = 'big')\
                        /1000.00

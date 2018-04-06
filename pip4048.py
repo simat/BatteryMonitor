@@ -18,12 +18,67 @@
 import serial
 import binascii
 from config import config
-numcells = config['battery']['numcells']
 def getcmd(port):
   """gets command from user"""
   command=input("Enter Command>")
-  command=command.encode('ascii','strict')
-  crc=crccalc(command)
+  reply=sendcmd(command,port)
+  print (reply)
+  print(binascii.hexlify(reply))
+  if command=='QPIGS':
+    print ('AC output V =',reply[12:17])
+    print ('AC output VA =',reply[23:27])
+    print ('AC output W =',reply[28:32])
+    print ('Bus V =',reply[37:40])
+    print ('Battery V =',reply[41:46])
+    print ('Battery In I =',reply[47:50])
+    print ('Heat sink T =',reply[51:54])
+    print ('PV Input current for battery I =',reply[60:64])
+    print ('PV Input V =',reply[65:70])
+    print ('Battery V from SCC =',reply[71:76])
+    print ('Battery Discharge I =',reply[77:82])
+    print ('Status =',reply[83:91])
+
+
+
+
+def sendcmd(command,port):
+  """send command/query to Pip4048, return reply"""
+  port = serial.Serial(port,baudrate=2400)  # open serial port
+  port.timeout = 3
+
+  for i in range(5):
+    try:
+      command=command.encode('ascii','strict')
+      crc=crccalc(command)
+      command=command+crc.to_bytes(2, byteorder='big')+b'\r'
+      print (command,binascii.hexlify(command))
+      port.write(command)
+      reply = port.read(200)
+      if  crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
+        raise IOError("CRC error in Pip4048 return string")
+      break
+    except IOError as err:
+      print(err.args)
+      if i==4:
+        raise
+  port.close()
+  return reply
+
+def setparam(command,port):
+  reply=sendcmd(command,port)
+  print (reply)
+  if reply[1:4]!=b'ACK':
+    raise IOError('Bad Parameters')
+
+def main(port='/dev/ttyUSB1'):
+  while True:
+    getcmd(port)
+
+
+def crccalc(command):
+  """returns crc as integer from binary string command"""
+
+  crc=binascii.crc_hqx(command,0)
   crchi=crc>>8
   crclo=crc&255
 
@@ -32,82 +87,7 @@ def getcmd(port):
 
   if crclo == 0x28 or crclo==0x0d or crclo==0x0a:
     crc+=1
+  return crc
 
-  command=command+crc.to_bytes(2, byteorder='big')+b'\r'
-  print (command,binascii.hexlify(command))
-  port.write(command)
-  reply = port.read(200)
-  print (reply)
-  print (hex(binascii.crc_hqx(reply[0:-3],0)))
-
-
-def main():
-  port = serial.Serial('/dev/ttyUSB0',baudrate=2400)  # open serial port
-  port.timeout = 3
-  while True:
-    getcmd(port)
-
-
-
-
-def crccalc(command):
-  """returns crc as integer from binary string command"""
-
-  return binascii.crc_hqx(command,0)
-
-class Raw:
-  # compile analog capture code to save CPU time
-  vin = []
-  for i in sorted(config['VoltageInputs']):
-    vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
-  #  vin = vin + [config['VoltageInputs'][i]]
-  #for i in config['CurrentInputs']:
-  #  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
-  iin = []
-  for i in sorted(config['CurrentInputs']):
-    iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
-
-  line1 = [ 0 for i in range(20)]
-  rawi = [0.0, 0.0, 0.0]
-  rawv = [ 0.0 for i in range(numcells+1)]
-
-  def getbmsdat(self,port,command):
-    """ Issue BMS command and return data as byte data """
-    """ assumes data port is open and configured """
-    port.write(command)
-    reply = port.read(4)
-  #  print (reply)
-    x = int.from_bytes(reply[3:5], byteorder = 'big')
-#    print (x)
-    data = port.read(x)
-    end = port.read(3)
-#    print (data)
-    return data
-
-  def x(self):
-    """ Get data from BMS board"""
-    ser = serial.Serial(config['files']['usbport'])  # open serial port
-    ser.timeout = 3
-    command = bytes.fromhex('DD A5 03 00 FF FD 77')
-    dat = self.getbmsdat(ser,command)
-    self.rawi[0] = int.from_bytes(dat[2:4], byteorder = 'big')
-#    print (self.rawi)
-#    self.line1 = [ 0 for i in range(int(len(dat)))]
-#    for i in range(0,int(len(dat))):
-  #    print (dat[i*2:i*2+2])
-  #    print (int.from_bytes(dat[i:i+1], byteorder = 'big'))
-#      self.line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
-#    print (binascii.hexlify(dat))
-#    print (self.line1)
-
-
-  # voltages
-    x = 'DD A5 04 00 FF FC 77'
-    command = bytes.fromhex('DD A5 04 00 FF FC 77')
-    voltages = self.getbmsdat(ser,command)
-    for i in range(0,numcells):
-      self.rawv[i+1] = int.from_bytes(voltages[i*2:i*2+2], byteorder = 'big')\
-                       /1000.00
-      self.rawv[i+1] = self.rawv[i+1]+self.rawv[i]
-  #  print (self.rawv)
-  #  print (binascii.hexlify(voltages))
+if __name__ == "__main__":
+  main()
