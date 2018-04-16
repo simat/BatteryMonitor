@@ -19,7 +19,8 @@
 from config import config
 numcells = config['battery']['numcells']
 import time
-exec(config['files']['interface'])
+for i in config['Interfaces']:
+  exec("import " + config['Interfaces'][i])
 #from x import Raw
 
 
@@ -27,7 +28,21 @@ exec(config['files']['interface'])
 class Readings:
   """ get and manipulates readings from the real world"""
 
-  rawdata = Raw()
+
+  for i in config['Interfaces']:
+    exec(config['Interfaces'][i] +'='+config['Interfaces'][i]+'.Rawdat()')
+  vin = []
+  for i in sorted(config['VoltageInputs']):
+    vin = vin + [config['VoltageInputs'][i]]
+
+#    vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
+  #  vin = vin + [config['VoltageInputs'][i]]
+  #for i in config['CurrentInputs']:
+  #  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
+  iin = []
+  for i in sorted(config['CurrentInputs']):
+    iin = iin + [config['CurrentInputs'][i]]
+#    iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
 
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
@@ -45,7 +60,7 @@ class Readings:
   uncalvolts = [ i*3.25 for i in range(numcells+1)]
   batvoltsav = [ i*3.25 for i in range(numcells+1)]
 
-  numiins = len(rawdata.iin)
+  numiins = len(config['CurrentInputs'])
   current = [ 0.0 for i in range(numiins)]
   currentav = [ 0.0 for i in range(numiins)]
   kWhin = [ 0.0 for i in range(numiins)]
@@ -68,24 +83,6 @@ class Readings:
   pwrin = 0.0  # gross power in units kW
   pwrintot = 0.0 # total gross power in units kWh
 
-  def getvi(self):
-    """ Get raw data """
-    self.oldsampletime=self.sampletime
-    sleeptime = max(config['sampling']['sampletime'] - (time.time()-self.oldsampletime), 0.0)
-  #	    print sleeptime
-    time.sleep(sleeptime)
-    self.sampletime = time.time()
-    self.rawdata.x()
-    for i in range(self.numiins):
-      self.current[i] = self.rawdata.rawi[i]*config['calibrate']['currentgain'][i] \
-                        -config['calibrate']['currentoffset'][i]
-    self.batvolts[0] = self.rawdata.rawv[0]
-    self.uncalvolts[0] = self.rawdata.rawv[0]
-    for i in range(1,numcells+1):
-      self.uncalvolts[i] = self.rawdata.rawv[i]*config['calibrate']['batvgain'] # A/D to battery volts
-      self.batvolts[i] = self.uncalvolts[i]*self.ratio[i] # calibrate values
-#    print (self.uncalvolts, self.batvolts, self.current)
-
   def __init__(self):
     self.sampletime = time.time()
     self.getvi()
@@ -93,13 +90,42 @@ class Readings:
     self.batcurrentav = self.current[0]
     self.incurrentav = self.current[1]
     for i in range(0,self.numiins):
-     self.currentav[i] = self.current[i]
-#    print (self.batvoltsav, self.current)
+      self.currentav[i] = self.current[i]
+#     (self.batvoltsav, self.current)
+
+  def getvi(self):
+    """ Get raw data """
+    self.oldsampletime=self.sampletime
+    sleeptime = max(config['sampling']['sampletime'] - (time.time()-self.oldsampletime), 0.0)
+  #	     sleeptime
+    time.sleep(sleeptime)
+    self.sampletime = time.time()
+# get data from Interfaces
+    for i in config['Interfaces']:
+      exec("self."+i+".getdata()")
+#    print (sorted(self.vin))
+    self.sortedvin=sorted(self.vin)
+    self.sortediin=sorted(self.iin)
+    for i in range(len(self.iin)):
+      self.current[i] = eval("self."+self.sortediin[i]) \
+                        *config['calibrate']['currentgain'][i] \
+                        -config['calibrate']['currentoffset'][i]
+#    self.batvolts[0] = self.rawdata.rawv[0]
+#    self.uncalvolts[0] = self.rawdata.rawv[0]
+    self.batvolts[0] = 0.0
+    self.uncalvolts[0] = 0.0
+
+    for i in range(len(self.vin)):
+
+      self.uncalvolts[i+1] = eval('self.'+self.sortedvin[i]) \
+                           *config['calibrate']['batvgain'] # A/D to battery volts
+      self.batvolts[i+1] = self.uncalvolts[i+1]*self.ratio[i] # calibrate values
+  #     (self.uncalvolts, self.batvolts, self.current)
 
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
     self.getvi()
-
+#    print (self.batvolts)
     samplesav = config['sampling']['samplesav']
     deltatime=(self.sampletime-self.oldsampletime)/3600
     self.batah = self.currentav[0]*deltatime

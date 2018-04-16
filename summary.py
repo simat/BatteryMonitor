@@ -99,6 +99,7 @@ class Summary:
                                      summary['current']['power'][1] ,6 )  # current to loads
 
     vprint=''
+    batdata.cellvolts=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0
     for i in range(numcells):
@@ -110,13 +111,16 @@ class Summary:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
-      vprint=vprint + str(round(batdata.deltav[i+1],3)).ljust(5,'0') + ' '
+      batdata.vcells=batdata.cellvolts+str(round(batdata.deltav[i+1],3)).ljust(5,'0')
+      vprint=vprint + batdata.vcells+ ' '
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
     if batdata.currentav[0] < config['battery']['ilowcurrent']:
       summary['current']['deltav'][1] = summary['current']['deltav'][0]
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
-    vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
-    vprint = vprint + str(summary['current']['deltav'][0]).ljust(5,'0') + ' '
+    batdata.vbat=str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0')
+    vprint = vprint + ' '+batdata.vbat
+    batdata.vdelta= str(summary['current']['deltav'][0]).ljust(5,'0')
+    vprint = vprint + batdata.vdelta+ ' '
 
     for i in range(batdata.numiins):
       summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
@@ -136,7 +140,7 @@ class Summary:
     self.currenttime = time.localtime()
     self.printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
     summary['current']['timestamp'] = "'" + self.printtime + "'"
-    currentdata = self.printtime + logdata
+    currentdata = self.printtime + logdata + str(batdata.pip.rawdat) + '\n'
 
 #      currentdata = currentdata + '               '
 #      for i in range(numcells):
