@@ -33,16 +33,15 @@ class Readings:
     exec(config['Interfaces'][i] +'='+config['Interfaces'][i]+'.Rawdat()')
   vin = []
   for i in sorted(config['VoltageInputs']):
-    vin = vin + [config['VoltageInputs'][i]]
-
-#    vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
+#    vin = vin + [config['VoltageInputs'][i]]
+    vin = vin + [compile('self.'+config['VoltageInputs'][i], '<string>', 'eval')]
   #  vin = vin + [config['VoltageInputs'][i]]
   #for i in config['CurrentInputs']:
   #  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
   iin = []
   for i in sorted(config['CurrentInputs']):
-    iin = iin + [config['CurrentInputs'][i]]
-#    iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
+#    iin = iin + [config['CurrentInputs'][i]]
+    iin = iin + [compile('self.'+config['CurrentInputs'][i], '<string>', 'eval')]
 
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
@@ -104,10 +103,10 @@ class Readings:
     for i in config['Interfaces']:
       exec("self."+i+".getdata()")
 #    print (sorted(self.vin))
-    self.sortedvin=sorted(self.vin)
-    self.sortediin=sorted(self.iin)
+#    self.sortedvin=sorted(self.vin)
+#    self.sortediin=sorted(self.iin)
     for i in range(len(self.iin)):
-      self.current[i] = eval("self."+self.sortediin[i]) \
+      self.current[i] = eval(self.iin[i]) \
                         *config['calibrate']['currentgain'][i] \
                         -config['calibrate']['currentoffset'][i]
 #    self.batvolts[0] = self.rawdata.rawv[0]
@@ -116,12 +115,11 @@ class Readings:
     self.uncalvolts[0] = 0.0
 
     for i in range(len(self.vin)):
-
-      self.uncalvolts[i+1] = eval('self.'+self.sortedvin[i]) \
+      self.uncalvolts[i+1] = eval(self.vin[i]) \
                            *config['calibrate']['batvgain'] # A/D to battery volts
       self.batvolts[i+1] = self.uncalvolts[i+1]*self.ratio[i] # calibrate values
   #     (self.uncalvolts, self.batvolts, self.current)
-
+    #print (self.batvolts)
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
     self.getvi()

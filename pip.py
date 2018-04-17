@@ -22,26 +22,8 @@ import binascii
 from config import config
 numcells = config['battery']['numcells']
 
-class Rawdat:
-
-  def __init__(self):
-    self.rawdat ={'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
-
-  def getdata(self):
-    """returns dictionary with data from Pip4048"""
-
-    self.openpip(config['files']['pipport'])
-    reply=self.sendcmd('QPIGS',110)
-    self.rawdat['BInI']=reply[47:50]
-    self.rawdat['BOutI']=reply[77:82]
-    self.rawdat['PVI']=reply[60:64]
-    self.rawdat['BV']=reply[41:46]
-    self.rawdat['ACW']=reply[28:32]
-    reply=self.sendcmd('Q1',74)
-    self.rawdat['ChgStat']=reply[-5:-3]
-    self.rawdat['PVW']=reply[53:56]
-    self.port.close()
-
+class Pip:
+  """Pip4048 inverter coms class"""
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=2)  # open serial port
 
@@ -80,6 +62,62 @@ class Rawdat:
       return reply
 
   def setparam(self,command,replylen):
+    self.openpip(self.self.config['files']['pipport'])
     reply=self.sendcmd(command,replylen)
+    self.port.close()
     if reply[1:4]!=b'ACK':
       raise IOError('Bad Parameters')
+
+
+
+class Rawdat(Pip):
+
+  def __init__(self):
+    self.rawdat ={'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
+
+  def getdata(self):
+    """returns dictionary with data from Pip4048"""
+
+    self.openpip(config['files']['pipport'])
+    reply=self.sendcmd('QPIGS',110)
+    self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
+    self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
+    self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
+    self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
+    self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
+    reply=self.sendcmd('Q1',74)
+    self.port.close()
+    self.rawdat['ChgStat']=reply[-5:-3]
+    self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
+    self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
+    self.rawdat['ipv']=-self.rawdat['PVI']
+    self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
+
+
+"""class Alarms(Pip):
+  # Initialise and compile alarms
+  def __init__(self):
+    self.overvflg=False
+  for i in config['alarms']:
+    exec(config['alarms'][i][0])
+    config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
+    config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec')
+    config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
+    config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
+
+  def scanalarms(self,batdata):
+    minvolts = 5.0
+    maxvolts = 0.0
+    for i in range(1,numcells):
+      minvolts = min(batdata.deltav[i],minvolts)
+      maxvolts = max(batdata.deltav[i],maxvolts)
+
+    for i in config['alarms']:
+      exec(config['alarms'][i][1])
+      if self.test:
+  #            sys.stderr.write('Alarm 1 triggered')
+        exec(config['alarms'][i][2])
+      exec(config['alarms'][i][3])
+      if self.test:
+        exec(config['alarms'][i][4])
+        """
