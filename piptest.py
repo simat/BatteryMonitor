@@ -20,7 +20,7 @@ import binascii
 from config import config
 
 def openpip(port):
-  openport = serial.Serial(port,baudrate=2400,timeout=0.25)  # open serial port
+  openport = serial.Serial(port,baudrate=2400,timeout=0.25,exclusive=True)  # open serial port
   return openport
 
 def sendcmd(command,openport,replylen):
