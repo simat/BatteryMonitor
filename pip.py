@@ -29,7 +29,7 @@ log.addHandler(logger.errfile)
 class Pip:
   """Pip4048 inverter coms class"""
   def openpip(self,port):
-    self.port = serial.Serial(port,baudrate=2400,timeout=2,exclusive=True)  # open serial port
+    self.port = serial.Serial(port,baudrate=2400,timeout=2)  # open serial port
 
   def crccalc(self,command):
     """returns crc as integer from binary string command"""
