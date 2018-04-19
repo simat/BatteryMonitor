@@ -17,10 +17,11 @@
 import sys
 import serial
 import binascii
-from config import config
 
+commands={'QPIGS':110,'Q1':74,'QFLAG':15,'QPIRI':102,'PEj':7,'PDj':7}
+#commands={}
 def openpip(port):
-  openport = serial.Serial(port,baudrate=2400,timeout=0.25,exclusive=True)  # open serial port
+  openport = serial.Serial(port,baudrate=2400,timeout=1.0,exclusive='True')  # open serial port
   return openport
 
 def sendcmd(command,openport,replylen):
@@ -51,8 +52,13 @@ def setparam(command,port):
 def getcmd(port):
   """gets command from user"""
   command=str(input("Enter Command>"))
+  try:
+    replylen=commands[command]
+  except KeyError:
+    replylen=int(input("Enter Reply Length>"))
+
   openport=openpip(port)
-  reply=sendcmd(command,openport,200)
+  reply=sendcmd(command,openport,replylen)
   openport.close()
   print (len(reply),reply)
   print(binascii.hexlify(reply))

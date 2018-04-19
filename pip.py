@@ -22,14 +22,14 @@ import binascii
 from config import config
 numcells = config['battery']['numcells']
 import logger
-log = logger.logging.getLogger('__name__')
+log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
 class Pip:
   """Pip4048 inverter coms class"""
   def openpip(self,port):
-    self.port = serial.Serial(port,baudrate=2400,timeout=2)  # open serial port
+    self.port = serial.Serial(port,baudrate=2400,timeout=1,exclusive='True')  # open serial port
 
   def crccalc(self,command):
     """returns crc as integer from binary string command"""
@@ -57,10 +57,11 @@ class Pip:
         self.port.write(command)
         reply = self.port.read(replylen)
         if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
-          raise IOError("CRC error in Pip4048 return string")
+          raise serial.serialutil.Serial.Exception('CRC error in reply')
           break
-      except IOError as err:
-        print(err.args)
+      except serial.serialutil.Serial.Exception as err:
+        logger.error(err)
+        time.sleep(0,5)
         if i==4:
           raise
       return reply
@@ -81,7 +82,7 @@ class Rawdat(Pip):
 
   def getdata(self):
     """returns dictionary with data from Pip4048"""
-
+#    log.debug('open')
     self.openpip(config['files']['pipport'])
     reply=self.sendcmd('QPIGS',110)
     try:
@@ -92,6 +93,7 @@ class Rawdat(Pip):
       self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
       reply=self.sendcmd('Q1',74)
       self.port.close()
+#      log.debug('close')
       self.rawdat['ChgStat']=reply[-5:-3]
       self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
       self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
