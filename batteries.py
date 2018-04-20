@@ -24,7 +24,7 @@ from config import loadconfig, config
 from configparser import SafeConfigParser
 numcells = config['battery']['numcells']
 import logger
-log = logger.logging.getLogger('__name__')
+log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 

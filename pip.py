@@ -16,7 +16,7 @@
 
 #!/usr/bin/python
 import sys
-
+import time
 import serial
 import binascii
 from config import config
@@ -48,23 +48,14 @@ class Pip:
   def sendcmd(self,command,replylen):
     """send command/query to Pip4048, return reply"""
 
-
-    for i in range(5):
-      try:
-        command=command.encode('ascii','strict')
-        crc=self.crccalc(command)
-        command=command+crc.to_bytes(2, byteorder='big')+b'\r'
-        self.port.write(command)
-        reply = self.port.read(replylen)
-        if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
-          raise serial.serialutil.Serial.Exception('CRC error in reply')
-          break
-      except serial.serialutil.Serial.Exception as err:
-        logger.error(err)
-        time.sleep(0,5)
-        if i==4:
-          raise
-      return reply
+    command=command.encode('ascii','strict')
+    crc=self.crccalc(command)
+    command=command+crc.to_bytes(2, byteorder='big')+b'\r'
+    self.port.write(command)
+    reply = self.port.read(replylen)
+    if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
+      raise serial.serialutil.Serial.Exception('CRC error in reply')
+    return reply
 
   def setparam(self,command,replylen):
     self.openpip(self.self.config['files']['pipport'])
@@ -83,24 +74,33 @@ class Rawdat(Pip):
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
-    self.openpip(config['files']['pipport'])
-    reply=self.sendcmd('QPIGS',110)
-    try:
-      self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
-      self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
-      self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
-      self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
-      self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
-      reply=self.sendcmd('Q1',74)
-      self.port.close()
-#      log.debug('close')
-      self.rawdat['ChgStat']=reply[-5:-3]
-      self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
-      self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
-      self.rawdat['ipv']=-self.rawdat['PVI']
-      self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
-    except ValueError as err:
-      log.error('{}\n{}'.format(err,reply))
+    for i in range(5):
+      try:
+        self.openpip(config['files']['pipport'])
+        reply=self.sendcmd('QPIGS',110)
+        self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
+        self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
+        self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
+        self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
+        self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
+        reply=self.sendcmd('Q1',74)
+        self.port.close()
+  #      log.debug('close')
+        self.rawdat['ChgStat']=reply[-5:-3]
+        self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
+        self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
+        self.rawdat['ipv']=-self.rawdat['PVI']
+        self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
+        break
+      except ValueError as err:
+        log.error('{}\n{}'.format(err,reply))
+      except serial.serialutil.SerialException as err:
+        logger.error(err)
+      finally:
+        time.sleep(0.5)
+        if i==4:
+          raise
+
 
 """class Alarms(Pip):
   # Initialise and compile alarms
