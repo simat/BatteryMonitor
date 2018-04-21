@@ -28,21 +28,8 @@ for i in config['Interfaces']:
 class Readings:
   """ get and manipulates readings from the real world"""
 
-
   for i in config['Interfaces']:
     exec(config['Interfaces'][i] +'='+config['Interfaces'][i]+'.Rawdat()')
-  vin = []
-  for i in sorted(config['VoltageInputs']):
-#    vin = vin + [config['VoltageInputs'][i]]
-    vin = vin + [compile('self.'+config['VoltageInputs'][i], '<string>', 'eval')]
-  #  vin = vin + [config['VoltageInputs'][i]]
-  #for i in config['CurrentInputs']:
-  #  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
-  iin = []
-  for i in sorted(config['CurrentInputs']):
-#    iin = iin + [config['CurrentInputs'][i]]
-    iin = iin + [compile('self.'+config['CurrentInputs'][i], '<string>', 'eval')]
-
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
 
@@ -83,6 +70,15 @@ class Readings:
   pwrintot = 0.0 # total gross power in units kWh
 
   def __init__(self):
+    self.vin = []
+    for i in sorted(config['VoltageInputs']):
+      self.vin = self.vin + [config['VoltageInputs'][i]]
+#      self.vin = self.vin + [compile('self.'+config['VoltageInputs'][i], '<string>', 'eval')]
+    self.iin = []
+    for i in sorted(config['CurrentInputs']):
+      self.iin = self.iin + [config['CurrentInputs'][i]]
+#      self.iin = self.iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
+
     self.sampletime = time.time()
     self.getvi()
     self.batvoltsav = self.batvolts
@@ -101,25 +97,26 @@ class Readings:
     self.sampletime = time.time()
 # get data from Interfaces
     for i in config['Interfaces']:
-      exec("self."+i+".getdata()")
+      exec('self.'+i+".getdata()")
 #    print (sorted(self.vin))
 #    self.sortedvin=sorted(self.vin)
 #    self.sortediin=sorted(self.iin)
     for i in range(len(self.iin)):
+#      print (self.iin[i])
       self.current[i] = eval(self.iin[i]) \
                         *config['calibrate']['currentgain'][i] \
                         -config['calibrate']['currentoffset'][i]
 #    self.batvolts[0] = self.rawdata.rawv[0]
 #    self.uncalvolts[0] = self.rawdata.rawv[0]
-    self.batvolts[0] = 0.0
-    self.uncalvolts[0] = 0.0
+#    self.batvolts[0] = 0.0
+#    self.uncalvolts[0] = 0.0
 
     for i in range(len(self.vin)):
+#      print (self.vin[i])
       self.uncalvolts[i+1] = eval(self.vin[i]) \
                            *config['calibrate']['batvgain'] # A/D to battery volts
       self.batvolts[i+1] = self.uncalvolts[i+1]*self.ratio[i] # calibrate values
-  #     (self.uncalvolts, self.batvolts, self.current)
-    #print (self.batvolts)
+#    print (self.batvolts,self.bms.rawdat)
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
     self.getvi()

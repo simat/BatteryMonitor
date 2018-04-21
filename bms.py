@@ -14,10 +14,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import time
 import serial
 import binascii
 from config import config
 numcells = config['battery']['numcells']
+import logger
+log = logger.logging.getLogger(__name__)
+log.setLevel(logger.logging.DEBUG)
+log.addHandler(logger.errfile)
+
 
 class Rawdat:
 
@@ -31,16 +37,28 @@ class Rawdat:
     self.rawdat['Ibat']=0.0"""
 
   def getdata(self):
-    port=self.openbms(config['files']['bmsport'])
-    data=self.getbmsdat(port,b'\x04\x00') # get BMS Voltage
-    for i in range(int(len(data)/2)):
-      self.rawdat['V{0:0=2}'.format(i+1)]=int.from_bytes(data[i*2:i*2+2], byteorder = 'big')/1000 \
-                                          +self.rawdat['V{0:0=2}'.format(i)]
-# convert from cell voltage to total voltages
-    data=self.getbmsdat(port,b'\x03\x00') # get BMS Current
-    self.port.close()
-    self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
-#    print (self.rawdat)
+    for i in range(5):
+      try:
+
+        port=self.openbms(config['files']['bmsport'])
+        data=self.getbmsdat(port,b'\x04\x00') # get BMS Voltage
+        for i in range(int(len(data)/2)):
+          self.rawdat['V{0:0=2}'.format(i+1)]=int.from_bytes(data[i*2:i*2+2], byteorder = 'big')/1000 \
+                                              +self.rawdat['V{0:0=2}'.format(i)]
+    # convert from cell voltage to total voltages
+        data=self.getbmsdat(port,b'\x03\x00') # get BMS Current
+        self.port.close()
+        self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
+    #    print (self.rawdat)
+        break
+      except ValueError as err:
+        log.error('{}\n{}'.format(err,reply))
+      except Exception as err:
+        log.error(err)
+      finally:
+        time.sleep(0.5)
+        if i==4:
+          raise
 
   def crccalc(self,data):
     """returns crc as integer from byte stream"""
@@ -50,7 +68,7 @@ class Rawdat:
     return crc
 
   def openbms(self,port):
-    self.port = serial.Serial(port,timeout=2,exclusive=True)  # open serial port
+    self.port = serial.Serial(port,timeout=2,exclusive=False)  # open serial port
 
   def getbmsdat(self,port,command):
     """ Issue BMS command and return data as byte data """
@@ -66,25 +84,19 @@ class Rawdat:
   def sendbms(self,port,packet):
     """Send complete command string with crc to BMS"""
 
-    for i in range(5):
-      try:
-        self.port.write(packet)
-        reply = self.port.read(4)
+    self.port.write(packet)
+    reply = self.port.read(4)
 #        raise serial.serialutil.SerialException('hithere')
 
-    #  print (reply)
-        x = int.from_bytes(reply[3:5], byteorder = 'big')
-    #    print (x)
-        data = self.port.read(x)
-        end = self.port.read(3)
+#  print (reply)
+    x = int.from_bytes(reply[3:5], byteorder = 'big')
+#    print (x)
+    data = self.port.read(x)
+    end = self.port.read(3)
 #        print (data,end,self.crccalc(reply[2:4]+data),end[0:2])
-        if self.crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder='big'):
-          raise serial.serialutil.Serial.Exception('CRC error in reply')
-    #    print (data)
-        break
-      except serial.serialutil.SerialException as err:
-        errfile=open(config['files']['errfile'],'at')
-        errfile.write(time.strftime("%Y%m%d%H%M%S ", time.localtime())+str(err.args)+'\n')
-        errfile.close()
+    if self.crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder='big'):
+      raise serial.serialutil.SerialException('CRC error in reply')
+#    print (data)
+
 
     return data
