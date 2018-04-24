@@ -23,10 +23,13 @@ from config import loadconfig, config
 errfile=logging.FileHandler(config['files']['errfile'])
 errfile.setLevel(logging.DEBUG)
 
+logfile=logging.FileHandler(config['files']['logfile'])
+
+
 # create formatter
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
+logformat = logging.Formatter('%(message)s')
 # add formatter to ch
 errfile.setFormatter(formatter)
-
+logfile.setFormatter(logformat)
 # add ch to logger

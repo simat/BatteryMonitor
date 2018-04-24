@@ -68,6 +68,11 @@ class Readings:
   pwrbattot = 0.0  # total battery power units kWh
   pwrin = 0.0  # gross power in units kW
   pwrintot = 0.0 # total gross power in units kWh
+  iall=""
+  vdelta=""
+  vcells=""
+  soctxt=""
+  socadjtxt=""
 
   def __init__(self):
     self.vin = []
@@ -137,7 +142,8 @@ class Readings:
         self.kWhout[i] = self.kWhout[i]+self.currentav[i]*deltatime*self.batvoltsav[numcells]/1000
 
     for i in range(1,numcells+1):
-      self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) + self.batvolts[i])/samplesav
+      self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
+                           + self.batvolts[i])/samplesav
 #    print (self.batvoltsav, self.currentav)
     self.deltav[0]=round(self.batvolts[0],3)
     for i in range(numcells,0,-1):
