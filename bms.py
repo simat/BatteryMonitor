@@ -47,18 +47,21 @@ class Rawdat:
                                               +self.rawdat['V{0:0=2}'.format(i)]
     # convert from cell voltage to total voltages
         data=self.getbmsdat(port,b'\x03\x00') # get BMS Current
-        self.port.close()
         self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
     #    print (self.rawdat)
         break
       except ValueError as err:
         log.error('{}\n{}'.format(err,reply))
-      except Exception as err:
-        log.error(err)
-      finally:
         time.sleep(0.5)
         if i==4:
           raise
+      except Exception as err:
+        log.error(err)
+        time.sleep(0.5)
+        if i==4:
+          raise
+      finally:
+        self.port.close()
 
   def crccalc(self,data):
     """returns crc as integer from byte stream"""

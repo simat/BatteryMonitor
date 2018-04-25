@@ -84,7 +84,6 @@ class Rawdat(Pip):
         self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
         self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
         reply=self.sendcmd('Q1',74)
-        self.port.close()
   #      log.debug('close')
         self.rawdat['ChgStat']=reply[-5:-3]
         self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
@@ -94,12 +93,16 @@ class Rawdat(Pip):
         break
       except ValueError as err:
         log.error('{}\n{}'.format(err,reply))
-      except Exception as err:
-        log.error(err)
-      finally:
         time.sleep(0.5)
         if i==4:
           raise
+      except Exception as err:
+        log.error(err)
+        time.sleep(0.5)
+        if i==4:
+          raise
+      finally:
+        self.port.close()
 
 
 """class Alarms(Pip):
