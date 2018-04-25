@@ -25,20 +25,19 @@ from configparser import SafeConfigParser
 numcells = config['battery']['numcells']
 
 import logging
-#logging.config.fileConfig('battery.cfg')
-#logger = logging.getLogger('batlogger')
-#logger.setlevel(logging.DEBUG)
-#errfile=logging.FileHandler([config][errfile])
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+errfile=logging.FileHandler(config['files']['errfile'])
 #errfile.setLevel(logging.DEBUG)
 
 # create formatter
-#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(config['loggers']['format'])
 
 # add formatter to ch
-#errfile.setFormatter(formatter)
+errfile.setFormatter(formatter)
 
 # add ch to logger
-#logger.addHandler(errfile)
+logger.addHandler(errfile)
 
 from getdata import Readings
 exec(config['files']['alarms'])  # import alarm code
@@ -59,6 +58,7 @@ def deamon(soc=-1):
   batdata = Readings()  # initialise batdata after we have valid sys time
   alarms = Alarms() # initialise alarms
 
+  logger.debug(printtime)
   print (str(printtime))
   filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
   if soc > config['battery']['capacity']:
