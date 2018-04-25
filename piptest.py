@@ -30,7 +30,7 @@ def sendcmd(command,port='/dev/ttyUSB1'):
   """send command/query to Pip4048, return reply"""
 
   try:
-    x=match("[A-Z]*",command)
+    x=match("[A-Z,a-z]*",command)
     replylen=commands[x.group()]
   except KeyError:
     replylen=int(input("Enter Reply Length>"))
