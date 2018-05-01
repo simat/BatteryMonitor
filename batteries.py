@@ -53,6 +53,7 @@ def deamon(soc=-1):
     filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
     if soc > config['battery']['capacity']:
       print ("Battery DOD must be less than Battery Capacity")
+
     else:
       if soc < 0:
          batdata.soc = summary['current']['ah'][0]
