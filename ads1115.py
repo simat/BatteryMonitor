@@ -18,26 +18,26 @@
 from config import config
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
-import Adafruit_ADS1x15
+import Adafruit_ADS1x15 as AtoD
 for i in config['AtoDs']:
   exec(i + '=' + config['AtoDs'][i])
 
-class Raw:
+class Rawdat:
   # compile analog capture code to save CPU time
   vin = []
-  for i in sorted(config['VoltageInputs']):
-    vin = vin + [compile(config['VoltageInputs'][i], '<string>', 'eval')]
-  #  vin = vin + [config['VoltageInputs'][i]]
-  #for i in config['CurrentInputs']:
-  #  config['CurrentInputs'][i] = compile(config['CurrentInputs'][i], '<string>', 'eval')
+  for i in sorted(config['VChannels']):
+    vin = vin + [compile(config['VChannels'][i], '<string>', 'eval')]
+  #  vin = vin + [config['VChannels'][i]]
+  #for i in config['IChannels']:
+  #  config['IChannels'][i] = compile(config['IChannels'][i], '<string>', 'eval')
   iin = []
-  for i in sorted(config['CurrentInputs']):
-    iin = iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
+  for i in sorted(config['IChannels']):
+    iin = iin + [compile(config['IChannels'][i], '<string>', 'eval')]
 
   rawi = [0.0 for i in iin]
   rawv = [ 0.0 for i in range(len(vin)+1)]
 
-  def x(self):
+  def getdata(self):
     """ Get data for A/Ds, calibrate, covert and place in list variables"""
 
     for i in range(len(self.vin)):

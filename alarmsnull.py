@@ -18,5 +18,5 @@
 
 class Alarms:
 
-  def scanalarms():
+  def scanalarms(self,batdata):
     None
