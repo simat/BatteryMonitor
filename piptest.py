@@ -14,15 +14,42 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
+import sys
 import serial
 import binascii
-from config import config
-def getcmd(port):
-  """gets command from user"""
-  command=input("Enter Command>")
-  reply=sendcmd(command,port)
-  print (reply)
+from re import match
+
+commands={'QPIGS':110,'Q1':74,'QFLAG':15,'QPIRI':102,'PEj':7,'PDj':7,'PBCV':7,  \
+          'PCVV':7}
+#commands={}
+def openpip(port):
+  openport = serial.Serial(port,baudrate=2400,timeout=1.0,exclusive='True')  # open serial port
+  return openport
+
+def sendcmd(command,port='/dev/ttyUSB1'):
+  """send command/query to Pip4048, return reply"""
+
+  try:
+    x=match("[A-Z,a-z]*",command)
+    replylen=commands[x.group()]
+  except KeyError:
+    replylen=int(input("Enter Reply Length>"))
+
+  try:
+    command=command.encode('ascii','strict')
+    crc=crccalc(command)
+    command=command+crc.to_bytes(2, byteorder='big')+b'\r'
+    openport=openpip(port)
+    openport.write(command)
+    reply = openport.read(replylen)
+    if  crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
+      raise IOError("CRC error in Pip4048 return string")
+  except IOError as err:
+    print(err.args)
+  finally:
+    openport.close()
+
+  print (len(reply),reply)
   print(binascii.hexlify(reply))
   if command=='QPIGS':
     print ('AC output V =',reply[12:17])
@@ -39,41 +66,24 @@ def getcmd(port):
     print ('Status =',reply[83:91])
 
 
-
-
-def sendcmd(command,port):
-  """send command/query to Pip4048, return reply"""
-  port = serial.Serial(port,baudrate=2400)  # open serial port
-  port.timeout = 3
-
-  for i in range(5):
-    try:
-      command=command.encode('ascii','strict')
-      crc=crccalc(command)
-      command=command+crc.to_bytes(2, byteorder='big')+b'\r'
-      print (command,binascii.hexlify(command))
-      port.write(command)
-      reply = port.read(200)
-      if  crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
-        raise IOError("CRC error in Pip4048 return string")
-      break
-    except IOError as err:
-      print(err.args)
-      if i==4:
-        raise
-  port.close()
-  return reply
-
 def setparam(command,port):
   reply=sendcmd(command,port)
   print (reply)
   if reply[1:4]!=b'ACK':
     raise IOError('Bad Parameters')
 
-def main(port='/dev/ttyUSB1'):
-  while True:
-    getcmd(port)
+def getcmd():
+  """gets command from user"""
+  command=str(input("Enter Command>"))
+  return command
 
+def loop():
+  while True:
+    main()
+
+def main(port='/dev/ttyUSB1'):
+    command=getcmd()
+    sendcmd(command,port)
 
 def crccalc(command):
   """returns crc as integer from binary string command"""
@@ -90,4 +100,14 @@ def crccalc(command):
   return crc
 
 if __name__ == "__main__":
-  main()
+  """if run from command line, piptest [command] [port]
+  default port /dev/ttyUSB1, if no command ask user"""
+
+  print (sys.argv)
+  if len(sys.argv) == 2:
+    sendcmd(sys.argv[1])
+  else:
+    if len(sys.argv) == 3:
+      sendcmd(sys.argv[1],sys.argv[2])
+    else:
+      loop()

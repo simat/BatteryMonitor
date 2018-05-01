@@ -23,7 +23,14 @@ from ast import literal_eval
 from configparser import SafeConfigParser
 from config import config
 numcells = config['battery']['numcells']
+import logger
+log = logger.logging.getLogger(__name__)
+log.setLevel(logger.logging.DEBUG)
+log.addHandler(logger.errfile)
 
+#logdata =logger.logging.getlogger()
+#logdata.setLevel(logger.logging.INFO)
+#log.addHandler(logger.logfile)
 
 class Summary:
   """Handles battery summary data"""
@@ -99,6 +106,8 @@ class Summary:
                                      summary['current']['power'][1] ,6 )  # current to loads
 
     vprint=''
+    batdata.vcells=''
+    batdata.iall=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0
     for i in range(numcells):
@@ -110,18 +119,21 @@ class Summary:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
-      vprint=vprint + str(round(batdata.deltav[i+1],3)).ljust(5,'0') + ' '
+      batdata.vcells=batdata.vcells+str(round(batdata.deltav[i+1],3)).ljust(5,'0')+' '
+    vprint=vprint + batdata.vcells
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
     if batdata.currentav[0] < config['battery']['ilowcurrent']:
       summary['current']['deltav'][1] = summary['current']['deltav'][0]
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
-    vprint = vprint + str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0') + ' '
-    vprint = vprint + str(summary['current']['deltav'][0]).ljust(5,'0') + ' '
+    batdata.vbat=str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0')+' '
+    vprint = vprint +batdata.vbat
+    batdata.vdelta= str(summary['current']['deltav'][0]).ljust(5,'0')+' '
+    vprint = vprint+batdata.vdelta
 
     for i in range(batdata.numiins):
       summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
       summary['current']['iinmax'][i] = summary['current']['ioutmax'][i]
-      vprint = vprint + str(round(batdata.currentav[i],1)).ljust(5,'0') + ' '
+      batdata.iall=batdata.iall+str(round(batdata.currentav[i],1)).ljust(5,'0')+' '
       if batdata.currentav[i] > 0:
         summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       else:
@@ -129,20 +141,17 @@ class Summary:
       summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
       summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
 
-    logdata = vprint + str(round(batdata.soc,2)).ljust(6,'0') + \
-              ' ' + str(round(batdata.socadj,2)).ljust(6,'0') + '\n'  #  + '\033[1A'
-    sys.stdout.write(logdata)  #  + '\033[1A'
+    vprint = vprint +batdata.iall
+    batdata.soctxt=str(round(batdata.soc,2)).ljust(6,'0') +' '
+    batdata.socadjtxt=str(round(batdata.socadj,2)).ljust(6,'0') + ' '  #  + '\033[1A'
     self.prevtime = self.currenttime
     self.currenttime = time.localtime()
     self.printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
     summary['current']['timestamp'] = "'" + self.printtime + "'"
-    currentdata = self.printtime + logdata
+    sys.stdout.write(eval(config['logging']['data'])+'\n')  #  + '\033[1A'
+    self.logfile.write(eval(config['logging']['data'])+'\n')
 
-#      currentdata = currentdata + '               '
-#      for i in range(numcells):
-#        currentdata = currentdata + str(round(batdata.uncalvolts[i+1]-batdata.uncalvolts[i],3)) + ' '
-#      currentdata = currentdata + '\n'
-    self.logfile.write(currentdata)
+#    log.info(config['logging']['data'])
 
   def updatesection(self, summary, section, source):
     """ Update 'summary' section 'section' with data from 'source' """

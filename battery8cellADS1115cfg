@@ -1,0 +1,77 @@
+[files]
+logfile = '/batdat/log'
+summaryfile = '/batdat/summary'
+errfile = '/batdat/baterrlog'
+alarms = 'from alarmsnull import Alarms'
+hoursummaryfile = '/batdat/hoursummary'
+daysummaryfile = '/batdat/daysummary'
+monthsummaryfile = '/batdat/monthsummary'
+yearsummaryfile = '/batdat/yearsummary'
+
+[logging]
+data="self.printtime+batdata.vcells+batdata.vbat+batdata.vdelta \
+      +batdata.iall+batdata.soctxt+batdata.socadjtxt"
+
+
+[battery]
+name = 'Karrak'
+numcells = 8
+capacity = 330
+ahloss = -0.005
+vreset = 27.55  # voltage to reset DOD counter
+ireset = 9.0  # current to reset DOD counter
+ilowcurrent = 7.2 # C/50 lowcurrent voltage logging current
+
+[Interfaces]
+ads1115= 'ads1115'
+
+[AtoDs]
+atod0 = 'AtoD.ADS1115(address=0x48)'
+atod1 = 'AtoD.ADS1115(address=0x49)'
+atod2 = 'AtoD.ADS1115(address=0x4A)'
+
+[VChannels]
+v1 = 'atod0.read_adc(0, gain=2)*0.06250197'
+v2 = 'atod0.read_adc(1, gain=2)*0.06250197'
+v3 = 'atod0.read_adc(2, gain=2)*0.06250197'
+v4 = 'atod0.read_adc(3, gain=2)*0.06250197'
+v5 = 'atod1.read_adc(0, gain=2)*0.06250197'
+v6 = 'atod1.read_adc(1, gain=2)*0.06250197'
+v7 = 'atod1.read_adc(2, gain=2)*0.06250197'
+v8 = 'atod1.read_adc(3, gain=2)*0.06250197'
+
+[IChannels]
+iin1 = 'atod2.read_adc_difference(0, gain=16)'
+iin2 = 'atod2.read_adc_difference(3, gain=16)'
+
+[VoltageInputs]
+v01 = 'self.ads1115.rawv[1]'
+v02 = 'self.ads1115.rawv[2]'
+v03 = 'self.ads1115.rawv[3]'
+v04 = 'self.ads1115.rawv[4]'
+v05 = 'self.ads1115.rawv[5]'
+v06 = 'self.ads1115.rawv[6]'
+v07 = 'self.ads1115.rawv[7]'
+v08 = 'self.ads1115.rawv[8]'
+
+[CurrentInputs]
+iin1 = 'self.ads1115.rawi[0]'
+iin2 = 'self.ads1115.rawi[1]'
+iin3 = 'self.current[0]+self.current[1]'
+
+[sampling]
+sampletime = 1.002
+samplesav = 10
+
+[calibrate]
+currentgain = [0.02604, 0.01094, 1.0]
+currentoffset = [-0.063, 0.0, 0.0]
+batvgain = 14.33333 # resistor divider (2.49kohm+33.2kohm)/2.49kohm
+measured = [0.0, 3.326, 6.655, 9.985, 13.316, 16.642, 19.972, 23.303, 26.633]
+displayed = [0.0, 3.326, 6.655, 9.985, 13.316, 16.642, 19.972, 23.303, 26.633]
+#displayed = [0.0, 3.282, 6.587, 9.834, 13.094, 16.44, 19.644, 23.102, 26.328]
+measureddelta = [ 0.0, 3.333, 3.33, 3.331, 3.33, 3.331, 3.331, 3.332, 3.331]
+displayeddelta = [ 0.0, 3.333, 3.33, 3.331, 3.33, 3.331, 3.331, 3.332, 3.331]
+delta = [0.008, -0.002, 0.002, 0.0, 0.0, 0.001, 0.005, 0.004]
+
+[alarms]
