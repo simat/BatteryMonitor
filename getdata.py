@@ -64,6 +64,9 @@ class Readings:
   inah = 0.0
   inahtot = 0.0
   ah = 0.0
+
+  lastmaxv = 0.0 # previous sample maximum cell voltage
+  lastminv = 100.0 # previous sample minimum cell voltage
   pwrbat = 0.0 # battery power units kW
   pwrbattot = 0.0  # total battery power units kWh
   pwrin = 0.0  # gross power in units kW
@@ -146,5 +149,11 @@ class Readings:
                            + self.batvolts[i])/samplesav
 #    print (self.batvoltsav, self.currentav)
     self.deltav[0]=round(self.batvolts[0],3)
+    self.mincellv=100.0
+    self.maxcellv=0.0
+    self.lastmincellv=self.mincellv
+    self.lastmaxcellv=self.maxcellv
     for i in range(numcells,0,-1):
       self.deltav[i]=round((self.batvoltsav[i]-self.batvoltsav[i-1]-config['calibrate']['delta'][i-1]),3)
+      self.mincellv = min(self.deltav[i],self.mincellv)
+      self.maxcellv = max(self.deltav[i],self.maxcellv)

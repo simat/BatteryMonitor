@@ -48,12 +48,6 @@ class Alarms:
 
 
   def scanalarms(self,batdata):
-    minvolts = 5.0
-    maxvolts = 0.0
-    for i in range(1,numcells):
-      minvolts = min(batdata.deltav[i],minvolts)
-      maxvolts = max(batdata.deltav[i],maxvolts)
-
     for i in config['alarms']:
       exec(config['alarms'][i][1])
       if self.test:
