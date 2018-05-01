@@ -19,7 +19,7 @@ import serial
 import binascii
 from re import match
 
-commands={'QPIGS':110,'Q1':74,'QFLAG':15,'QPIRI':102,'PEj':7,'PDj':7,'PBCV':7,  \
+commands={'QPIGS':110,'Q':74,'QFLAG':15,'QPIRI':102,'PE':7,'PD':7,'PBCV':7,  \
           'PCVV':7}
 #commands={}
 def openpip(port):
