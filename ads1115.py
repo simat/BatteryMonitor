@@ -22,6 +22,12 @@ import Adafruit_ADS1x15 as AtoD
 for i in config['AtoDs']:
   exec(i + '=' + config['AtoDs'][i])
 
+import logger
+log = logger.logging.getLogger(__name__)
+log.setLevel(logger.logging.DEBUG)
+log.addHandler(logger.errfile)
+
+
 class Rawdat:
   # compile analog capture code to save CPU time
   vin = []
@@ -39,8 +45,15 @@ class Rawdat:
 
   def getdata(self):
     """ Get data for A/Ds, calibrate, covert and place in list variables"""
-
-    for i in range(len(self.vin)):
-      self.rawv[i+1] = eval(self.vin[i])/1000 # A to D 1 to 4 in volts
-    for i in range(len(self.iin)):
-      self.rawi[i] = eval(self.iin[i])
+    for i in range(5):
+      try:
+        for i in range(len(self.vin)):
+          self.rawv[i+1] = eval(self.vin[i])/1000 # A to D 1 to 4 in volts
+        for i in range(len(self.iin)):
+          self.rawi[i] = eval(self.iin[i])
+          break
+      except Exception as err:
+        log.error(err)
+        time.sleep(0.5)
+        if i==4:
+          raise
