@@ -28,6 +28,13 @@ log.addHandler(logger.errfile)
 
 class Pip:
   """Pip4048 inverter coms class"""
+
+  def __init__(self):
+    self.floatv='48.0'
+    self.bulkv='48.0'
+    self.rechargev='48.0'
+    self.lowv='44.0'
+
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=1,exclusive=False)  # open serial port
 
@@ -57,14 +64,53 @@ class Pip:
       raise serial.serialutil.Serial.Exception('CRC error in reply')
     return reply
 
-  def setparam(self,command,replylen):
-    self.openpip(self.self.config['files']['pipport'])
-    reply=self.sendcmd(command,replylen)
-    self.port.close()
+  def setparam(self,command):
+    reply=self.sendcmd(command,7)
+    print (command,reply)
     if reply[1:4]!=b'ACK':
       raise IOError('Bad Parameters')
 
+  def stashchargeparams(self):
+    """Gets and stashes charging voltage settings from PIP"""
+    reply=self.sendcmd('QPIRI',102)
+    self.floatv=reply[58:62].decode('ascii','strict')
+    self.bulkv=reply[53:57].decode('ascii','strict')
+    self.rechargev=reply[43:47].decode('ascii','strict')
+    self.lowv=reply[48:52].decode('ascii','strict')
 
+  def setblkflt(self,fltv='48.0',bulkv='48.0'):
+    """Sets PIP bulk and float voltage to v and stashes old settings"""
+    stashok=False
+    for i in range(5):
+      try:
+        self.openpip(config['files']['pipport'])
+        if stashok==False:
+          self.stashchargeparams()
+        stashok=True
+        if bulkv < self.floatv:
+          param1='PBFT'+fltv
+          param2='PCVV'+bulkv
+        else:
+          param1='PCVV'+bulkv
+          param2='PBFT'+fltv
+        print (param1,param2,i)
+        self.setparam(param1)
+        time.sleep(0.2)
+        self.setparam(param2)
+        break
+      except Exception as err:
+        log.error(err)
+        time.sleep(0.5)
+        if i==4:
+          raise
+      finally:
+        self.port.close()
+
+  def resetblkflt(self):
+    """Resets bulk and float voltage back to stashed values"""
+    fltv=self.floatv
+    bulkv=self.bulkv
+    self.setblkflt(fltv,bulkv)
 
 class Rawdat(Pip):
 
