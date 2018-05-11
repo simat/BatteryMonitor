@@ -17,9 +17,20 @@
 #!/usr/bin/python
 import sys
 
-import Adafruit_GPIO as GPIO
+import serial
+import binascii
+from config import config
+
+import logger
+log = logger.logging.getLogger(__name__)
+log.setLevel(logger.logging.DEBUG)
+log.addHandler(logger.errfile)
+
+
 class Alarms:
   # Initialise and compile alarms
+  def __init__(self):
+    self.overvflg=False
   for i in config['alarms']:
     exec(config['alarms'][i][0])
     config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
@@ -27,18 +38,15 @@ class Alarms:
     config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
     config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
 
-def scanalarms():
-  minvolts = 5.0
-  maxvolts = 0.0
-  for i in range(1,numcells):
-    minvolts = min(batdata.deltav[i],minvolts)
-    maxvolts = max(batdata.deltav[i],maxvolts)
-
-  for i in config['alarms']:
-    exec(config['alarms'][i][1])
-    if test:
-#            sys.stderr.write('Alarm 1 triggered')
-      exec(config['alarms'][i][2])
-    exec(config['alarms'][i][3])
-    if test:
-      exec(config['alarms'][i][4])
+  def scanalarms(self,batdata):
+    for i in config['alarms']:
+      exec(config['alarms'][i][1])
+#      log.debug('{}{}{}'.format(self.test,batdata.maxcellv,batdata.lastmaxcellv))
+      if self.test:
+  #            sys.stderr.write('Alarm 1 triggered')
+        log.debug('alarm triggered')
+        exec(config['alarms'][i][2])
+      exec(config['alarms'][i][3])
+      if self.test:
+        log.debug('alarm reset')
+        exec(config['alarms'][i][4])

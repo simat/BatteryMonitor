@@ -20,7 +20,7 @@ import binascii
 from re import match
 
 commands={'QPIGS':110,'Q':74,'QFLAG':15,'QPIRI':102,'PE':7,'PD':7,'PBCV':7,  \
-          'PCVV':7}
+          'PCVV':7,'PBFT':7,'PCVT':7}
 #commands={}
 def openpip(port):
   openport = serial.Serial(port,baudrate=2400,timeout=1.0,exclusive='True')  # open serial port

@@ -29,7 +29,8 @@ log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
 from getdata import Readings
-exec(config['files']['alarms'])  # import alarm code
+from alarms import Alarms
+#exec(config['files']['alarms'])  # import alarm code
 #import Adafruit_BBIO.GPIO as GPIO
 
 
