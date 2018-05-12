@@ -34,10 +34,11 @@ class Alarms:
     for i in config['alarms']:
       self.alarmtriggered[i]=False
       exec(config['alarms'][i][0])
-      config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
-      config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec')
-      config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
-      config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
+#     config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
+#      config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec')
+#      config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
+#      config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
+
   def scanalarms(self,batdata):
     for i in config['alarms']:
       exec(config['alarms'][i][1])
