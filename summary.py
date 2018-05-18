@@ -119,7 +119,7 @@ class Summary:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
-      summary['current']['baltime'][i]=batdata.baltime[i]
+      summary['current']['baltime'][i]=round(batdata.baltime[i],4)
       batdata.vcells=batdata.vcells+str(round(batdata.deltav[i+1],3)).ljust(5,'0')+' '
 
     vprint=vprint + batdata.vcells
@@ -142,6 +142,10 @@ class Summary:
         summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
       summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
+
+    for i in range(len(batdata.tin)): # get temperatures
+      summary['current']['tmax'][i] = batdata.temp[i]
+      summary['current']['tmin'][i] = summary['current']['tmax'][i]
 
     vprint = vprint +batdata.iall
     batdata.soctxt=str(round(batdata.soc,2)).ljust(6,'0') +' '
@@ -195,9 +199,10 @@ class Summary:
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
       section['maxnocharge'][i] = max(section['maxnocharge'][i], source['maxnocharge'][i])
       section['minnoload'][i] = min(section['minnoload'][i], source['minnoload'][i])
+    for i in range(numcells):
       section['baltime'][i] = section['baltime'][i]+source['baltime'][i]
-    for i in range(len(config['tmax'])):
-      section['tmax'][i] = min(section['tmax'][i], source['tmax'][i])
+    for i in range(len(config['TemperatureInputs'])):
+      section['tmax'][i] = max(section['tmax'][i], source['tmax'][i])
       section['tmin'][i] = min(section['tmin'][i], source['tmin'][i])
     section['timestamp'] = summary['current']['timestamp']
 

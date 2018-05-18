@@ -39,7 +39,6 @@ class Rawdat:
   def getdata(self):
     for i in range(5):
       try:
-
         port=self.openbms(config['files']['bmsport'])
         data=self.getbmsdat(port,b'\x04\x00') # get BMS Voltage
         for i in range(int(len(data)/2)):
@@ -49,9 +48,9 @@ class Rawdat:
         data=self.getbmsdat(port,b'\x03\x00') # get other BMS data
         self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
         self.rawdat['Bal']=int.from_bytes(data[12:14],byteorder = 'big',signed=False)
-        for i in range(int.from_bytes(data[23:24]): # read temperatures
-          self.rawdat['T{0:0=1}'.format(i+1)]=(int.from_bytes(data[24+i*2:i*2+26],'big')-2731)/10
-        print (self.rawdat)
+        for i in range(int.from_bytes(data[22:23],'big')): # read temperatures
+          self.rawdat['T{0:0=1}'.format(i+1)]=(int.from_bytes(data[23+i*2:i*2+25],'big')-2731)/10
+#        print (self.rawdat)
         break
       except ValueError as err:
         log.error('{}\n{}'.format(err,reply))

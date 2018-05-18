@@ -45,7 +45,9 @@ class Readings:
   batvolts = [ i*3.25 for i in range(numcells+1)]
   uncalvolts = [ i*3.25 for i in range(numcells+1)]
   batvoltsav = [ i*3.25 for i in range(numcells+1)]
-
+  balflg = [ 0.0 for i in range(numcells)]
+  baltime = [ 0.0 for i in range(numcells)]
+  temp = [ 0.0 for i in range(len(config['TemperatureInputs']))]
   numiins = len(config['CurrentInputs'])
   current = [ 0.0 for i in range(numiins)]
   currentav = [ 0.0 for i in range(numiins)]
@@ -89,13 +91,13 @@ class Readings:
       self.iin = self.iin + [config['CurrentInputs'][i]]
 #      self.iin = self.iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
 
-self.tin = [] # temperatures
-for i in sorted(config['TemperatureInputs']):
-  self.tin = self.tin + [config['TemperatureInputs'][i]]
+    self.tin = [] # temperatures
+    for i in sorted(config['TemperatureInputs']):
+      self.tin = self.tin + [config['TemperatureInputs'][i]]
 
-self.balf = [] # balance flags
-for i in sorted(config['BalanceFlags']):
-  self.balf = self.balf + [config['BalanceFlags'][i]]
+    self.balf = [] # balance flags
+    for i in sorted(config['BalanceFlags']):
+      self.balf = self.balf + [config['BalanceFlags'][i]]
 
     self.sampletime = time.time()
     self.getvi()
@@ -164,7 +166,8 @@ for i in sorted(config['BalanceFlags']):
     for i in range(1,numcells+1):
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
                            + self.batvolts[i])/samplesav
-      self.baltime[i-1]= self.baltime[i-1]+deltatime # update time balancers are on
+      if self.balflg[i-1]:
+        self.baltime[i-1]= self.baltime[i-1]+deltatime # update time balancers are on
 #    print (self.batvoltsav, self.currentav)
     self.deltav[0]=round(self.batvolts[0],3)
     self.lastmincellv=self.mincellv
