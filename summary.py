@@ -119,7 +119,9 @@ class Summary:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
+      summary['current']['baltime'][i]=batdata.baltime[i]
       batdata.vcells=batdata.vcells+str(round(batdata.deltav[i+1],3)).ljust(5,'0')+' '
+
     vprint=vprint + batdata.vcells
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
     if batdata.currentav[0] < config['battery']['ilowcurrent']:
@@ -193,6 +195,10 @@ class Summary:
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
       section['maxnocharge'][i] = max(section['maxnocharge'][i], source['maxnocharge'][i])
       section['minnoload'][i] = min(section['minnoload'][i], source['minnoload'][i])
+      section['baltime'][i] = section['baltime'][i]+source['baltime'][i]
+    for i in range(len(config['tmax'])):
+      section['tmax'][i] = min(section['tmax'][i], source['tmax'][i])
+      section['tmin'][i] = min(section['tmin'][i], source['tmin'][i])
     section['timestamp'] = summary['current']['timestamp']
 
   def writesummary(self):

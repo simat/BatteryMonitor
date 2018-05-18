@@ -46,9 +46,12 @@ class Rawdat:
           self.rawdat['V{0:0=2}'.format(i+1)]=int.from_bytes(data[i*2:i*2+2], byteorder = 'big')/1000 \
                                               +self.rawdat['V{0:0=2}'.format(i)]
     # convert from cell voltage to total voltages
-        data=self.getbmsdat(port,b'\x03\x00') # get BMS Current
+        data=self.getbmsdat(port,b'\x03\x00') # get other BMS data
         self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
-    #    print (self.rawdat)
+        self.rawdat['Bal']=int.from_bytes(data[12:14],byteorder = 'big',signed=False)
+        for i in range(int.from_bytes(data[23:24]): # read temperatures
+          self.rawdat['T{0:0=1}'.format(i+1)]=(int.from_bytes(data[24+i*2:i*2+26],'big')-2731)/10
+        print (self.rawdat)
         break
       except ValueError as err:
         log.error('{}\n{}'.format(err,reply))

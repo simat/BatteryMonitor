@@ -131,8 +131,9 @@ def deamon(soc=-1):
             for i in range(batdata.numiins):
               batdata.kWhin[i] = 0.0
               batdata.kWhout[i] = 0.0
-
-
+            for i in range(numcells):
+              batdata.baltime[i]=0
+  
 
           if logsummary.currenttime[3] != logsummary.prevtime[3]:  # new hour
             logsummary.starthour(summary)

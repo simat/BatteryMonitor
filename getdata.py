@@ -89,6 +89,14 @@ class Readings:
       self.iin = self.iin + [config['CurrentInputs'][i]]
 #      self.iin = self.iin + [compile(config['CurrentInputs'][i], '<string>', 'eval')]
 
+self.tin = [] # temperatures
+for i in sorted(config['TemperatureInputs']):
+  self.tin = self.tin + [config['TemperatureInputs'][i]]
+
+self.balf = [] # balance flags
+for i in sorted(config['BalanceFlags']):
+  self.balf = self.balf + [config['BalanceFlags'][i]]
+
     self.sampletime = time.time()
     self.getvi()
     self.batvoltsav = self.batvolts
@@ -127,6 +135,13 @@ class Readings:
                            *config['calibrate']['batvgain'] # A/D to battery volts
       self.batvolts[i+1] = self.uncalvolts[i+1]*self.ratio[i] # calibrate values
 #    print (self.batvolts,self.bms.rawdat)
+
+    for i in range(len(self.tin)): # get temperatures
+      self.temp[i] = eval(self.tin[i])
+
+    for i in range(len(self.balf)): # get balance flags
+      self.balflg[i] = eval(self.balf[i])
+
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
     self.getvi()
@@ -149,6 +164,7 @@ class Readings:
     for i in range(1,numcells+1):
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
                            + self.batvolts[i])/samplesav
+      self.baltime[i-1]= self.baltime[i-1]+deltatime # update time balancers are on
 #    print (self.batvoltsav, self.currentav)
     self.deltav[0]=round(self.batvolts[0],3)
     self.lastmincellv=self.mincellv
