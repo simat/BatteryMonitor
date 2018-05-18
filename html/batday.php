@@ -4,7 +4,7 @@
 
 <?php
 //Replace location of battery config file with the location on your system
-$config = file_get_contents("/home/simat/gadgets/bms/BatteryMonitor/battery.cfg");
+$config = file_get_contents("/home/pi/BatteryMonitor/battery.cfg");
 //error handler function
 function customError($errno, $errstr) {
   echo "<b>Error:</b> [$errno] $errstr";
@@ -231,8 +231,11 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <?php for ($x = ($numbercells/2); $x < $numbercells; $x++) {
 
 			echo ('<td style="background-color:' . $batcolour[$x] . ';text-align:center">');
-			echo ('<p> <span style="font-size:2.0em">' . ($x+1) . '</span><br>');
+			echo ('<p> <span style="font-size:2.0em">' . intval($x+1) . '</span><br>');
 			echo ('<span id= "' . $batmaxtype[$x] . '"> <span style="font-size:0.8em">' . $daymaxv[$x] . 'V </span></span><br>');
+
+/*      echo ($batmaxtype[$x]. $daymaxv[$x] ); */
+
 			echo ('<span id= "' . $batnochargetype[$x] . '"> <span style="font-size:0.8em">' . $daymaxnochargev[$x] . 'V </span></span><br>');
 			echo ('<span id= "' . $batvoltstype[$x] . '">' . $batvolts[$x] .'V </span><br>');
 			echo ('<span id= "' . $batmintype[$x] . '"> <span style="font-size:0.8em">' . $dayminv[$x] . 'V </span></span><br>');
@@ -243,7 +246,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <?php for ($x = $numbercells/2-1; $x >= 0; $x--) {
 
 			echo ('<td style="background-color:' . $batcolour[$x] . ';text-align:center">');
-			echo ('<p> <span style="font-size:2.0em">' . ($x+1) . '</span><br>');
+			echo ('<p> <span style="font-size:2.0em">' . intval($x+1) . '</span><br>');
 			echo ('<span id= "' . $batmaxtype[$x] . '"> <span style="font-size:0.8em">' . $daymaxv[$x] . 'V </span></span><br>');
 			echo ('<span id= "' . $batnochargetype[$x] . '"> <span style="font-size:0.8em">' . $daymaxnochargev[$x] . 'V </span></span><br>');
 			echo ('<span id= "' . $batvoltstype[$x] . '">' . $batvolts[$x] .'V </span><br>');
