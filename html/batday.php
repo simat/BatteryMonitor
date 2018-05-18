@@ -125,6 +125,7 @@ $batvolts = getdat("maxvoltages");
 $deltav = getdat("deltav");
 $amps = getdat("ioutmax");
 $dod = getdat("dod");
+$temp = getdat("tmax");
 $capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
 if  ($capacity > "75") {
    $capcolour="green";
@@ -265,6 +266,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <p><?php echo $dod[0]."Ah"?></p>
 <p><?php echo $batvolts[$numbercells]."V"?></p>
 <p><?php echo $deltav[0]."V"?></p>
+<p style="font-size:0.4em;line-height:0.0;"><?php echo "TBat ".$temp[1]."C TFet ".$temp[0]."C"?></p>
 </div>
 
 <div id="footer">
