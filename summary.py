@@ -200,7 +200,7 @@ class Summary:
       section['maxnocharge'][i] = max(section['maxnocharge'][i], source['maxnocharge'][i])
       section['minnoload'][i] = min(section['minnoload'][i], source['minnoload'][i])
     for i in range(numcells):
-      section['baltime'][i] = section['baltime'][i]+source['baltime'][i]
+      section['baltime'][i] = round(section['baltime'][i]+source['baltime'][i],4)
     for i in range(len(config['TemperatureInputs'])):
       section['tmax'][i] = max(section['tmax'][i], source['tmax'][i])
       section['tmin'][i] = min(section['tmin'][i], source['tmin'][i])
