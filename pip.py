@@ -34,7 +34,7 @@ class Pip:
     self.bulkv='48.0'
     self.rechargev='48.0'
     self.lowv='44.0'
-
+    self.pipdown=0.0
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=1,exclusive=False)  # open serial port
 
@@ -120,35 +120,42 @@ class Rawdat(Pip):
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
-    for i in range(5):
-      try:
-        self.openpip(config['files']['pipport'])
-        reply=self.sendcmd('QPIGS',110)
-        self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
-        self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
-        self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
-        self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
-        self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
-        reply=self.sendcmd('Q1',74)
-  #      log.debug('close')
-        self.rawdat['ChgStat']=reply[-5:-3]
-        self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
-        self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
-        self.rawdat['ipv']=-self.rawdat['PVI']
-        self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
-        break
-      except ValueError as err:
-        log.error('{}\n{}'.format(err,reply))
-        time.sleep(0.5)
-        if i==4:
-          raise
-      except Exception as err:
-        log.error(err)
-        time.sleep(0.5)
-        if i==4:
-          raise
-      finally:
-        self.port.close()
+    if self.pipdown=0.0:
+      for i in range(5):
+        try:
+          self.openpip(config['files']['pipport'])
+          reply=self.sendcmd('QPIGS',110)
+          self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
+          self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
+          self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
+          self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
+          self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
+          reply=self.sendcmd('Q1',74)
+    #      log.debug('close')
+          self.rawdat['ChgStat']=reply[-5:-3]
+          self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
+          self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
+          self.rawdat['ipv']=-self.rawdat['PVI']
+          self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
+          break
+        except ValueError as err:
+          log.error('{}\n{}'.format(err,reply))
+          time.sleep(0.5)
+          if i==4:
+            self.pipdown=1.0 # flag pip is down
+            log.error("{} interface down".format(self))
+        except Exception as err:
+          log.error(err)
+          time.sleep(0.5)
+          if i==4:
+            self.pipdown=1.0 # flag pip is down
+            log.error("{} interface down".format(self))
+        finally:
+          self.port.close()
+    else:
+      self.pipdown=self.pipdown+batdata.deltatime
+      if self.pipdown>600: #retry interface every 10 minutes
+        self.pipdown=0.0
 
 
 """class Alarms(Pip):
