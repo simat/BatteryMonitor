@@ -34,7 +34,7 @@ class Pip:
     self.bulkv='48.0'
     self.rechargev='48.0'
     self.lowv='44.0'
-    self.pipdown=0.0
+
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=1,exclusive=False)  # open serial port
 
@@ -116,11 +116,11 @@ class Rawdat(Pip):
 
   def __init__(self):
     self.rawdat ={'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
-
+    self.pipdown=0.0
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
-    if self.pipdown=0.0:
+    if self.pipdown==0.0:
       for i in range(5):
         try:
           self.openpip(config['files']['pipport'])
