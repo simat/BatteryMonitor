@@ -60,3 +60,14 @@ def x(port):
     rawv[i] = int.from_bytes(voltages[i*2:i*2+2], byteorder = 'big')/1000.00
     rawv[i] = rawv[i]+rawv[i-1]
   print (rawv)
+
+  command = bytes.fromhex('DD A5 05 00 FF FB 77')
+  dat = getbmsdat(ser,command)
+
+#  line1 = [ 0 for i in range(int(len(dat)))]
+#  for i in range(0,int(len(dat))):
+#    print (dat[i*2:i*2+2])
+#    print (int.from_bytes(dat[i:i+1], byteorder = 'big'))
+#    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
+  print (binascii.hexlify(dat))
+#  print (line1)

@@ -19,8 +19,8 @@ import serial
 import binascii
 from re import match
 
-commands={'QPIGS':110,'Q':74,'QFLAG':15,'QPIRI':102,'PE':7,'PD':7,'PBCV':7,  \
-          'PCVV':7,'PBFT':7,'PCVT':7}
+#commands={'QPIGS':110,'Q':74,'QFLAG':15,'QPIRI':102,'PE':7,'PD':7,'PBCV':7,  \
+#          'PCVV':7,'PBFT':7,'PCVT':7}
 #commands={}
 def openpip(port):
   openport = serial.Serial(port,baudrate=2400,timeout=1.0,exclusive='True')  # open serial port
@@ -29,11 +29,11 @@ def openpip(port):
 def sendcmd(command,port='/dev/ttyUSB1'):
   """send command/query to Pip4048, return reply"""
 
-  try:
-    x=match("[A-Z,a-z]*",command)
-    replylen=commands[x.group()]
-  except KeyError:
-    replylen=int(input("Enter Reply Length>"))
+#  try:
+#    x=match("[A-Z,a-z]*",command)
+#    replylen=commands[x.group()]
+#  except KeyError:
+#    replylen=int(input("Enter Reply Length>"))
 
   try:
     command=command.encode('ascii','strict')
@@ -41,7 +41,14 @@ def sendcmd(command,port='/dev/ttyUSB1'):
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
     openport=openpip(port)
     openport.write(command)
-    reply = openport.read(replylen)
+#    reply = openport.read(replylen)
+    reply = b''
+    for i in range(200):
+      char=openport.read(1)
+      reply = reply + char
+      if char==b'\r':
+        break
+
     if  crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise IOError("CRC error in Pip4048 return string")
   except IOError as err:
