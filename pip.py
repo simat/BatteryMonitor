@@ -19,6 +19,7 @@ import sys
 import time
 import serial
 import binascii
+import glob
 from config import config
 numcells = config['battery']['numcells']
 import logger
@@ -34,6 +35,27 @@ class Pip:
     self.bulkv='48.0'
     self.rechargev='48.0'
     self.lowv='44.0'
+
+  def findpip(self):
+    """Scan ports to find PIP port"""
+
+    self.pipport=""
+    for dev in glob.glob("/dev/ttyU*"):
+      for i in range(2):
+        try:
+          self.openpip(dev)
+          reply=self.sendcmd("QID",18)
+          if reply[1:15].decode('ascii','strict')==self.sn:
+            self.pipport=dev
+            break
+        except serial.serialutil.SerialException:
+          pass
+        finally:
+          self.port.close
+      if self.pipport!="":
+        break
+    if self.pipport=="":
+      raise Exception("Couldn't find PIP sn {}".format(self.sn))
 
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=1,exclusive=False)  # open serial port
@@ -61,7 +83,7 @@ class Pip:
     self.port.write(command)
     reply = self.port.read(replylen)
     if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
-      raise serial.serialutil.Serial.Exception('CRC error in reply')
+      raise serial.serialutil.SerialException('CRC error in reply')
     return reply
 
   def setparam(self,command):
@@ -83,7 +105,7 @@ class Pip:
     stashok=False
     for i in range(5):
       try:
-        self.openpip(config['files']['pipport'])
+        self.openpip(self.pipport)
         if stashok==False:
           self.stashchargeparams()
         stashok=True
@@ -114,16 +136,21 @@ class Pip:
 
 class Rawdat(Pip):
 
-  def __init__(self):
-    self.rawdat ={'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
+  def __init__(self,sn):
+    self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
     self.pipdown=0.0
+    self.sn=sn
+    self.findpip()
+
+
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
     if self.pipdown==0.0:
+      self.rawdat['DataValid']=False
       for i in range(5):
         try:
-          self.openpip(config['files']['pipport'])
+          self.openpip(self.pipport)
           reply=self.sendcmd('QPIGS',110)
           self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
           self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
@@ -137,26 +164,33 @@ class Rawdat(Pip):
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=-self.rawdat['PVI']
           self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
+          self.rawdat['DataValid']=True
           break
         except ValueError as err:
-          log.error('{}\n{}'.format(err,reply))
+          log.error('PIP bad response{}'.format(reply))
           time.sleep(0.5)
           if i==4:
-            self.pipdown=1.0 # flag pip is down
-            log.error("{} interface down".format(self))
+            self.pipdown=time.time() # flag pip is down
+            log.error("PIP sn {} interface down".format(self.sn))
         except Exception as err:
-          log.error(err)
+          log.error('PIP interface error {}'.format(err))
           time.sleep(0.5)
           if i==4:
-            self.pipdown=1.0 # flag pip is down
-            log.error("{} interface down".format(self))
+            self.pipdown=time.time() # flag pip is down
+            log.error("PIP sn {} interface down".format(self.sn))
         finally:
           self.port.close()
     else:
-      self.pipdown=self.pipdown+batdata.deltatime
-      if self.pipdown>600: #retry interface every 10 minutes
-        self.pipdown=0.0
-
+      downtime=time.time()-self.pipdown
+      if int(downtime)%600==0: #retry interface every 10 minutes
+        try:
+          self.findpip()
+        except:
+          pass
+#          if downtime>3600: # upgrade error if more than one hour
+#            raise
+        else:
+          self.pipdown=0.0
 
 """class Alarms(Pip):
   # Initialise and compile alarms

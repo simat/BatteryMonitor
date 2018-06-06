@@ -16,20 +16,23 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 #from test import config
+import re
 from config import config
 numcells = config['battery']['numcells']
 import time
-for i in config['Interfaces']:
-  exec("import " + config['Interfaces'][i])
 #from x import Raw
-
-
 
 class Readings:
   """ get and manipulates readings from the real world"""
 
   for i in config['Interfaces']:
-    exec(config['Interfaces'][i] +'='+config['Interfaces'][i]+'.Rawdat()')
+    interface=re.match(r'\w*',config['Interfaces'][i]).group()
+    snstring=re.compile(r'[(].*[^)]')
+    sn=snstring.search(config['Interfaces'][i]).group()
+
+
+    exec("import " + interface)
+    exec(interface +'='+interface+".Rawdat('"+str(sn[1:])+"')")
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
 

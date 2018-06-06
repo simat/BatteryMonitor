@@ -17,6 +17,7 @@
 import time
 import serial
 import binascii
+import glob
 from config import config
 numcells = config['battery']['numcells']
 import logger
@@ -24,46 +25,34 @@ log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
+class Bms:
+  """Generic Chinese BMS comms class"""
 
-class Rawdat:
+#  def __init__(self,sn):
 
-  def __init__(self):
 
-    self.rawdat={'V00':0.0}
-    """port=self.openbms(config['files']['usbport'])
-    data=self.getbmsdat(port,b'\x04\x00') # get BMS voltages
-    port.close()
-    self.rawdat={'V'+str(x+1):0.0 for x in range(int(len(data)/2))}
-    self.rawdat['Ibat']=0.0"""
+  def findbms(self):
+    """Scan ports to find BMS port"""
 
-  def getdata(self):
-    for i in range(5):
-      try:
-        port=self.openbms(config['files']['bmsport'])
-        data=self.getbmsdat(port,b'\x04\x00') # get BMS Voltage
-        for i in range(int(len(data)/2)):
-          self.rawdat['V{0:0=2}'.format(i+1)]=int.from_bytes(data[i*2:i*2+2], byteorder = 'big')/1000 \
-                                              +self.rawdat['V{0:0=2}'.format(i)]
-    # convert from cell voltage to total voltages
-        data=self.getbmsdat(port,b'\x03\x00') # get other BMS data
-        self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
-        self.rawdat['Bal']=int.from_bytes(data[12:14],byteorder = 'big',signed=False)
-        for i in range(int.from_bytes(data[22:23],'big')): # read temperatures
-          self.rawdat['T{0:0=1}'.format(i+1)]=(int.from_bytes(data[23+i*2:i*2+25],'big')-2731)/10
-#        print (self.rawdat)
+    self.bmsport=""
+    for dev in glob.glob("/dev/ttyU*"):
+      for i in range(2):
+        try:
+          self.openbms(dev)
+          reply=self.getbmsdat(self.port,b'\x05\x00')
+          if reply.decode('ascii','strict')==self.sn:
+            self.bmsport=dev
+            break
+        except serial.serialutil.SerialException:
+          pass
+        finally:
+          self.port.close()
+      if self.bmsport!="":
         break
-      except ValueError as err:
-        log.error('{}\n{}'.format(err,reply))
-        time.sleep(0.5)
-        if i==4:
-          raise
-      except Exception as err:
-        log.error(err)
-        time.sleep(0.5)
-        if i==4:
-          raise
-      finally:
-        self.port.close()
+    if self.bmsport=="":
+      raise Exception("Couldn't find BMS hardware name {}".format(self.sn))
+
+
 
   def crccalc(self,data):
     """returns crc as integer from byte stream"""
@@ -82,7 +71,7 @@ class Rawdat:
     crc=self.crccalc(command)
     packet=b'\xDD\xA5'+command+crc.to_bytes(2, byteorder='big')+b'\x77'
   #  print (packet)
-    data=self.sendbms(port,packet)
+    data=self.sendbms(self.port,packet)
     return data
 
 
@@ -93,7 +82,7 @@ class Rawdat:
     reply = self.port.read(4)
 #        raise serial.serialutil.SerialException('hithere')
 
-#  print (reply)
+#    print (reply)
     x = int.from_bytes(reply[3:5], byteorder = 'big')
 #    print (x)
     data = self.port.read(x)
@@ -105,3 +94,49 @@ class Rawdat:
 
 
     return data
+
+
+class Rawdat(Bms):
+
+  def __init__(self,sn):
+
+    self.rawdat={'DataValid':False,'V00':0.0}
+    self.sn=sn
+    self.findbms()
+    """port=self.openbms(config['files']['usbport'])
+    data=self.getbmsdat(port,b'\x04\x00') # get BMS voltages
+    port.close()
+    self.rawdat={'V'+str(x+1):0.0 for x in range(int(len(data)/2))}
+    self.rawdat['Ibat']=0.0"""
+
+  def getdata(self):
+    self.rawdat['DataValid']=False
+    for i in range(5):
+      try:
+        self.openbms(self.bmsport)
+        data=self.getbmsdat(self.port,b'\x04\x00') # get BMS Voltage
+#        print(data)
+        for i in range(int(len(data)/2)):
+          self.rawdat['V{0:0=2}'.format(i+1)]=int.from_bytes(data[i*2:i*2+2], byteorder = 'big')/1000 \
+                                              +self.rawdat['V{0:0=2}'.format(i)]
+    # convert from cell voltage to total voltages
+        data=self.getbmsdat(self.port,b'\x03\x00') # get other BMS data
+        self.rawdat['Ibat']=int.from_bytes(data[2:4], byteorder = 'big',signed=True)
+        self.rawdat['Bal']=int.from_bytes(data[12:14],byteorder = 'big',signed=False)
+        for i in range(int.from_bytes(data[22:23],'big')): # read temperatures
+          self.rawdat['T{0:0=1}'.format(i+1)]=(int.from_bytes(data[23+i*2:i*2+25],'big')-2731)/10
+#        print (self.rawdat)
+        self.rawdat['DataValid']=True
+        break
+      except ValueError as err:
+        log.error('{}\n{}'.format(err,reply))
+        time.sleep(0.5)
+        if i==4:
+          raise
+      except Exception as err:
+        log.error(err)
+        time.sleep(0.5)
+        if i==4:
+          raise
+      finally:
+        self.port.close()
