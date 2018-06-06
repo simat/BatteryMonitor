@@ -28,7 +28,9 @@ class Readings:
   for i in config['Interfaces']:
     interface=re.match(r'\w*',config['Interfaces'][i]).group()
     snstring=re.compile(r'[(].*[^)]')
-    sn=snstring.search(config['Interfaces'][i]).group()
+    sn=snstring.search(config['Interfaces'][i])
+    if sn!=None:
+      sn=sn.group()
 
 
     exec("import " + interface)
