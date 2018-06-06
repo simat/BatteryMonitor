@@ -32,9 +32,12 @@ class Readings:
     if sn!=None:
       sn=sn.group()
 
-
     exec("import " + interface)
-    exec(interface +'='+interface+".Rawdat('"+str(sn[1:])+"')")
+    if sn!=None
+      exec(interface +'='+interface+'.Rawdat()')
+    else:
+      exec(interface +'='+interface+".Rawdat('"+str(sn[1:])+"')")
+
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
 
