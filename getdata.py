@@ -33,7 +33,7 @@ class Readings:
       sn=sn.group()
 
     exec("import " + interface)
-    if sn!=None
+    if sn!=None:
       exec(interface +'='+interface+'.Rawdat()')
     else:
       exec(interface +'='+interface+".Rawdat('"+str(sn[1:])+"')")
