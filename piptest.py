@@ -36,11 +36,11 @@ def sendcmd(command,port='/dev/ttyUSB1'):
 #    replylen=int(input("Enter Reply Length>"))
 
   try:
-    command=command.encode('ascii','strict')
-    crc=crccalc(command)
-    command=command+crc.to_bytes(2, byteorder='big')+b'\r'
+    cmd=command.encode('ascii','strict')
+    crc=crccalc(cmd)
+    cmd=cmd+crc.to_bytes(2, byteorder='big')+b'\r'
     openport=openpip(port)
-    openport.write(command)
+    openport.write(cmd)
 #    reply = openport.read(replylen)
     reply = b''
     for i in range(200):
