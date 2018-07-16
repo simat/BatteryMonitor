@@ -41,15 +41,18 @@ class Alarms:
 
   def scanalarms(self,batdata):
     for i in config['alarms']:
-      exec(config['alarms'][i][1])
-#      log.debug('{}{}{}'.format(self.test,batdata.maxcellv,batdata.lastmaxcellv))
-      if self.test:
-  #            sys.stderr.write('Alarm 1 triggered')
-        log.debug('alarm triggered')
-        self.alarmtriggered[i]=True
-        exec(config['alarms'][i][2])
-      exec(config['alarms'][i][3])
-      if self.test:
-        log.debug('alarm reset')
-        self.alarmtriggered[i]=False
-        exec(config['alarms'][i][4])
+      if not self.alarmtriggered[i]:
+        exec(config['alarms'][i][1])
+  #      log.debug('{}{}{}'.format(self.test,batdata.maxcellv,batdata.lastmaxcellv))
+        if self.test:
+    #            sys.stderr.write('Alarm 1 triggered')
+          log.debug('alarm triggered')
+          self.alarmtriggered[i]=True
+          exec(config['alarms'][i][2])
+
+      if self.alarmtriggered[i]:
+        exec(config['alarms'][i][3])
+        if self.test:
+          log.debug('alarm reset')
+          self.alarmtriggered[i]=False
+          exec(config['alarms'][i][4])

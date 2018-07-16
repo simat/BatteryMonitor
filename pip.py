@@ -27,14 +27,23 @@ log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
-class Pip:
-  """Pip4048 inverter coms class"""
+class Rawdat():
+  """class for obtaining data from and controlling indidvdual PIP inverters.
+  When class is instantiated the SN of the PIP is used to tie the instance of
+  the class to the particular machine"""
 
-  def __init__(self):
-    self.floatv='48.0'
-    self.bulkv='48.0'
-    self.rechargev='48.0'
-    self.lowv='44.0'
+  def __init__(self,sn):
+    self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
+    self.pipdown=0.0
+    self.sn=sn
+    self.findpip()
+    self.stashok=False
+    self.floatv=48.0
+    self.bulkv=48.0
+    self.rechargev=48.0
+    self.lowv=44.0
+    self.stashok=False
+
 
   def findpip(self):
     """Scan ports to find PIP port"""
@@ -44,7 +53,7 @@ class Pip:
       for i in range(2):
         try:
           self.openpip(dev)
-          reply=self.sendcmd("QID",18)
+          reply=self.sendcmd("QID")
           if reply[1:15].decode('ascii','strict')==self.sn:
             self.pipport=dev
             break
@@ -74,51 +83,64 @@ class Pip:
       crc+=1
     return crc
 
-  def sendcmd(self,command,replylen):
+  def sendcmd(self,command):
     """send command/query to Pip4048, return reply"""
 
     command=command.encode('ascii','strict')
     crc=self.crccalc(command)
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
     self.port.write(command)
-    reply = self.port.read(replylen)
+#    reply = self.port.read(replylen)
+    reply = b''
+    for i in range(200):
+      char=self.port.read(1)
+      reply = reply + char
+      if char==b'\r':
+        break
+
     if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise serial.serialutil.SerialException('CRC error in reply')
     return reply
 
   def setparam(self,command):
-    reply=self.sendcmd(command,7)
+    reply=self.sendcmd(command)
     print (command,reply)
     if reply[1:4]!=b'ACK':
       raise IOError('Bad Parameters')
 
   def stashchargeparams(self):
     """Gets and stashes charging voltage settings from PIP"""
-    reply=self.sendcmd('QPIRI',102)
-    self.floatv=reply[58:62].decode('ascii','strict')
-    self.bulkv=reply[53:57].decode('ascii','strict')
-    self.rechargev=reply[43:47].decode('ascii','strict')
-    self.lowv=reply[48:52].decode('ascii','strict')
+    if self.stashok==False:
+      reply=self.sendcmd('QPIRI')
+      self.floatv=float(reply[58:62].decode('ascii','strict'))
+      self.bulkv=float(reply[53:57].decode('ascii','strict'))
+      self.rechargev=float(reply[43:47].decode('ascii','strict'))
+      self.lowv=float(reply[48:52].decode('ascii','strict'))
+      self.stashok=True
 
-  def setblkflt(self,fltv='48.0',bulkv='48.0'):
-    """Sets PIP bulk and float voltage to v and stashes old settings"""
-    stashok=False
+  def setblkflt(self,bulkv,floatv):
+    if bulkv < self.floatv:
+      param1='PBFT'+str(floatv)
+      param2='PCVV'+str(bulkv)
+    else:
+      param1='PCVV'+str(bulkv)
+      param2='PBFT'+str(floatv)
+    self.setparam(param1)
+    time.sleep(0.2)
+    self.setparam(param2)
+
+  def setchargevs(self,bulkv=0,floatv=0,lowv=0):
+    """Sets PIP charge and discharge limit voltage and stashes old settings
+       Only sets non zero voltages """
+    self.stashok=False
     for i in range(5):
       try:
         self.openpip(self.pipport)
-        if stashok==False:
-          self.stashchargeparams()
-        stashok=True
-        if bulkv < self.floatv:
-          param1='PBFT'+fltv
-          param2='PCVV'+bulkv
-        else:
-          param1='PCVV'+bulkv
-          param2='PBFT'+fltv
-        print (param1,param2,i)
-        self.setparam(param1)
-        time.sleep(0.2)
-        self.setparam(param2)
+        self.stashchargeparams()
+        if floatv or bulkv:
+          self.setblkflt(bulkv,floatv)
+        if lowv:
+          self.setparam("PSDV"+str(lowv))
         break
       except Exception as err:
         log.error(err)
@@ -128,20 +150,15 @@ class Pip:
       finally:
         self.port.close()
 
-  def resetblkflt(self):
-    """Resets bulk and float voltage back to stashed values"""
-    fltv=self.floatv
-    bulkv=self.bulkv
-    self.setblkflt(fltv,bulkv)
-
-class Rawdat(Pip):
-
-  def __init__(self,sn):
-    self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
-    self.pipdown=0.0
-    self.sn=sn
-    self.findpip()
-
+  def resetchargevs(self,bulkv=0,floatv=0,lowv=0):
+    """Resets specified voltages back to stashed values"""
+    if bulkv:
+      bulkv=self.bulkv
+    if floatv:
+      floatv=self.floatv
+    if lowv:
+      lowv=self.lowv
+    self.setchargevs(bulkv,floatv,lowv)
 
   def getdata(self):
     """returns dictionary with data from Pip4048"""
@@ -151,13 +168,13 @@ class Rawdat(Pip):
       for i in range(5):
         try:
           self.openpip(self.pipport)
-          reply=self.sendcmd('QPIGS',110)
+          reply=self.sendcmd('QPIGS')
           self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
           self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
           self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
           self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
           self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
-          reply=self.sendcmd('Q1',74)
+          reply=self.sendcmd('Q1')
     #      log.debug('close')
           self.rawdat['ChgStat']=reply[-5:-3]
           self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
@@ -182,7 +199,7 @@ class Rawdat(Pip):
           self.port.close()
     else:
       downtime=time.time()-self.pipdown
-      if int(downtime)%600==0: #retry interface every 10 minutes
+      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
         try:
           self.findpip()
         except:
@@ -191,31 +208,3 @@ class Rawdat(Pip):
 #            raise
         else:
           self.pipdown=0.0
-
-"""class Alarms(Pip):
-  # Initialise and compile alarms
-  def __init__(self):
-    self.overvflg=False
-  for i in config['alarms']:
-    exec(config['alarms'][i][0])
-    config['alarms'][i][1] = compile(config['alarms'][i][1], '<string>', 'exec')
-    config['alarms'][i][2] = compile(config['alarms'][i][2], '<string>', 'exec')
-    config['alarms'][i][3] = compile(config['alarms'][i][3], '<string>', 'exec')
-    config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
-
-  def scanalarms(self,batdata):
-    minvolts = 5.0
-    maxvolts = 0.0
-    for i in range(1,numcells):
-      minvolts = min(batdata.deltav[i],minvolts)
-      maxvolts = max(batdata.deltav[i],maxvolts)
-
-    for i in config['alarms']:
-      exec(config['alarms'][i][1])
-      if self.test:
-  #            sys.stderr.write('Alarm 1 triggered')
-        exec(config['alarms'][i][2])
-      exec(config['alarms'][i][3])
-      if self.test:
-        exec(config['alarms'][i][4])
-        """
