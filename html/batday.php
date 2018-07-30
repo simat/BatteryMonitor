@@ -82,6 +82,29 @@ set_error_handler("customError");
     font-size: 0.9em;
 }
 
+.btn-group .button {
+    background-color: #4CAF50; /* Green */
+    border: 1px solid green;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    width: 150px;
+    display: block;
+}
+
+.btn-group .button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+}
+
+.btn-group .button:hover {
+    background-color: #3e8e41;
+}
+
+
 </style>
 
 <?php
@@ -126,6 +149,7 @@ $deltav = getdat("deltav");
 $amps = getdat("ioutmax");
 $dod = getdat("dod");
 $temp = getdat("tmax");
+$state = getdat("state");
 $capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
 if  ($capacity > "75") {
    $capcolour="green";
@@ -215,7 +239,6 @@ for($x = 0; $x < $arrlength; $x++) {
 <body id="body">
 <!-- <meta http-equiv="refresh" content="60"> -->
 <meta http-equiv=cache-control" content="no-cache">
-<meta http-equiv=cache-control" content="no-cache">
 <meta http-equiv=pragma" content="no-cache">
 <div id="header">
 <!-- <p style=font-size:24px; font-weight:900> Geoff's Battery Data Dated </p> -->
@@ -263,10 +286,12 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <?php echo $capacity."%"; ?></p>
 <p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[0]."A"?></p>
 <p style="font-size:0.5em;line-height:0.0;"><?php echo "In ".$amps[1]."A Out ".$amps[2]."A"?></p>
+<p style="font-size:0.5em;line-height:0.0;"><?php echo "Charge State ".$state[0]?></p>
 <p><?php echo $dod[0]."Ah"?></p>
 <p><?php echo $batvolts[$numbercells]."V"?></p>
 <p><?php echo $deltav[0]."V"?></p>
 <p style="font-size:0.4em;line-height:0.0;"><?php echo "TBat ".$temp[1]."C TFet ".$temp[0]."C"?></p>
+<!-- <p><button class="button" onclick=test()>Full Power</button></p>-->
 </div>
 
 <div id="footer">
@@ -281,5 +306,11 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 
 
 </div>
+<script>
+function test() {
+  document.getElementById("button").style.backgroundColor = "red";
+}
+</script>
+
 </body>
 </html>

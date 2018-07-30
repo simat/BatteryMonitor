@@ -152,6 +152,8 @@ class Readings:
     for i in range(len(self.balf)): # get balance flags
       self.balflg[i] = eval(self.balf[i])
 
+    self.chargestate=eval(config['Status']['chargestate'])
+
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
     self.getvi()
