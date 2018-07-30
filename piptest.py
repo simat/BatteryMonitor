@@ -71,6 +71,14 @@ def sendcmd(command,port='/dev/ttyUSB1'):
     print ('Battery Discharge I =',reply[77:82])
     print ('Status =',reply[83:91])
 
+# (230.0 21.7 230.0 50.0 21.7 5000 4000 48.0 49.0 45.0 51.6 50.2 2 30 030 0 1 3 9 01 0 0 48.0 0 1 000\x19Q\r'
+
+  elif command=='QPIRI':
+    print ('Recharge V =',reply[43:47])
+    print ('LVD =',reply[48:52])
+    print ('Bulk V =',reply[53:57])
+    print ('Float V =',reply[58:62])
+
 
 def setparam(command,port):
   reply=sendcmd(command,port)
