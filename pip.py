@@ -176,7 +176,8 @@ class Rawdat():
           self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
           reply=self.sendcmd('Q1')
     #      log.debug('close')
-          self.rawdat['ChgStat']=reply[69:70]
+          self.rawdat['ChgStat']=reply[69:71]
+          print  (self.rawdat['ChgStat'])
           self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=-self.rawdat['PVI']
