@@ -23,7 +23,7 @@ from re import match
 #          'PCVV':7,'PBFT':7,'PCVT':7}
 #commands={}
 def openpip(port):
-  openport = serial.Serial(port,baudrate=2400,timeout=1.0,exclusive='True')  # open serial port
+  openport = serial.Serial(port,baudrate=2400,timeout=1.0)  # open serial port
   return openport
 
 def sendcmd(command,port='/dev/ttyUSB1'):
@@ -48,7 +48,6 @@ def sendcmd(command,port='/dev/ttyUSB1'):
       reply = reply + char
       if char==b'\r':
         break
-
     if  crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise IOError("CRC error in Pip4048 return string")
   except IOError as err:

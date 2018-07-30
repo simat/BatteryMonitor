@@ -62,7 +62,7 @@ class Bms:
     return crc
 
   def openbms(self,port):
-    self.port = serial.Serial(port,timeout=2,exclusive=False)  # open serial port
+    self.port = serial.Serial(port,timeout=2)  # open serial port
 
   def getbmsdat(self,port,command):
     """ Issue BMS command and return data as byte data """

@@ -67,7 +67,7 @@ class Rawdat():
       raise Exception("Couldn't find PIP sn {}".format(self.sn))
 
   def openpip(self,port):
-    self.port = serial.Serial(port,baudrate=2400,timeout=1,exclusive=False)  # open serial port
+    self.port = serial.Serial(port,baudrate=2400,timeout=1)  # open serial port
 
   def crccalc(self,command):
     """returns crc as integer from binary string command"""
