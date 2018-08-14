@@ -16,7 +16,8 @@
 
 #!/usr/bin/python
 import sys
-
+from time import localtime
+import RPi.GPIO as gpio
 import serial
 import binascii
 from config import config
@@ -40,6 +41,8 @@ class Alarms:
 #      config['alarms'][i][4] = compile(config['alarms'][i][4], '<string>', 'exec')
 
   def scanalarms(self,batdata):
+#    self.timedate = localtime()
+#    print (self.timedate.tm_hour)
     for i in config['alarms']:
       if not self.alarmtriggered[i]:
         exec(config['alarms'][i][1])
