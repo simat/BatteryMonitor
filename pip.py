@@ -53,7 +53,7 @@ class Rawdat():
       for i in range(2):
         try:
           self.openpip(dev)
-          reply=self.sendcmd("QID")
+          reply=self.sendcmd("QID",18)
           if reply[1:15].decode('ascii','strict')==self.sn:
             self.pipport=dev
             break
@@ -83,39 +83,27 @@ class Rawdat():
       crc+=1
     return crc
 
-  def sendcmd(self,command):
+  def sendcmd(self,command,replylen):
     """send command/query to Pip4048, return reply"""
 
     command=command.encode('ascii','strict')
     crc=self.crccalc(command)
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
     self.port.write(command)
-#    reply = self.port.read(replylen)
-    reply = b''
-    for i in range(200):
-      char=self.port.read(1)
-      reply = reply + char
-      if char==b'\r':
-        break
-
+    reply = self.port.read(replylen)
     if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise serial.serialutil.SerialException('CRC error in reply')
     return reply
 
   def setparam(self,command):
-    reply=self.sendcmd(command)
-#    print (command,reply)
+    reply=self.sendcmd(command,7)
+    print (command,reply)
     if reply[1:4]!=b'ACK':
       raise IOError('Bad Parameters')
 
   def stashchargeparams(self):
     """Gets and stashes charging voltage settings from PIP"""
     if self.stashok==False:
-      reply=self.sendcmd('QPIRI')
-      self.floatv=float(reply[58:62].decode('ascii','strict'))
-      self.bulkv=float(reply[53:57].decode('ascii','strict'))
-      self.rechargev=float(reply[43:47].decode('ascii','strict'))
-      self.lowv=float(reply[48:52].decode('ascii','strict'))
       self.stashok=True
 
   def setblkflt(self,bulkv,floatv):
@@ -133,6 +121,11 @@ class Rawdat():
     """Sets PIP charge and discharge limit voltage and stashes old settings
        Only sets non zero voltages """
     self.stashok=False
+    reply=self.sendcmd('QPIRI',102)
+    self.floatv=reply[58:62].decode('ascii','strict')
+    self.bulkv=reply[53:57].decode('ascii','strict')
+    self.rechargev=reply[43:47].decode('ascii','strict')
+    self.lowv=reply[48:52].decode('ascii','strict')
     for i in range(5):
       try:
         self.openpip(self.pipport)
@@ -168,13 +161,13 @@ class Rawdat():
       for i in range(5):
         try:
           self.openpip(self.pipport)
-          reply=self.sendcmd('QPIGS')
+          reply=self.sendcmd('QPIGS',110)
           self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
           self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
           self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
           self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
           self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
-          reply=self.sendcmd('Q1')
+          reply=self.sendcmd('Q1',74)
     #      log.debug('close')
           self.rawdat['ChgStat']=reply[69:71]
           print  (self.rawdat['ChgStat'])
