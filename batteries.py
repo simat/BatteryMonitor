@@ -48,7 +48,7 @@ def deamon(soc=-1):
       time.sleep(30)
       printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
     batdata = Readings()  # initialise batdata after we have valid sys time
-    alarms = Alarms() # initialise alarms
+    alarms = Alarms(batdata) # initialise alarms
 
     print (str(printtime))
     filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
@@ -133,7 +133,7 @@ def deamon(soc=-1):
               batdata.kWhout[i] = 0.0
             for i in range(numcells):
               batdata.baltime[i]=0
-  
+
 
           if logsummary.currenttime[3] != logsummary.prevtime[3]:  # new hour
             logsummary.starthour(summary)

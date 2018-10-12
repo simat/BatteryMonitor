@@ -17,7 +17,6 @@
 #!/usr/bin/python
 import sys
 from time import localtime
-import RPi.GPIO as gpio
 import serial
 import binascii
 from config import config
@@ -30,7 +29,7 @@ log.addHandler(logger.errfile)
 
 class Alarms:
   # Initialise and compile alarms
-  def __init__(self):
+  def __init__(self,batdata):
     self.alarmtriggered={}
     for i in config['alarms']:
       self.alarmtriggered[i]=False
