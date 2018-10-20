@@ -49,7 +49,7 @@ class Rawdat():
     """Scan ports to find PIP port"""
 
     self.pipport=""
-    for dev in glob.glob("/dev/ttyU*"):
+    for dev in glob.glob(config['Ports']['pipport']):
       for i in range(2):
         try:
           self.openpip(dev)
@@ -91,7 +91,7 @@ class Rawdat():
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
     self.port.write(command)
     reply = self.port.read(replylen)
-    if  self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
+    if self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise serial.serialutil.SerialException('CRC error in reply')
     return reply
 
@@ -162,12 +162,14 @@ class Rawdat():
         try:
           self.openpip(self.pipport)
           reply=self.sendcmd('QPIGS',110)
+#          print (reply)
           self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
           self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
           self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
           self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
           self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
           reply=self.sendcmd('Q1',74)
+#          print (reply)
     #      log.debug('close')
           self.rawdat['ChgStat']=reply[69:71]
           print  (self.rawdat['ChgStat'])

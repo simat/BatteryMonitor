@@ -35,7 +35,7 @@ class Bms:
     """Scan ports to find BMS port"""
 
     self.bmsport=""
-    for dev in glob.glob("/dev/ttyU*"):
+    for dev in glob.glob(config['Ports']['bmsport']):
       for i in range(2):
         try:
           self.openbms(dev)
