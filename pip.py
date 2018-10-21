@@ -36,7 +36,10 @@ class Rawdat():
     self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
     self.pipdown=0.0
     self.sn=sn
-    self.findpip()
+    try:
+      self.findpip()
+    except Exception:
+      self.pipdown=time.time() # flag pip is down
     self.stashok=False
     self.floatv=48.0
     self.bulkv=48.0
@@ -91,9 +94,9 @@ class Rawdat():
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
     self.port.write(command)
     reply = self.port.read(replylen)
+    return reply
     if self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise serial.serialutil.SerialException('CRC error in reply')
-    return reply
 
   def setparam(self,command):
     reply=self.sendcmd(command,7)
@@ -168,11 +171,13 @@ class Rawdat():
           self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
           self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
           self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
-          reply=self.sendcmd('Q1',74)
-#          print (reply)
+          try:
+            reply=self.sendcmd('Q1',74)
+          except serial.serialutil.SerialException:
+#            if reply[-2,-1]!=b'\r': # check for different length reply
+            reply=reply+self.port.read(17)
     #      log.debug('close')
           self.rawdat['ChgStat']=reply[69:71]
-          print  (self.rawdat['ChgStat'])
           self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=-self.rawdat['PVI']
