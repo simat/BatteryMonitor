@@ -104,6 +104,12 @@ class Rawdat():
     if reply[1:4]!=b'ACK':
       raise IOError('Bad Parameters')
 
+  def opensetparam(self,command):
+    """open port, send set parameter command to pip, close port"""
+    self.openpip(self.pipport)
+    self.setparam(command)
+    self.port.close
+
   def stashchargeparams(self):
     """Gets and stashes charging voltage settings from PIP"""
     if self.stashok==False:
