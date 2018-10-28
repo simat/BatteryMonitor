@@ -166,7 +166,7 @@ class Rawdat():
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
     if self.pipdown==0.0:
-      self.rawdat['DataValid']=False
+      self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
       for i in range(5):
         try:
           self.openpip(self.pipport)

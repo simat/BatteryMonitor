@@ -34,9 +34,9 @@ class Readings:
 
     exec("import " + interface)
     if sn==None:
-      exec(interface +'='+interface+'.Rawdat()')
+      exec(i +'='+interface+'.Rawdat()')
     else:
-      exec(interface +'='+interface+".Rawdat('"+str(sn[1:])+"')")
+      exec(i +'='+interface+".Rawdat('"+str(sn[1:])+"')")
 
   measured = config['calibrate']['measured']
   displayed = config['calibrate']['displayed']
@@ -61,6 +61,8 @@ class Readings:
   currentav = [ 0.0 for i in range(numiins)]
   kWhin = [ 0.0 for i in range(numiins)]
   kWhout = [ 0.0 for i in range(numiins)]
+  chargestates = [ b'00' for i in range(len(config['Status']))]
+
 #  rawcurrent = 0.0
 #  batcurrent = 0.0
 #  batcurrentav = 0.0
@@ -107,6 +109,11 @@ class Readings:
     for i in sorted(config['BalanceFlags']):
       self.balf = self.balf + [config['BalanceFlags'][i]]
 
+    self.chgstat = [] # balance flags
+    for i in sorted(config['Status']):
+      self.chgstat = self.chgstat + [config['Status'][i]]
+
+
     self.sampletime = time.time()
     self.getvi()
     self.batvoltsav = self.batvolts
@@ -125,6 +132,8 @@ class Readings:
     self.sampletime = time.time()
 # get data from Interfaces
     for i in config['Interfaces']:
+      dir ()
+      print (i)
       exec('self.'+i+".getdata()")
 #    print (sorted(self.vin))
 #    self.sortedvin=sorted(self.vin)
@@ -152,7 +161,8 @@ class Readings:
     for i in range(len(self.balf)): # get balance flags
       self.balflg[i] = eval(self.balf[i])
 
-    self.chargestate=eval(config['Status']['chargestate'])
+    for i in range(len(self.chgstat)): # get PIP charge states
+      self.chargestates[i]=eval(self.chgstat[i])
 
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""

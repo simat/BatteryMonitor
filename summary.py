@@ -104,14 +104,17 @@ class Summary:
     summary['current']['power'][3] = round(summary['current']['power'][0] - \
                                      summary['current']['power'][2] + \
                                      summary['current']['power'][1] ,6 )  # current to loads
-    if batdata.chargestate == b'10':
-      summary['current']['state'][0] ='No Sun'
-    elif batdata.chargestate == b'11':
-      summary['current']['state'][0] ='Bulk'
-    elif batdata.chargestate == b'12':
-      summary['current']['state'][0] ='Absorb'
-    elif batdata.chargestate == b'13':
-      summary['current']['state'][0] ='Float'
+    for i in range(len(batdata.chargestates)):
+      if batdata.chargestates[i] == b'00':
+        summary['current']['state'][i] ='Offline'
+      elif batdata.chargestates[i] == b'10':
+        summary['current']['state'][i] ='No Sun'
+      elif batdata.chargestates[i] == b'11':
+        summary['current']['state'][i] ='Bulk'
+      elif batdata.chargestates[i] == b'12':
+        summary['current']['state'][i] ='Absorb'
+      elif batdata.chargestates[i] == b'13':
+        summary['current']['state'][i] ='Float'
 
     vprint=''
     batdata.vcells=''

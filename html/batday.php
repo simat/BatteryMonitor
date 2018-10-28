@@ -286,7 +286,10 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <?php echo $capacity."%"; ?></p>
 <p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[count($amps)-3]."A"?></p>
 <p style="font-size:0.5em;line-height:0.0;"><?php echo "In ".$amps[count($amps)-2]."A Out ".$amps[count($amps)-1]."A"?></p>
-<p style="font-size:0.5em;line-height:0.0;"><?php echo "Charge State ".$state[0]?></p>
+<p style="font-size:0.5em;line-height:1.0em;"><?php foreach ($state as $value) {
+  echo "Charge State $value <br>";
+}
+?></p>
 <p><?php echo $dod[0]."Ah"?></p>
 <p><?php echo $batvolts[$numbercells]."V"?></p>
 <p><?php echo $deltav[0]."V"?></p>
