@@ -117,8 +117,8 @@ class Readings:
     self.sampletime = time.time()
     self.getvi()
     self.batvoltsav = self.batvolts
-    self.batcurrentav = self.current[0]
-    self.incurrentav = self.current[1]
+    self.batcurrentav = self.current[-3]
+    self.incurrentav = self.current[-2]
     for i in range(0,self.numiins):
       self.currentav[i] = self.current[i]
 #     (self.batvoltsav, self.current)
@@ -170,9 +170,9 @@ class Readings:
 #    print (self.batvolts)
     samplesav = config['sampling']['samplesav']
     self.deltatime=(self.sampletime-self.oldsampletime)/3600
-    self.batah = self.currentav[0]*self.deltatime
-    self.batahadj = (self.currentav[0]+config['battery']['ahloss'])*self.deltatime
-    self.inah = self.currentav[1]*self.deltatime
+    self.batah = self.currentav[-3]*self.deltatime
+    self.batahadj = (self.currentav[-3]+config['battery']['ahloss'])*self.deltatime
+    self.inah = self.currentav[-2]*self.deltatime
     self.pwrin = self.inah*self.batvoltsav[config['battery']['numcells']]/1000 # gross input power
     self.pwrbat = self.batah*self.batvoltsav[config['battery']['numcells']]/1000 # battery power in/out
 
