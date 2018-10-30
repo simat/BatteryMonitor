@@ -22,6 +22,7 @@ import binascii
 def getbmsdat(port,command):
   """ Issue BMS command and return data as byte data """
   """ assumes data port is open and configured """
+  print (command)
   port.write(command)
   reply = port.read(4)
 
@@ -31,12 +32,42 @@ def getbmsdat(port,command):
   data = port.read(x)
   end = port.read(3)
   print (data)
+  print (binascii.hexlify(data))
   return data
 
-def x(port):
+def getcmd():
+  """gets command from user"""
+  command=str(input("Enter Command>"))
+  return command
+
+def loop():
+  while True:
+    main()
+
+def main(port='/dev/ttyUSB0'):
+    ser = openbms(port)
+    command=bytes.fromhex(getcmd())
+    getbmsdat(ser,command)
+    ser.close
+
+def openbms(port='/dev/ttyUSB0'):
+    ser = serial.Serial(port)  # open serial port
+    ser.timeout = 3
+    return ser
+
+def switchfets(port='/dev/ttyUSB0'):
+  ser = openbms(port)
+  command = bytes.fromhex('DD 5A 00 02 56 78 FF 30 77')
+  getbmsdat(ser,command)
+  command = bytes.fromhex('DD 5A E1 02 00 00 FF 1D 77')
+  getbmsdat(ser,command)
+  command = bytes.fromhex('DD 5A 01 02 00 00 FF FD 77')
+  getbmsdat(ser,command)
+
+
+def getdat(port='/dev/ttyUSB0'):
   """ Get data from BMS board"""
-  ser = serial.Serial(port)  # open serial port
-  ser.timeout = 3
+  ser = openbms(port)
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
   dat = getbmsdat(ser,command)
   rawi = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
@@ -71,3 +102,16 @@ def x(port):
 #    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
   print (binascii.hexlify(dat))
 #  print (line1)
+
+if __name__ == "__main__":
+  """if run from command line, piptest [command] [port]
+  default port /dev/ttyUSB1, if no command ask user"""
+
+  print (sys.argv)
+  if len(sys.argv) == 2:
+    sendcmd(sys.argv[1])
+  else:
+    if len(sys.argv) == 3:
+      sendcmd(sys.argv[1],sys.argv[2])
+    else:
+      loop()
