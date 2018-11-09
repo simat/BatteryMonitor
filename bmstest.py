@@ -76,17 +76,17 @@ configcmd['?23']='dd a5 aa 00 ff 56 77'
 def getbmsdat(port,command):
   """ Issue BMS command and return data as byte data """
   """ assumes data port is open and configured """
-  print (command)
+#  print (command)
   port.write(command)
   reply = port.read(4)
 
-  print (reply)
+#  print (reply)
   x = int.from_bytes(reply[3:5], byteorder = 'big')
-  print (x)
+#  print (x)
   data = port.read(x)
   end = port.read(3)
-  print (data)
-  print (binascii.hexlify(data))
+#  print (data)
+#  print (binascii.hexlify(data))
   return data
 
 def getcmd():
@@ -126,16 +126,28 @@ def switchfets(port='/dev/ttyUSB0'):
 
 def getconfig(port='/dev/ttyUSB0'):
   """ Get config settings from BMS"""
+  configitem=str(input("Enter config item>"))
   ser = openbms(port)
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
-  getbmsdat(ser,command)
+  print (binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print (binascii.hexlify(data))
+  command = bytes.fromhex('DD A5 04 00 FF FC 77')
+  print (binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print (binascii.hexlify(data))
   command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
-  getbmsdat(ser,command)
-  for i in configcmd:
-    getbmsdat(ser,bytes.fromhex(configcmd[i]))
+  print (binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print (binascii.hexlify(data))
+#  for i in configcmd:
+  print (configcmd[configitem])
+  data=getbmsdat(ser,bytes.fromhex(configcmd[configitem]))
+  print (configitem,binascii.hexlify(data),int.from_bytes(data, byteorder = 'big'))
   command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
-  getbmsdat(ser,command)
-
+  print (binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print (binascii.hexlify(data))
 
 def getdat(port='/dev/ttyUSB0'):
   """ Get data from BMS board"""
