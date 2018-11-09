@@ -127,6 +127,8 @@ def switchfets(port='/dev/ttyUSB0'):
 def getconfig(port='/dev/ttyUSB0'):
   """ Get config settings from BMS"""
   ser = openbms(port)
+  command = bytes.fromhex('DD A5 03 00 FF FD 77')
+  getbmsdat(ser,command)
   command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
   getbmsdat(ser,command)
   for i in configcmd:
