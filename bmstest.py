@@ -22,7 +22,7 @@ import binascii
 configcmd={}
 configcmd['FullCap']='10 00'
 configcmd['CycleCap']='11 00'
-configcmd['?1']='12 00
+configcmd['?1']='12 00'
 configcmd['RateDsg']='13 00'
 configcmd['?2']='14 00'
 configcmd['?3']='15 00'
