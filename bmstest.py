@@ -130,7 +130,7 @@ def getconfig(port='/dev/ttyUSB0'):
   command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
   getbmsdat(ser,command)
   for i in configcmd:
-    getbmsdat(ser,configcmd[i])
+    getbmsdat(ser,bytes.fromhex(configcmd[i]))
   command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
   getbmsdat(ser,command)
 
