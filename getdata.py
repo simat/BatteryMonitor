@@ -33,6 +33,7 @@ class Readings:
       sn=sn.group()
 
     exec("import " + interface)
+    print (i)
     if sn==None:
       exec(i +'='+interface+'.Rawdat()')
     else:
@@ -132,7 +133,6 @@ class Readings:
     self.sampletime = time.time()
 # get data from Interfaces
     for i in config['Interfaces']:
-      dir ()
       print (i)
       exec('self.'+i+".getdata()")
 #    print (sorted(self.vin))
