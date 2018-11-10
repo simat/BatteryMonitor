@@ -69,9 +69,9 @@ configcmd['?18']=b'\x3d'
 configcmd['?19']=b'\x3e'
 configcmd['?20']=b'\x3f'
 configcmd['?21']=b'\x3f'
-configcmd['?22']=b'\xa0'
-configcmd['SN']=b'\xa1'
-configcmd['Model']=b'\xa2'
+configcmd['?SN']=b'\xa0'
+configcmd['Model']=b'\xa1'
+configcmd['?22']=b'\xa2'
 configcmd['?23']=b'\xaa'
 
 def getbmsdat(port,command):
