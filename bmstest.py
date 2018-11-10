@@ -19,20 +19,75 @@ import serial
 import binascii
 
 
+configcmd={}
+configcmd['FullCap']=b'\x10'
+configcmd['CycleCap']=b'\x11'
+configcmd['?1']=b'\x12'
+configcmd['?2']=b'\x13'
+configcmd['RateDsg']=b'\x14'
+configcmd['?2']=b'\x15'
+configcmd['?3']=b'\x16'
+configcmd['?4']=b'\x17'
+configcmd['ChgOTPtrig']=b'\x18'
+configcmd['ChgOTPrel']=b'\x19'
+configcmd['ChgUTPtrig']=b'\x1a'
+configcmd['ChgUTPrelease']=b'\x1b'
+configcmd['DsgOTPtrig']=b'\x1c'
+configcmd['DsgOTPrelease']=b'\x1d'
+configcmd['DsgUTPtrig']=b'\x1e'
+configcmd['DsgUTPrelease']=b'\x1f'
+configcmd['PackOVPtrig']=b'\x20'
+configcmd['PackOVPrelease']=b'\x21'
+configcmd['PackUVPtrigger']=b'\x22'
+configcmd['PackUVPrelease']=b'\x23'
+configcmd['CellOVPtrigger']=b'\x24'
+configcmd['CellOVPrelease']=b'\x25'
+configcmd['CellUVPtrigger']=b'\x26'
+configcmd['CellUVPrelease']=b'\x27'
+configcmd['ChgOCP']=b'\x28'
+configcmd['DsgOCP']=b'\x29'
+configcmd['?5']=b'\x2a'
+configcmd['?6']=b'\x2b'
+configcmd['?7']=b'\x2c'
+configcmd['?8']=b'\x2d'
+configcmd['?9']=b'\x2e'
+configcmd['?10']=b'\x2f'
+configcmd['?11']=b'\x30'
+configcmd['?12']=b'\x31'
+configcmd['80%Cap']=b'\x32'
+configcmd['60%Cap']=b'\x33'
+configcmd['40%Cap']=b'\x34'
+configcmd['20%Cap']=b'\x35'
+configcmd['HardCellOVP']=b'\x36'
+configcmd['HardCellUVP']=b'\x37'
+configcmd['?13']=b'\x38'
+configcmd['?14']=b'\x39'
+configcmd['?15']=b'\x3a'
+configcmd['?16']=b'\x3b'
+configcmd['?17']=b'\x3c'
+configcmd['?18']=b'\x3d'
+configcmd['?19']=b'\x3e'
+configcmd['?20']=b'\x3f'
+configcmd['?21']=b'\x3f'
+configcmd['SN']=b'\xa0'
+configcmd['Model']=b'\xa1'
+configcmd['?22']=b'\xa2'
+configcmd['?23']=b'\xaa'
+
 def getbmsdat(port,command):
   """ Issue BMS command and return data as byte data """
   """ assumes data port is open and configured """
-  print (command)
+#  print (command)
   port.write(command)
   reply = port.read(4)
 
-  print (reply)
+#  print (reply)
   x = int.from_bytes(reply[3:5], byteorder = 'big')
-  print (x)
+#  print (x)
   data = port.read(x)
   end = port.read(3)
-  print (data)
-  print (binascii.hexlify(data))
+#  print (data)
+#  print (binascii.hexlify(data))
   return data
 
 def getcmd():
@@ -56,14 +111,57 @@ def openbms(port='/dev/ttyUSB0'):
     return ser
 
 def switchfets(port='/dev/ttyUSB0'):
+  """ switch charge and discharge fets """
+  print ('(0)=Both FETs off')
+  print ('(1)=Charge FET on, Discharge FET off')
+  print ('(2)=Charge FET off, Discharge FET on')
+  print ('(3)=Both FETs on')
+  usercmd = input("Enter numeric option> ")
   ser = openbms(port)
   command = bytes.fromhex('DD 5A 00 02 56 78 FF 30 77')
   getbmsdat(ser,command)
-  command = bytes.fromhex('DD 5A E1 02 00 00 FF 1D 77')
+  command = bytes.fromhex('DD 5A E1 02 00'+' 0'+usercmd+' 00 FF 1D 77')
   getbmsdat(ser,command)
   command = bytes.fromhex('DD 5A 01 02 00 00 FF FD 77')
   getbmsdat(ser,command)
 
+def getconfig(port='/dev/ttyUSB0'):
+  """ Get config settings from BMS"""
+  configitem=input("Enter config item>")
+  configitem=configcmd[configitem]
+#  print ('register=',configitem)
+  rw=input("r or w>")
+  if rw=='w':
+    rw=b'\x5a'
+    configdata=int(input('Enter data>'))
+    configitem=configitem+b'\x02'+configdata.to_bytes(2, byteorder='big')
+#    print ('value=',configdata,configitem)
+  else:
+    rw=b'\xa5'
+    configitem=configitem+b'\x00'
+  ser = openbms(port)
+  command = bytes.fromhex('DD A5 03 00 FF FD 77')
+  print ('command=',binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
+  command = bytes.fromhex('DD A5 04 00 FF FC 77')
+  print ('command=',binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
+  command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
+  print ('command=',binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
+#  for i in configcmd:
+#  print('rw=',rw,'command=',configitem)
+  packet=b'\xDD'+rw+configitem+crccalc(configitem).to_bytes(2, byteorder='big')+b'\x77'
+  print ('register command=',binascii.hexlify(packet))
+  data=getbmsdat(ser,packet)
+  print ('register reply=',binascii.hexlify(data),int.from_bytes(data, byteorder = 'big'))
+  command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
+  print ('command=',binascii.hexlify(command))
+  data=getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
 
 def getdat(port='/dev/ttyUSB0'):
   """ Get data from BMS board"""
@@ -102,6 +200,13 @@ def getdat(port='/dev/ttyUSB0'):
 #    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
   print (binascii.hexlify(dat))
 #  print (line1)
+
+def crccalc(data):
+  """returns crc as integer from byte stream"""
+  crc=0x10000
+  for i in data:
+    crc=crc-int(i)
+  return crc
 
 if __name__ == "__main__":
   """if run from command line, piptest [command] [port]
