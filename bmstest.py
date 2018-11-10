@@ -20,58 +20,58 @@ import binascii
 
 
 configcmd={}
-configcmd['FullCap']='10 00'
-configcmd['CycleCap']='11 00'
-configcmd['?1']='12 00'
-configcmd['RateDsg']='13 00'
-configcmd['?2']='14 00'
-configcmd['?3']='15 00'
-configcmd['?4']='16 00'
-configcmd['ChgOTPtrig']='17 00'
-configcmd['ChgOTPrel']='18 00'
-configcmd['ChgUTPtrig']='19 00'
-configcmd['ChgUTPrelease']='1a 00'
-configcmd['DsgOTPtrig']='1b 00'
-configcmd['DsgOTPrelease']='1c 00'
-configcmd['DsgUTPtrig']='1d 00'
-configcmd['DsgUTPrelease']='1e 00'
-configcmd['PackOVPtrig']='1f 00'
-configcmd['PackOVPrelease']='20 00'
-configcmd['PackUVPtrigger']='21 00'
-configcmd['PackUVPrelease']='22 00'
-configcmd['CellOVPtrigger']='23 00'
-configcmd['CellOVPrelease']='24 00'
-configcmd['CellUVPtrigger']='25 00'
-configcmd['CellUVPrelease']='26 00'
-configcmd['ChgOCP']='27 00'
-configcmd['DsgOCP']='28 00'
-configcmd['?5']='29 00'
-configcmd['?6']='2a 00'
-configcmd['?7']='2b 00'
-configcmd['?8']='2c 00'
-configcmd['?9']='2d 00'
-configcmd['?10']='2e 00'
-configcmd['?11']='2f 00'
-configcmd['?12']='30 00'
-configcmd['80%Cap']='31 00'
-configcmd['60%Cap']='32 00'
-configcmd['40%Cap']='33 00'
-configcmd['20%Cap']='34 00'
-configcmd['HardCellOVP']='35 00'
-configcmd['HardCellUVP']='36 00'
-configcmd['?13']='37 00'
-configcmd['?14']='38 00'
-configcmd['?15']='39 00'
-configcmd['?16']='3a 00'
-configcmd['?17']='3b 00'
-configcmd['?18']='3c 00'
-configcmd['?19']='3d 00'
-configcmd['?20']='3e 00'
-configcmd['?21']='3f 00'
-configcmd['?22']='a0 00'
-configcmd['SN']='a1 00'
-configcmd['Model']='a2 00'
-configcmd['?23']='aa 00'
+configcmd['FullCap']=b'\x10'
+configcmd['CycleCap']=b'\x11'
+configcmd['?1']=b'\x12'
+configcmd['RateDsg']=b'\x13'
+configcmd['?2']=b'\x14'
+configcmd['?3']=b'\x15'
+configcmd['?4']=b'\x16'
+configcmd['ChgOTPtrig']=b'\x17'
+configcmd['ChgOTPrel']=b'\x18'
+configcmd['ChgUTPtrig']=b'\x19'
+configcmd['ChgUTPrelease']=b'\x1a'
+configcmd['DsgOTPtrig']=b'\x1b'
+configcmd['DsgOTPrelease']=b'\x1c'
+configcmd['DsgUTPtrig']=b'\x1d'
+configcmd['DsgUTPrelease']=b'\x1e'
+configcmd['PackOVPtrig']=b'\x1f'
+configcmd['PackOVPrelease']=b'\x20'
+configcmd['PackUVPtrigger']=b'\x21'
+configcmd['PackUVPrelease']=b'\x22'
+configcmd['CellOVPtrigger']=b'\x23'
+configcmd['CellOVPrelease']=b'\x24'
+configcmd['CellUVPtrigger']=b'\x25'
+configcmd['CellUVPrelease']=b'\x26'
+configcmd['ChgOCP']=b'\x27'
+configcmd['DsgOCP']=b'\x28'
+configcmd['?5']=b'\x29'
+configcmd['?6']=b'\x2a'
+configcmd['?7']=b'\x2b'
+configcmd['?8']=b'\x2c'
+configcmd['?9']=b'\x2d'
+configcmd['?10']=b'\x2e'
+configcmd['?11']=b'\x2f'
+configcmd['?12']=b'\x30'
+configcmd['80%Cap']=b'\x31'
+configcmd['60%Cap']=b'\x32'
+configcmd['40%Cap']=b'\x33'
+configcmd['20%Cap']=b'\x34'
+configcmd['HardCellOVP']=b'\x35'
+configcmd['HardCellUVP']=b'\x36'
+configcmd['?13']=b'\x37'
+configcmd['?14']=b'\x38'
+configcmd['?15']=b'\x39'
+configcmd['?16']=b'\x3a'
+configcmd['?17']=b'\x3b'
+configcmd['?18']=b'\x3c'
+configcmd['?19']=b'\x3d'
+configcmd['?20']=b'\x3e'
+configcmd['?21']=b'\x3f'
+configcmd['?22']=b'\xa0'
+configcmd['SN']=b'\xa1'
+configcmd['Model']=b'\xa2'
+configcmd['?23']=b'\xaa'
 
 def getbmsdat(port,command):
   """ Issue BMS command and return data as byte data """
@@ -127,36 +127,40 @@ def switchfets(port='/dev/ttyUSB0'):
 def getconfig(port='/dev/ttyUSB0'):
   """ Get config settings from BMS"""
   configitem=input("Enter config item>")
-  configitem=bytes.fromhex(configcmd[configitem])
-  r/w=input("r or w>")
-  if r/w='w':
-    r/w=b'\x5a'
-    configdata=('Enter data>')
-    configitem=configitem+configdata.to_bytes(2, byteorder='big')
+  configitem=configcmd[configitem]
+#  print ('register=',configitem)
+  rw=input("r or w>")
+  if rw=='w':
+    rw=b'\x5a'
+    configdata=int(input('Enter data>'))
+    configitem=configitem+b'\x02'+configdata.to_bytes(2, byteorder='big')
+#    print ('value=',configdata,configitem)
   else:
-    r/w=b'\xa5'
+    rw=b'\xa5'
+    configitem=configitem+b'\x00'
   ser = openbms(port)
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
-  print (binascii.hexlify(command))
+  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print (binascii.hexlify(data))
+  print ('reply=',binascii.hexlify(data))
   command = bytes.fromhex('DD A5 04 00 FF FC 77')
-  print (binascii.hexlify(command))
+  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print (binascii.hexlify(data))
+  print ('reply=',binascii.hexlify(data))
   command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
-  print (binascii.hexlify(command))
+  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print (binascii.hexlify(data))
+  print ('reply=',binascii.hexlify(data))
 #  for i in configcmd:
-  print (configcmd[configitem])
-  packet=b'\xDD'+r/w+configitem+crc.to_bytes(2, byteorder='big')+b'\x77'
+#  print('rw=',rw,'command=',configitem)
+  packet=b'\xDD'+rw+configitem+crccalc(configitem).to_bytes(2, byteorder='big')+b'\x77'
+  print ('register command=',binascii.hexlify(packet))
   data=getbmsdat(ser,packet)
-  print (configitem,binascii.hexlify(data),int.from_bytes(data, byteorder = 'big'))
+  print ('register reply=',binascii.hexlify(data),int.from_bytes(data, byteorder = 'big'))
   command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
-  print (binascii.hexlify(command))
+  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print (binascii.hexlify(data))
+  print ('reply=',binascii.hexlify(data))
 
 def getdat(port='/dev/ttyUSB0'):
   """ Get data from BMS board"""
@@ -196,7 +200,7 @@ def getdat(port='/dev/ttyUSB0'):
   print (binascii.hexlify(dat))
 #  print (line1)
 
-def crccalc(self,data):
+def crccalc(data):
   """returns crc as integer from byte stream"""
   crc=0x10000
   for i in data:
