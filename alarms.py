@@ -1,4 +1,4 @@
-# *****BatteryMonitor main file batteries.py*****
+{{# *****BatteryMonitor main file batteries.py*****
 # Copyright (C) 2014 Simon Richard Matthews
 # Project loaction https://github.com/simat/BatteryMonitor
 # This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,8 @@ from config import config
 
 import logger
 log = logger.logging.getLogger(__name__)
-log.setLevel(logger.logging.DEBUG)
-log.addHandler(logger.errfile)
+log.setLevel(logger.logging.INFO)
+log.addHandler(logger.alarmfile)
 
 
 class Alarms:
@@ -48,13 +48,13 @@ class Alarms:
   #      log.debug('{}{}{}'.format(self.test,batdata.maxcellv,batdata.lastmaxcellv))
         if self.test:
     #            sys.stderr.write('Alarm 1 triggered')
-          log.debug('alarm triggered')
+          log.info('alarm {} triggered'.format(i))
           self.alarmtriggered[i]=True
           exec(config['alarms'][i][2])
 
       if self.alarmtriggered[i]:
         exec(config['alarms'][i][3])
         if self.test:
-          log.debug('alarm reset')
+          log.info('alarm {} reset'.format(i))
           self.alarmtriggered[i]=False
           exec(config['alarms'][i][4])

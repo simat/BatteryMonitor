@@ -1,5 +1,5 @@
 # *****Logging Module logger.py*****
-# Copyright (C) 2014 Simon Richard Matthews
+# Copyright (C) 2014-2018 Simon Richard Matthews
 # Project loaction https://github.com/simat/BatteryMonitor
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,14 +22,16 @@ from config import loadconfig, config
 
 errfile=logging.FileHandler(config['files']['errfile'])
 errfile.setLevel(logging.DEBUG)
-
+alarmfile=logging.FileHandler(config['files']['alarmfile'])
 logfile=logging.FileHandler(config['files']['logfile'])
 
 
 # create formatter
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+alarmformat = logging.Forrmatter('%(asctime)s - %(message)s')
 logformat = logging.Formatter('%(message)s')
 # add formatter to ch
 errfile.setFormatter(formatter)
+alarmfile.setFormatter(alarmformat)
 logfile.setFormatter(logformat)
 # add ch to logger
