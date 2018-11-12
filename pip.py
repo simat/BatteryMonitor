@@ -27,13 +27,16 @@ log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
+initrawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':b'00'}
+
+
 class Rawdat():
   """class for obtaining data from and controlling indidvdual PIP inverters.
   When class is instantiated the SN of the PIP is used to tie the instance of
   the class to the particular machine"""
 
   def __init__(self,sn):
-    self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
+    self.rawdat = initrawdat
     self.pipdown=0.0
     self.sn=sn
     try:
@@ -166,7 +169,7 @@ class Rawdat():
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
     if self.pipdown==0.0:
-      self.rawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':00}
+      self.rawdat = initrawdat
       for i in range(5):
         try:
           self.openpip(self.pipport)
