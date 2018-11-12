@@ -1,4 +1,4 @@
-{{# *****BatteryMonitor main file batteries.py*****
+# *****BatteryMonitor main file batteries.py*****
 # Copyright (C) 2014 Simon Richard Matthews
 # Project loaction https://github.com/simat/BatteryMonitor
 # This program is free software; you can redistribute it and/or modify
