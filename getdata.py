@@ -121,8 +121,7 @@ class Readings:
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.current[-3]
     self.incurrentav = self.current[-2]
-    print(self.batvoltsav,seff.batcurrentav)
-    self.batpwr1hrav = self.batvoltsav*self.batcurrentav
+    self.batpwr1hrav = self.batvoltsav[-1]*self.batcurrentav/1000
     for i in range(0,self.numiins):
       self.currentav[i] = self.current[i]
 #     (self.batvoltsav, self.current)

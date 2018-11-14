@@ -4,7 +4,7 @@
 
 <?php
 //Replace location of battery config file with the location on your system
-$config = file_get_contents("/home/pi/BatteryMonitor/battery.cfg");
+$config = file_get_contents("/home/simat/BatteryMonitor/battery.cfg");
 //error handler function
 function customError($errno, $errstr) {
   echo "<b>Error:</b> [$errno] $errstr";
@@ -48,7 +48,7 @@ set_error_handler("customError");
     margin-top:-0.9em;
     margin-bottom:0em;
     width:220px;
-    height:300px;
+    height:330px;
     float:left;
     padding:10px;
     font-size:2.5em;
@@ -150,7 +150,6 @@ $amps = getdat("ioutmax");
 $dod = getdat("dod");
 $temp = getdat("tmax");
 $state = getdat("state");
-$batpwr1hrav = getdat("batpwr1hrav")
 $capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
 if  ($capacity > "75") {
    $capcolour="green";
@@ -168,6 +167,8 @@ $dayminnoloadv = getdat("minnoload");
 $dayminloadv = getdat("minvoltages");
 $dayah = getdat("ah");
 $power = getdat("power");
+$batpwr1hrav = getdat("batpwr1hrav");
+echo ($batpwr1hrav);
 
 $numbercells = count($batvolts)-1;
 $batwidth = $numbercells*38;
@@ -286,9 +287,9 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <p style="text-align:center;font-size:2.0em;line-height:0.0em;color:<?php echo $capcolour?>">
 <?php echo $capacity."%"; ?></p>
 <p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[count($amps)-3]."A"?></p>
-<p style="font-size:0.5em;line-height:0.0;"><?php echo "In ".$amps[count($amps)-2]."A Out ".$amps[count($amps)-1]."A"?></p>
-<p style="font-size:0.5em;line-height:0.0;"><?php echo "1Hr Battery Power Av ".$1hrbatpwrav."kW"?></p>
-<p style="font-size:0.5em;line-height:1.0em;"><?php foreach ($state as $value) {
+<p style="font-size:0.5em;line-height:0.0em;"><?php echo "In ".$amps[count($amps)-2]."A Out ".$amps[count($amps)-1]."A"?></p>
+<p style="font-size:0.5em;line-height:0.0em;"><?php echo "1Hr Bat Power ".$batpwr1hrav[0]."kW"?></p>
+<p style="font-size:0.5em;line-height:0.0em;"><?php foreach ($state as $value) {
   echo "Charge State $value <br>";
 }
 ?></p>
