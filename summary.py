@@ -104,7 +104,7 @@ class Summary:
     summary['current']['power'][3] = round(summary['current']['power'][0] - \
                                      summary['current']['power'][2] + \
                                      summary['current']['power'][1] ,6 )  # current to loads
-    summary['current']['batpwr1hrav']=round(batdata.batpwr1hrav,3)
+    summary['current']['batpwr1hrav'][0]=round(batdata.batpwr1hrav,3)
     for i in range(len(batdata.chargestates)):
       if batdata.chargestates[i] == b'00':
         summary['current']['state'][i] ='Offline'
