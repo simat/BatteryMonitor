@@ -91,6 +91,7 @@ class Readings:
   vcells=""
   soctxt=""
   socadjtxt=""
+  sampleshr=3600/config['sampling']['sampletime'] # numder of sample / hour
 
   def __init__(self):
     self.vin = []
@@ -114,8 +115,7 @@ class Readings:
     for i in sorted(config['Status']):
       self.chgstat = self.chgstat + [config['Status'][i]]
 
-
-    self.sampletime = time.time()
+      self.sampletime = time.time()
     self.getvi()
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.current[-3]
@@ -173,8 +173,11 @@ class Readings:
     self.batah = self.currentav[-3]*self.deltatime
     self.batahadj = (self.currentav[-3]+config['battery']['ahloss'])*self.deltatime
     self.inah = self.currentav[-2]*self.deltatime
-    self.pwrin = self.inah*self.batvoltsav[config['battery']['numcells']]/1000 # gross input power
-    self.pwrbat = self.batah*self.batvoltsav[config['battery']['numcells']]/1000 # battery power in/out
+    batvoltsav = self.batvoltsav[config['battery']['numcells']]
+    self.pwrin = self.inah*batvoltsav/1000 # gross input power
+    self.pwrbat = self.batah*batvoltsav/1000 # battery power in/out
+    self.batpwr1hrav = self.batpwr1hrav \
+                    +(self.currentav[-3]*batvoltsav/1000-self.batpwr1hrav)/self.sampleshr # caculate battery power 1hr running av in kW
 
     for i in range(0,self.numiins):
       self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
