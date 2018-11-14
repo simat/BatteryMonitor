@@ -92,7 +92,8 @@ class Readings:
   soctxt=""
   socadjtxt=""
   sampleshr=3600/config['sampling']['sampletime'] # numder of sample / hour
-
+  batpwr1hrav = 0.0
+  
   def __init__(self):
     self.vin = []
     for i in sorted(config['VoltageInputs']):
@@ -120,6 +121,7 @@ class Readings:
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.current[-3]
     self.incurrentav = self.current[-2]
+    self.batpwr1hrav = self.batvoltsav*self.batcurrentav
     for i in range(0,self.numiins):
       self.currentav[i] = self.current[i]
 #     (self.batvoltsav, self.current)
