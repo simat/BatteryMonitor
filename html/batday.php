@@ -150,6 +150,7 @@ $amps = getdat("ioutmax");
 $dod = getdat("dod");
 $temp = getdat("tmax");
 $state = getdat("state");
+$batpwr1hrav = getdat("batpwr1hrav");
 $capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
 if  ($capacity > "75") {
    $capcolour="green";
@@ -167,8 +168,6 @@ $dayminnoloadv = getdat("minnoload");
 $dayminloadv = getdat("minvoltages");
 $dayah = getdat("ah");
 $power = getdat("power");
-$batpwr1hrav = getdat("batpwr1hrav");
-echo ($batpwr1hrav);
 
 $numbercells = count($batvolts)-1;
 $batwidth = $numbercells*38;
