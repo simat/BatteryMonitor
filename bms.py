@@ -77,7 +77,7 @@ class Bms:
 
   def sendbms(self,port,packet):
     """Send complete command string with crc to BMS"""
-
+    self.port.flushInput()
     self.port.write(packet)
     reply = self.port.read(4)
 #        raise serial.serialutil.SerialException('hithere')

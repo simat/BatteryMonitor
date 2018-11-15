@@ -37,6 +37,7 @@ class Rawdat():
 
   def __init__(self,sn):
     self.rawdat = initrawdat
+    self.reply ='' # placeholder for reply from sendcmd
     self.pipdown=0.0
     self.sn=sn
     try:
@@ -59,8 +60,8 @@ class Rawdat():
       for i in range(2):
         try:
           self.openpip(dev)
-          reply=self.sendcmd("QID",18)
-          if reply[1:15].decode('ascii','strict')==self.sn:
+          self.sendcmd("QID",18)
+          if self.reply[1:15].decode('ascii','strict')==str(self.sn):
             self.pipport=dev
             break
         except serial.serialutil.SerialException:
@@ -95,16 +96,23 @@ class Rawdat():
     command=command.encode('ascii','strict')
     crc=self.crccalc(command)
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
+#    self.port.reset_input_buffer()
+    self.port.flushInput()
     self.port.write(command)
-    reply = self.port.read(replylen)
-    return reply
-    if self.crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
-      raise serial.serialutil.SerialException('CRC error in reply')
+    self.reply = self.port.read(replylen)
+    if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
+      raise IOError('CRC error in reply')
+
+  def sendQ1(self):  #special to send Q1 command due to variable length reply
+    try:
+      self.sendcmd('Q1',74)
+    except IOError:
+      if self.reply[-2:-1]!=b'\r': # check for different length self.reply
+        self.reply=self.reply+self.port.read(17)
 
   def setparam(self,command):
-    reply=self.sendcmd(command,7)
-    print (command,reply)
-    if reply[1:4]!=b'ACK':
+    self.sendcmd(command,7)
+    if self.reply[1:4]!=b'ACK':
       raise IOError('Bad Parameters')
 
   def opensetparam(self,command):
@@ -113,10 +121,57 @@ class Rawdat():
     self.setparam(command)
     self.port.close
 
-  def stashchargeparams(self):
-    """Gets and stashes charging voltage settings from PIP"""
-    if self.stashok==False:
-      self.stashok=True
+  def getdata(self):
+    """returns dictionary with data from Pip4048"""
+#    log.debug('open')
+    if self.pipdown==0.0:
+      self.rawdat = initrawdat
+      for i in range(5):
+        try:
+          self.openpip(self.pipport)
+          self.sendcmd('QPIGS',110)
+          self.rawdat['BInI']=float(self.reply[47:50].decode('ascii','strict'))
+          self.rawdat['BOutI']=float(self.reply[77:82].decode('ascii','strict'))
+          self.rawdat['PVI']=float(self.reply[60:64].decode('ascii','strict'))
+          self.rawdat['BV']=float(self.reply[41:46].decode('ascii','strict'))
+          self.rawdat['ACW']=float(self.reply[28:32].decode('ascii','strict'))
+          self.sendQ1()
+          self.rawdat['ChgStat']=self.reply[69:71]
+          self.rawdat['PVW']=float(self.reply[53:56].decode('ascii','strict'))
+          self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
+          self.rawdat['ipv']=-self.rawdat['PVI']
+          self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
+          self.rawdat['DataValid']=True
+          break
+        except ValueError as err:
+          log.error('PIP bad response{}'.format(self.reply))
+          time.sleep(0.5)
+          if i==4:
+            self.pipdown=time.time() # flag pip is down
+            log.error("PIP sn {} interface down".format(self.sn))
+        except Exception as err:
+          log.error('PIP interface error {}'.format(err))
+          time.sleep(0.5)
+          if i==4:
+            self.pipdown=time.time() # flag pip is down
+            log.error("PIP sn {} interface down".format(self.sn))
+        finally:
+          self.port.close()
+    else:
+      downtime=time.time()-self.pipdown
+      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
+        try:
+          self.findpip()
+        except:
+          pass
+#          if downtime>3600: # upgrade error if more than one hour
+#            raise
+        else:
+          self.pipdown=0.0
+          def stashchargeparams(self):
+            """Gets and stashes charging voltage settings from PIP"""
+            if self.stashok==False:
+              self.stashok=True
 
   def setblkflt(self,bulkv,floatv):
     if bulkv < self.floatv:
@@ -133,11 +188,11 @@ class Rawdat():
     """Sets PIP charge and discharge limit voltage and stashes old settings
        Only sets non zero voltages """
     self.stashok=False
-    reply=self.sendcmd('QPIRI',102)
-    self.floatv=reply[58:62].decode('ascii','strict')
-    self.bulkv=reply[53:57].decode('ascii','strict')
-    self.rechargev=reply[43:47].decode('ascii','strict')
-    self.lowv=reply[48:52].decode('ascii','strict')
+    self.sendcmd('QPIRI',102)
+    self.floatv=self.reply[58:62].decode('ascii','strict')
+    self.bulkv=self.reply[53:57].decode('ascii','strict')
+    self.rechargev=self.reply[43:47].decode('ascii','strict')
+    self.lowv=self.reply[48:52].decode('ascii','strict')
     for i in range(5):
       try:
         self.openpip(self.pipport)
@@ -164,57 +219,3 @@ class Rawdat():
     if lowv:
       lowv=self.lowv
     self.setchargevs(bulkv,floatv,lowv)
-
-  def getdata(self):
-    """returns dictionary with data from Pip4048"""
-#    log.debug('open')
-    if self.pipdown==0.0:
-      self.rawdat = initrawdat
-      for i in range(5):
-        try:
-          self.openpip(self.pipport)
-          reply=self.sendcmd('QPIGS',110)
-#          print (reply)
-          self.rawdat['BInI']=float(reply[47:50].decode('ascii','strict'))
-          self.rawdat['BOutI']=float(reply[77:82].decode('ascii','strict'))
-          self.rawdat['PVI']=float(reply[60:64].decode('ascii','strict'))
-          self.rawdat['BV']=float(reply[41:46].decode('ascii','strict'))
-          self.rawdat['ACW']=float(reply[28:32].decode('ascii','strict'))
-          try:
-            reply=self.sendcmd('Q1',74)
-          except serial.serialutil.SerialException:
-#            if reply[-2,-1]!=b'\r': # check for different length reply
-            reply=reply+self.port.read(17)
-    #      log.debug('close')
-          self.rawdat['ChgStat']=reply[69:71]
-          self.rawdat['PVW']=float(reply[53:56].decode('ascii','strict'))
-          self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
-          self.rawdat['ipv']=-self.rawdat['PVI']
-          self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
-          self.rawdat['DataValid']=True
-          break
-        except ValueError as err:
-          log.error('PIP bad response{}'.format(reply))
-          time.sleep(0.5)
-          if i==4:
-            self.pipdown=time.time() # flag pip is down
-            log.error("PIP sn {} interface down".format(self.sn))
-        except Exception as err:
-          log.error('PIP interface error {}'.format(err))
-          time.sleep(0.5)
-          if i==4:
-            self.pipdown=time.time() # flag pip is down
-            log.error("PIP sn {} interface down".format(self.sn))
-        finally:
-          self.port.close()
-    else:
-      downtime=time.time()-self.pipdown
-      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
-        try:
-          self.findpip()
-        except:
-          pass
-#          if downtime>3600: # upgrade error if more than one hour
-#            raise
-        else:
-          self.pipdown=0.0
