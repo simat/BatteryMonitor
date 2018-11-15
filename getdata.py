@@ -21,80 +21,79 @@ from config import config
 numcells = config['battery']['numcells']
 import time
 #from x import Raw
-
 class Readings:
   """ get and manipulates readings from the real world"""
 
-  for i in config['Interfaces']:
-    interface=re.match(r'\w*',config['Interfaces'][i]).group()
-    snstring=re.compile(r'[(].*[^)]')
-    sn=snstring.search(config['Interfaces'][i])
-    if sn!=None:
-      sn=sn.group()
-
-    exec("import " + interface)
-    print (i)
-    if sn==None:
-      exec(i +'='+interface+'.Rawdat()')
-    else:
-      exec(i +'='+interface+".Rawdat('"+str(sn[1:])+"')")
-
-  measured = config['calibrate']['measured']
-  displayed = config['calibrate']['displayed']
-
-  ratio = [ 1.0 for i in range(numcells+1)]
-  for i in range(1, numcells+1):
-    ratio[i] = measured[i]/displayed[i]
-  calvolts = [ 0.0 for i in range(numcells+1)]
-
-#  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
-  deltav = [ 3.25 for i in range(numcells+1)]
-  deltav[0] = 0.0
-  rawvolts = [ 0.0 for i in range(numcells+1)]
-  batvolts = [ i*3.25 for i in range(numcells+1)]
-  uncalvolts = [ i*3.25 for i in range(numcells+1)]
-  batvoltsav = [ i*3.25 for i in range(numcells+1)]
-  balflg = [ 0.0 for i in range(numcells)]
-  baltime = [ 0.0 for i in range(numcells)]
-  temp = [ 0.0 for i in range(len(config['TemperatureInputs']))]
-  numiins = len(config['CurrentInputs'])
-  current = [ 0.0 for i in range(numiins)]
-  currentav = [ 0.0 for i in range(numiins)]
-  kWhin = [ 0.0 for i in range(numiins)]
-  kWhout = [ 0.0 for i in range(numiins)]
-  chargestates = [ b'00' for i in range(len(config['Status']))]
-
-#  rawcurrent = 0.0
-#  batcurrent = 0.0
-#  batcurrentav = 0.0
-#  rawincurrent = 0.0
-#  incurrent = 0.0
-#  incurrentav = 0.0
-  soc = 0.0
-  socadj = 0.0
-  batah = 0.0
-  batahadj = 0.0
-  inah = 0.0
-  inahtot = 0.0
-  ah = 0.0
-
-  mincellv=100.0
-  maxcellv=0.0
-  lastmaxv = 0.0 # previous sample maximum cell voltage
-  lastminv = 100.0 # previous sample minimum cell voltage
-  pwrbat = 0.0 # battery power units kW
-  pwrbattot = 0.0  # total battery power units kWh
-  pwrin = 0.0  # gross power in units kW
-  pwrintot = 0.0 # total gross power in units kWh
-  iall=""
-  vdelta=""
-  vcells=""
-  soctxt=""
-  socadjtxt=""
-  sampleshr=3600/config['sampling']['sampletime'] # numder of sample / hour
-  batpwr1hrav = 0.0
 
   def __init__(self):
+    self.measured = config['calibrate']['measured']
+    self.displayed = config['calibrate']['displayed']
+
+    self.ratio = [ 1.0 for i in range(numcells+1)]
+    for i in range(1, numcells+1):
+      self.ratio[i] = self.measured[i]/self.displayed[i]
+    self.calvolts = [ 0.0 for i in range(numcells+1)]
+
+    #  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
+    self.deltav = [ 3.25 for i in range(numcells+1)]
+    self.deltav[0] = 0.0
+    self.rawvolts = [ 0.0 for i in range(numcells+1)]
+    self.batvolts = [ i*3.25 for i in range(numcells+1)]
+    self.uncalvolts = [ i*3.25 for i in range(numcells+1)]
+    self.batvoltsav = [ i*3.25 for i in range(numcells+1)]
+    self.balflg = [ 0.0 for i in range(numcells)]
+    self.baltime = [ 0.0 for i in range(numcells)]
+    self.temp = [ 0.0 for i in range(len(config['TemperatureInputs']))]
+    self.numiins = len(config['CurrentInputs'])
+    self.current = [ 0.0 for i in range(self.numiins)]
+    self.currentav = [ 0.0 for i in range(self.numiins)]
+    self.kWhin = [ 0.0 for i in range(self.numiins)]
+    self.kWhout = [ 0.0 for i in range(self.numiins)]
+    self.chargestates = [ b'00' for i in range(len(config['Status']))]
+
+    #  rawcurrent = 0.0
+    #  batcurrent = 0.0
+    #  batcurrentav = 0.0
+    #  rawincurrent = 0.0
+    #  incurrent = 0.0
+    #  incurrentav = 0.0
+    soc = 0.0
+    socadj = 0.0
+    batah = 0.0
+    batahadj = 0.0
+    inah = 0.0
+    inahtot = 0.0
+    ah = 0.0
+
+    mincellv=100.0
+    maxcellv=0.0
+    lastmaxv = 0.0 # previous sample maximum cell voltage
+    lastminv = 100.0 # previous sample minimum cell voltage
+    pwrbat = 0.0 # battery power units kW
+    pwrbattot = 0.0  # total battery power units kWh
+    pwrin = 0.0  # gross power in units kW
+    pwrintot = 0.0 # total gross power in units kWh
+    iall=""
+    vdelta=""
+    vcells=""
+    soctxt=""
+    socadjtxt=""
+    sampleshr=3600/config['sampling']['sampletime'] # numder of sample / hour
+    batpwr1hrav = 0.0
+
+    for i in config['Interfaces']:
+      interface=re.match(r'\w*',config['Interfaces'][i]).group()
+      snstring=re.compile(r'[(].*[^)]')
+      sn=snstring.search(config['Interfaces'][i])
+      if sn!=None:
+        sn=sn.group()
+
+      exec("import " + interface)
+      if sn==None:
+        exec('self.'+i +'='+interface+'.Rawdat()')
+      else:
+        exec('self.'+i+'='+interface+".Rawdat('"+str(sn[1:])+"')")
+
     self.vin = []
     for i in sorted(config['VoltageInputs']):
       self.vin = self.vin + [config['VoltageInputs'][i]]
@@ -117,6 +116,7 @@ class Readings:
       self.chgstat = self.chgstat + [config['Status'][i]]
 
       self.sampletime = time.time()
+
     self.getvi()
     self.batvoltsav = self.batvolts
     self.batcurrentav = self.current[-3]
@@ -135,13 +135,8 @@ class Readings:
     self.sampletime = time.time()
 # get data from Interfaces
     for i in config['Interfaces']:
-      print (i)
       exec('self.'+i+".getdata()")
-#    print (sorted(self.vin))
-#    self.sortedvin=sorted(self.vin)
-#    self.sortediin=sorted(self.iin)
     for i in range(len(self.iin)):
-#      print (self.iin[i])
       self.current[i] = eval(self.iin[i]) \
                         *config['calibrate']['currentgain'][i] \
                         -config['calibrate']['currentoffset'][i]
@@ -151,11 +146,9 @@ class Readings:
 #    self.uncalvolts[0] = 0.0
 
     for i in range(len(self.vin)):
-#      print (self.vin[i])
       self.uncalvolts[i+1] = eval(self.vin[i]) \
                            *config['calibrate']['batvgain'] # A/D to battery volts
       self.batvolts[i+1] = self.uncalvolts[i+1]*self.ratio[i] # calibrate values
-#    print (self.batvolts,self.bms.rawdat)
 
     for i in range(len(self.tin)): # get temperatures
       self.temp[i] = eval(self.tin[i])
@@ -169,7 +162,6 @@ class Readings:
   def getraw(self):
     """ gets battery data, do averaging, voltage results in volts, current in amps"""
     self.getvi()
-#    print (self.batvolts)
     samplesav = config['sampling']['samplesav']
     self.deltatime=(self.sampletime-self.oldsampletime)/3600
     self.batah = self.currentav[-3]*self.deltatime
@@ -193,7 +185,6 @@ class Readings:
                            + self.batvolts[i])/samplesav
       if self.balflg[i-1]:
         self.baltime[i-1]= self.baltime[i-1]+self.deltatime # update time balancers are on
-#    print (self.batvoltsav, self.currentav)
     self.deltav[0]=round(self.batvolts[0],3)
     self.lastmincellv=self.mincellv
     self.lastmaxcellv=self.maxcellv
