@@ -4,7 +4,7 @@
 
 <?php
 //Replace location of battery config file with the location on your system
-$config = file_get_contents("/home/simat/BatteryMonitor/battery.cfg");
+$config = file_get_contents("battery.cfg");
 //error handler function
 function customError($errno, $errstr) {
   echo "<b>Error:</b> [$errno] $errstr";
@@ -288,7 +288,7 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[count($amps)-3]."A"?></p>
 <p style="font-size:0.5em;line-height:0.0em;"><?php echo "In ".$amps[count($amps)-2]."A Out ".$amps[count($amps)-1]."A"?></p>
 <p style="font-size:0.5em;line-height:0.0em;"><?php echo "1Hr Bat Power ".$batpwr1hrav[0]."kW"?></p>
-<p style="font-size:0.5em;line-height:0.0em;"><?php foreach ($state as $value) {
+<p style="font-size:0.5em;line-height:1.0em;"><?php foreach ($state as $value) {
   echo "Charge State $value <br>";
 }
 ?></p>
