@@ -87,7 +87,6 @@ class Readings:
       sn=snstring.search(config['Interfaces'][i])
       if sn!=None:
         sn=sn.group()
-
       exec("import " + interface)
       if sn==None:
         exec('self.'+i +'='+interface+'.Rawdat()')

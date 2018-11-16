@@ -26,8 +26,8 @@ import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
-
 initrawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':b'00'}
+
 
 
 class Rawdat():
@@ -36,7 +36,7 @@ class Rawdat():
   the class to the particular machine"""
 
   def __init__(self,sn):
-    self.rawdat = initrawdat
+    self.rawdat = dict.copy(initrawdat)
     self.reply ='' # placeholder for reply from sendcmd
     self.pipdown=0.0
     self.sn=sn
@@ -92,7 +92,6 @@ class Rawdat():
 
   def sendcmd(self,command,replylen):
     """send command/query to Pip4048, return reply"""
-
     command=command.encode('ascii','strict')
     crc=self.crccalc(command)
     command=command+crc.to_bytes(2, byteorder='big')+b'\r'
@@ -124,8 +123,8 @@ class Rawdat():
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
+    self.rawdat = dict.copy(initrawdat)
     if self.pipdown==0.0:
-      self.rawdat = initrawdat
       for i in range(5):
         try:
           self.openpip(self.pipport)
@@ -157,65 +156,14 @@ class Rawdat():
             log.error("PIP sn {} interface down".format(self.sn))
         finally:
           self.port.close()
-    else:
-      downtime=time.time()-self.pipdown
-      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
-        try:
-          self.findpip()
-        except:
-          pass
+#    else:
+#      downtime=time.time()-self.pipdown
+#      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
+#        try:
+#          self.findpip()
+#        except:
+#          pass
 #          if downtime>3600: # upgrade error if more than one hour
 #            raise
-        else:
-          self.pipdown=0.0
-          def stashchargeparams(self):
-            """Gets and stashes charging voltage settings from PIP"""
-            if self.stashok==False:
-              self.stashok=True
-
-  def setblkflt(self,bulkv,floatv):
-    if bulkv < self.floatv:
-      param1='PBFT'+str(floatv)
-      param2='PCVV'+str(bulkv)
-    else:
-      param1='PCVV'+str(bulkv)
-      param2='PBFT'+str(floatv)
-    self.setparam(param1)
-    time.sleep(0.2)
-    self.setparam(param2)
-
-  def setchargevs(self,bulkv=0,floatv=0,lowv=0):
-    """Sets PIP charge and discharge limit voltage and stashes old settings
-       Only sets non zero voltages """
-    self.stashok=False
-    self.sendcmd('QPIRI',102)
-    self.floatv=self.reply[58:62].decode('ascii','strict')
-    self.bulkv=self.reply[53:57].decode('ascii','strict')
-    self.rechargev=self.reply[43:47].decode('ascii','strict')
-    self.lowv=self.reply[48:52].decode('ascii','strict')
-    for i in range(5):
-      try:
-        self.openpip(self.pipport)
-        self.stashchargeparams()
-        if floatv or bulkv:
-          self.setblkflt(bulkv,floatv)
-        if lowv:
-          self.setparam("PSDV"+str(lowv))
-        break
-      except Exception as err:
-        log.error(err)
-        time.sleep(0.5)
-        if i==4:
-          raise
-      finally:
-        self.port.close()
-
-  def resetchargevs(self,bulkv=0,floatv=0,lowv=0):
-    """Resets specified voltages back to stashed values"""
-    if bulkv:
-      bulkv=self.bulkv
-    if floatv:
-      floatv=self.floatv
-    if lowv:
-      lowv=self.lowv
-    self.setchargevs(bulkv,floatv,lowv)
+#        else:
+#          self.pipdown=0.0
