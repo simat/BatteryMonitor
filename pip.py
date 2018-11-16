@@ -42,8 +42,11 @@ class Rawdat():
     self.sn=sn
     try:
       self.findpip()
-    except Exception:
+    except serial.serialutil.SerialException as err:
       self.pipdown=time.time() # flag pip is down
+      log.error(err)
+
+
     self.stashok=False
     self.floatv=48.0
     self.bulkv=48.0
@@ -71,7 +74,7 @@ class Rawdat():
       if self.pipport!="":
         break
     if self.pipport=="":
-      raise Exception("Couldn't find PIP sn {}".format(self.sn))
+      raise serial.serialutil.SerialException("Couldn't find PIP sn {}".format(self.sn))
 
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=1)  # open serial port
@@ -100,19 +103,21 @@ class Rawdat():
     self.port.write(command)
     self.reply = self.port.read(replylen)
     if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
-      raise IOError('CRC error in reply')
+      raise serial.serialutil.SerialException('CRC error in reply')
 
   def sendQ1(self):  #special to send Q1 command due to variable length reply
     try:
       self.sendcmd('Q1',74)
-    except IOError:
+    except serial.serialutil.SerialException:
       if self.reply[-2:-1]!=b'\r': # check for different length self.reply
         self.reply=self.reply+self.port.read(17)
 
   def setparam(self,command):
     self.sendcmd(command,7)
     if self.reply[1:4]!=b'ACK':
-      raise IOError('Bad Parameters')
+#      raise serial.serialutil.SerialException('Bad Parameters')
+       log.error('Bad Parameters {}'.format(command))
+
 
   def opensetparam(self,command):
     """open port, send set parameter command to pip, close port"""
@@ -148,7 +153,7 @@ class Rawdat():
           if i==4:
             self.pipdown=time.time() # flag pip is down
             log.error("PIP sn {} interface down".format(self.sn))
-        except Exception as err:
+        except serial.serialutil.SerialException as err:
           log.error('PIP interface error {}'.format(err))
           time.sleep(0.5)
           if i==4:
@@ -156,14 +161,14 @@ class Rawdat():
             log.error("PIP sn {} interface down".format(self.sn))
         finally:
           self.port.close()
-#    else:
-#      downtime=time.time()-self.pipdown
-#      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
-#        try:
-#          self.findpip()
-#        except:
-#          pass
+    else:
+      downtime=time.time()-self.pipdown
+      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
+        try:
+          self.findpip()
+        except serial.serialutil.SerialException:
+          pass
 #          if downtime>3600: # upgrade error if more than one hour
 #            raise
-#        else:
-#          self.pipdown=0.0
+        else:
+          self.pipdown=0.0
