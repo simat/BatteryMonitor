@@ -125,6 +125,12 @@ class Rawdat():
     self.setparam(command)
     self.port.close
 
+  def setparamnoerror(self,command): # set parameter, ignore errors
+    try:
+      self.opensetparam(command)
+    except serial.serialutil.SerialException:
+      pass
+
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
@@ -172,3 +178,4 @@ class Rawdat():
 #            raise
         else:
           self.pipdown=0.0
+          log.info("PIP sn {} interface back up".format(self.sn))
