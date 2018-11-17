@@ -17,7 +17,7 @@
 import time
 import serial
 import binascii
-
+import json
 
 configcmd={}
 configcmd['FullCap']=b'\x10'
@@ -73,6 +73,11 @@ configcmd['SN']=b'\xa0'
 configcmd['Model']=b'\xa1'
 configcmd['?23']=b'\xa2'
 configcmd['?24']=b'\xaa'
+
+def wrjson(data):
+  with open("bms.json", "w") as write_file:
+    json.dump(data, write_file)
+
 
 def getbmsdat(port,command):
   """ Issue BMS command and return data as byte data """
