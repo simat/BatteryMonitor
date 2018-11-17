@@ -53,7 +53,7 @@ class Rawdat():
     self.rechargev=48.0
     self.lowv=44.0
     self.stashok=False
-
+    self.command=b''  # last command sent to PIP
 
   def findpip(self):
     """Scan ports to find PIP port"""
@@ -95,12 +95,12 @@ class Rawdat():
 
   def sendcmd(self,command,replylen):
     """send command/query to Pip4048, return reply"""
-    command=command.encode('ascii','strict')
-    crc=self.crccalc(command)
-    command=command+crc.to_bytes(2, byteorder='big')+b'\r'
+    self.command=command.encode('ascii','strict')
+    crc=self.crccalc(self.command)
+    self.command=self.command+crc.to_bytes(2, byteorder='big')+b'\r'
 #    self.port.reset_input_buffer()
     self.port.flushInput()
-    self.port.write(command)
+    self.port.write(self.command)
     self.reply = self.port.read(replylen)
     if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
       raise serial.serialutil.SerialException('CRC error in reply')
@@ -154,7 +154,7 @@ class Rawdat():
           self.rawdat['DataValid']=True
           break
         except ValueError as err:
-          log.error('PIP bad response{}'.format(self.reply))
+          log.error('PIP bad response{} to command {}'.format(self.reply,self.command))
           time.sleep(0.5)
           if i==4:
             self.pipdown=time.time() # flag pip is down
