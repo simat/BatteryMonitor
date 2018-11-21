@@ -20,6 +20,7 @@ from time import localtime
 import serial
 import binascii
 from config import config
+from summary import loadsummary
 
 import logger
 log = logger.logging.getLogger(__name__)
@@ -30,6 +31,7 @@ log.addHandler(logger.alarmfile)
 class Alarms:
   # Initialise and compile alarms
   def __init__(self,batdata):
+    self.summary=loadsummary()
     self.alarmtriggered={}
     for i in config['alarms']:
       self.alarmtriggered[i]=False
