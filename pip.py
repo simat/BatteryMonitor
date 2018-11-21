@@ -113,10 +113,11 @@ class Rawdat():
         self.reply=self.reply+self.port.read(17)
 
   def setparam(self,command):
+#    time.sleep(5.0)
     self.sendcmd(command,7)
     if self.reply[1:4]!=b'ACK':
 #      raise serial.serialutil.SerialException('Bad Parameters')
-       log.error('Bad Parameters {}'.format(command))
+       log.error('Bad Reply {} to command {}'.format(self.reply,command))
 
 
   def opensetparam(self,command):
