@@ -246,7 +246,7 @@ class Summary:
     """ Append 'data' to 'file' for previous period """
     periodfile=open(config['files'][file],'a')
     writestr=''
-    y = self.summaryfile.items(data)
+    y = summaryfile.items(data)
     for i in y:
       writestr = writestr + str(i) +"\n"
     writestr = writestr + "\n"
