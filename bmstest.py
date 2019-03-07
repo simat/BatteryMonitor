@@ -114,6 +114,10 @@ def main():
       print('(3) Write config data to BMS PCB')
       print('(4) Write config data to disk')
       print('(5) Dump config data')
+      print('(6) Change config item by name')
+      print('(7) Change config item by register address')
+      print('(8) Dump raw config data')
+
       cmd=int(getcmd())
       if cmd==1:
         bmscore.configitems(bmscore.fullconfiglist,port)
@@ -127,9 +131,24 @@ def main():
         bmscore.wrjson(file,bmscore.configinmem)
       elif cmd ==5:
         for i in bmscore.configinmem:
-          value=bmscore.configinmem[i]['value']
-          print ('{}={}{}'.format(i,eval(bmscore.configinmem[i]['decode']),bmscore.configinmem[i]['units']))
+          print ('{}={}{}'.format(i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units']))
+      elif cmd==6:
+        item=input("Enter Config Item Name>")
+        value=input('{} = {}, Enter New Value>'.format(item,bmscore.configinmem[item]['value']))
+        bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
+        print (bmscore.configinmem[item]['value'])
+      elif cmd==7:
+        reg=input("Enter Config Register Address>")
+        for i in bmscore.configmem:
+          if bmscore.configinmem[i]['reg']==item:
+            item=i
+            break
 
+        value=input('Register {} = {}, Enter New Value>'.format(item,bmscore.configinmem[item]['value']))
+        bmscore.configinmem[item]['value']=value
+      elif cmd==8:
+        for i in bmscore.configinmem:
+          print (i,bmscore.configinmem[i])
 
 if __name__ == "__main__":
   """if run from command line, piptest [command] [port]

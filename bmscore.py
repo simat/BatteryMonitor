@@ -26,7 +26,7 @@ def rdjson(file):
 
 configinmem={}  # template for bms data
 configinmem=rdjson('bms.json')
-fullconfiglist= [configinmem[i] for i in configinmem]
+fullconfiglist= [i for i in configinmem]
 
 def wrjson(file,data):
   with open(file, "w") as write_file:
@@ -87,16 +87,21 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
     print (configitem)
 
     if write:
-      packet=bytes.fromhex(configitem['reg'])+b'\x02' \
-      +configitem['value'].to_bytes(2, byteorder='big')
+      value=configinmem[configitem]['value']
+      print (value)
+      packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x02' \
+      +eval(configinmem[configitem]['encode'])
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
+      print (packet)
     else:
-      packet=bytes.fromhex(configitem['reg'])+b'\x00'
+      packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x00'
       packet=b'\xDD\xA5'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-    print ('command=',binascii.hexlify(packet))
-    data=getbmsdat(ser,packet)
-    configitem['value']=int.from_bytes(data, byteorder = 'big')
-    print ('register reply=',binascii.hexlify(data),int.from_bytes(data, byteorder = 'big'))
+      print ('command=',binascii.hexlify(packet))
+      value=getbmsdat(ser,packet)
+      valueint=int.from_bytes(value, byteorder = 'big')
+      configinmem[configitem]['value']=eval(configinmem[configitem]['decode'])
+      print ('register reply=',binascii.hexlify(value),int.from_bytes(value, byteorder = 'big'))
   command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
   print ('command=',binascii.hexlify(command))
+  data=getbmsdat(ser,command)
   print ('reply=',binascii.hexlify(data))
