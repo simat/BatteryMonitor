@@ -21,6 +21,8 @@ import serial
 import binascii
 from config import config
 
+#self.summary=summary
+
 import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.INFO)
@@ -29,7 +31,8 @@ log.addHandler(logger.alarmfile)
 
 class Alarms:
   # Initialise and compile alarms
-  def __init__(self,batdata):
+  def __init__(self,batdata,summary):
+    self.summary=summary
     self.alarmtriggered={}
     for i in config['alarms']:
       self.alarmtriggered[i]=False

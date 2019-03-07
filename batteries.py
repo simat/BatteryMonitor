@@ -36,7 +36,6 @@ from alarms import Alarms
 
 def deamon(soc=-1):
   """ Main loop, gets battery data, gets summary.py to do logging"""
-
   try:
     import summary
     logsummary = summary.Summary()
@@ -48,7 +47,7 @@ def deamon(soc=-1):
       time.sleep(30)
       printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
     batdata = Readings()  # initialise batdata after we have valid sys time
-    alarms = Alarms(batdata) # initialise alarms
+    alarms = Alarms(batdata,summary) # initialise alarms
 
     print (str(printtime))
     filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))

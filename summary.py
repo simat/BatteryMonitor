@@ -28,9 +28,23 @@ log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
+summaryfile = SafeConfigParser()
+summaryfile.read(config['files']['summaryfile'])
+
 #logdata =logger.logging.getlogger()
 #logdata.setLevel(logger.logging.INFO)
 #log.addHandler(logger.logfile)
+def loadsummary():
+    summary = {}
+    for section in summaryfile.sections():
+      summary[section] = {}
+      for key, val in summaryfile.items(section):
+        summary[section][key] = literal_eval(val)
+#      daysummaryfile = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/daysummary','r')
+#      self.daydata = literal_eval(daysummaryfile.read())
+#      daysummaryfile.close()
+    return summary
+
 
 class Summary:
   """Handles battery summary data"""
@@ -41,20 +55,8 @@ class Summary:
     self.logfile = open(config['files']['logfile'],'at',buffering=1)
     self.sampletime = time.time()
     self.prevtime = time.localtime()
+    self.summary=loadsummary()
 
-    try:
-      self.summaryfile = SafeConfigParser()
-      self.summaryfile.read(config['files']['summaryfile'])
-      self.summary = {}
-      for section in self.summaryfile.sections():
-        self.summary[section] = {}
-        for key, val in self.summaryfile.items(section):
-          self.summary[section][key] = literal_eval(val)
-#      daysummaryfile = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/daysummary','r')
-#      self.daydata = literal_eval(daysummaryfile.read())
-#      daysummaryfile.close()
-    except IOError:
-      pass
 #      summary = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/summary','w')
 #      pickle.dump(hivolts, summary)
 #      pickle.dump(lowvolts, summary)
@@ -221,11 +223,11 @@ class Summary:
   def writesummary(self):
     """ Write summary file """
 
-    for section in self.summaryfile.sections():
-      for option in self.summaryfile.options(section):
-        self.summaryfile.set(section, option, str(self.summary[section][option]))
+    for section in summaryfile.sections():
+      for option in summaryfile.options(section):
+        summaryfile.set(section, option, str(self.summary[section][option]))
     of = open(config['files']['summaryfile'],'w')
-    self.summaryfile.write(of)
+    summaryfile.write(of)
     of.close()
 
 #  def writehour(self, data):
@@ -244,7 +246,7 @@ class Summary:
     """ Append 'data' to 'file' for previous period """
     periodfile=open(config['files'][file],'a')
     writestr=''
-    y = self.summaryfile.items(data)
+    y = summaryfile.items(data)
     for i in y:
       writestr = writestr + str(i) +"\n"
     writestr = writestr + "\n"
