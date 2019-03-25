@@ -14,7 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from time
+from time import sleep
 from config import config
 #import smbus
 #from Adafruit_I2C import Adafruit_I2C
@@ -54,6 +54,6 @@ class Rawdat:
           break
       except Exception as err:
         log.error(err)
-        time.sleep(0.5)
+        sleep(0.5)
         if i==4:
           raise

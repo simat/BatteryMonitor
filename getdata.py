@@ -89,7 +89,7 @@ class Readings:
         sn=sn.group()
       exec("import " + interface)
       if sn==None:
-        exec('self.'+i +'='+interface+'.Rawdat()')
+        exec('self.'+i+'='+interface+'.Rawdat()')
       else:
         exec('self.'+i+'='+interface+".Rawdat('"+str(sn[1:])+"')")
 
@@ -114,7 +114,7 @@ class Readings:
     for i in sorted(config['Status']):
       self.chgstat = self.chgstat + [config['Status'][i]]
 
-      self.sampletime = time.time()
+    self.sampletime = time.time()
 
     self.getvi()
     self.batvoltsav = self.batvolts
