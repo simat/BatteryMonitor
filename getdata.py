@@ -89,7 +89,7 @@ class Readings:
         sn=sn.group()
       exec("import " + interface)
       if sn==None:
-        exec('self.'+i +'='+interface+'.Rawdat()')
+        exec('self.'+i+'='+interface+'.Rawdat()')
       else:
         exec('self.'+i+'='+interface+".Rawdat('"+str(sn[1:])+"')")
 
