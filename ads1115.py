@@ -51,7 +51,7 @@ class Rawdat:
           self.rawv[i+1] = eval(self.vin[i])/1000 # A to D 1 to 4 in volts
         for i in range(len(self.iin)):
           self.rawi[i] = eval(self.iin[i])
-          break
+        break
       except Exception as err:
         log.error(err)
         sleep(0.5)
