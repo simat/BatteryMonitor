@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# *****BatteryMonitor Getdata from battery cells getdata.py*****
+# *****Program to retrieve and store data to BMS PCBs*****
 # Copyright (C) 2017 Simon Richard Matthews
 # Project loaction https://github.com/simat/BatteryMonitor
 # This program is free software; you can redistribute it and/or modify
@@ -14,176 +14,143 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import time
-import serial
-import binascii
-import json
+import bmscore
+import sys
 
-class Bms:
-  def __init__(self):
-    self.bmsconfig={}
-    self.bmsconfig=self.rdjson('bms.json')
+def getcmd():
+  """gets command from user"""
+  command=str(input("Enter Command>"))
+  return command
 
-  def wrjson(self,file,data):
-    with open(file, "w") as write_file:
-      json.dump(data,write_file,indent=2)
+def switchfets(port='/dev/ttyUSB0'):
+  """ switch charge and discharge fets """
+  print ('(03)=Both FETs off')
+  print ('(01)=Charge FET on, Discharge FET off')
+  print ('(02)=Charge FET off, Discharge FET on')
+  print ('(00)=Both FETs on')
+  usercmd = input("Enter numeric option> ")
+  ser = bmscore.openbms(port)
+  command = bytes.fromhex('DD A5 03 00 FF FD 77')
+  print ('command=',binascii.hexlify(command))
+  data=bmscore.getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
+  command = bytes.fromhex('DD A5 04 00 FF FC 77')
+  print ('command=',binascii.hexlify(command))
+  data=bmscore.getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
+  command = bytes.fromhex('DD 5A 00 02 56 78 FF 30 77')
+  getbmsdat(ser,command)
+  usercmd=b'\xE1\x02\x00'+bytes.fromhex(usercmd)
+  command = b'\xDD\x5A'+usercmd+bmscore.crccalc(usercmd).to_bytes(2, byteorder='big')+b'\x77'
+  print (binascii.hexlify(command))
+  bmscore.getbmsdat(ser,command)
+  command = bytes.fromhex('DD 5A 01 02 00 00 FF FD 77')
+  bmscore.getbmsdat(ser,command)
 
-  def rdjson(self,file):
-    with open(file, "r") as read_file:
-      data=json.load(read_file)
-    return data
+def getdat(port='/dev/ttyUSB0'):
+  """ Get data from BMS board"""
+  ser = bmscore.openbms(port)
+  command = bytes.fromhex('DD A5 03 00 FF FD 77')
+  dat = bmscore.getbmsdat(ser,command)
+  rawi = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
+  print ("I=",rawi)
+#  line1 = [ 0 for i in range(int(len(dat)))]
+#  for i in range(0,int(len(dat))):
+#    print (dat[i*2:i*2+2])
+#    print (int.from_bytes(dat[i:i+1], byteorder = 'big'))
+#    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
+  print (binascii.hexlify(dat))
+#  print (line1)
 
-  def rdallconfig(self,port='/dev/ttyUSB0'):
-    "reads BMS data from BMS board and stores in template self.bmsconfig"
 
-    for i in self.bmsconfig:
-      list=[]
-      list.append(i)
-      self.configitems(list)
+  # voltages
+  command = bytes.fromhex('DD A5 04 00 FF FC 77')
+  voltages = bsmcore.getbmsdat(ser,command)
+  ser.close
+  print (binascii.hexlify(voltages))
+  rawv = [ 0.0 for i in range(15)]
+  for i in range(15):
+    rawv[i] = int.from_bytes(voltages[i*2:i*2+2], byteorder = 'big')/1000.00
+    rawv[i] = rawv[i]+rawv[i-1]
+  print (rawv)
 
-  def getbmsdat(self,port,command):
-    """ Issue BMS command and return data as byte data """
-    """ assumes data port is open and configured """
-  #  print (command)
-    port.write(command)
-    reply = port.read(4)
+  command = bytes.fromhex('DD A5 05 00 FF FB 77')
+  dat = getbmsdat(ser,command)
 
-  #  print (reply)
-    x = int.from_bytes(reply[3:5], byteorder = 'big')
-  #  print (x)
-    data = port.read(x)
-    end = port.read(3)
-  #  print (data)
-  #  print (binascii.hexlify(data))
-    return data
+#  line1 = [ 0 for i in range(int(len(dat)))]
+#  for i in range(0,int(len(dat))):
+#    print (dat[i*2:i*2+2])
+#    print (int.from_bytes(dat[i:i+1], byteorder = 'big'))
+#    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
+  print (binascii.hexlify(dat))
+#  print (line1)
 
-  def getcmd(self):
-    """gets command from user"""
-    command=str(input("Enter Command>"))
-    return command
+def main():
+  print (sys.argv)
+  if len(sys.argv) == 2:
+    sendcmd(sys.argv[1])
+  elif len(sys.argv) == 3:
+    sendcmd(sys.argv[1],sys.argv[2])
+  elif len(sys.argv) == 1:
 
-  def loop(self):
+    print ('Enter BMS port address option [3]')
+    print ('(1) /ttyUSB0')
+    print ('(2) /ttyUSB1')
+    print ('(3) other')
+    port=int(getcmd())
+    if port==1:
+      port='/dev/ttyUSB0'
+    elif port == 2:
+      port='/dev/ttyUSB1'
+    else:
+      port=str(input("Enter port name>"))
+
     while True:
-      self.main()
+      bmscore.openbms(port)
 
-  def main(self,port='/dev/ttyUSB0'):
-      ser = self.openbms(port)
-      command=bytes.fromhex(self.getcmd())
-      self.getbmsdat(ser,command)
-      ser.close
+      print('Enter option')
+      print('(1) Load config data from BMS PCB')
+      print('(2) Read config data from disk')
+      print('(3) Write config data to BMS PCB')
+      print('(4) Write config data to disk')
+      print('(5) Dump config data')
+      print('(6) Change config item by name')
+      print('(7) Change config item by register address')
+      print('(8) Dump raw config data')
 
-  def openbms(self,port='/dev/ttyUSB0'):
-      ser = serial.Serial(port)  # open serial port
-      ser.timeout = 3
-      return ser
+      cmd=int(getcmd())
+      if cmd==1:
+        bmscore.configitems(bmscore.fullconfiglist,port)
+      elif cmd==2:
+        file=str(input("Enter filename>"))
+        bmscore.configinmem=bmscore.rdjson(file)
+      elif cmd==3:
+        bmscore.configitems(bmscore.fullconfiglist,port,write=True)
+      elif cmd==4:
+        file=str(input("Enter filename>"))
+        bmscore.wrjson(file,bmscore.configinmem)
+      elif cmd ==5:
+        for i in bmscore.configinmem:
+          print ('{}={}{}'.format(i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units']))
+      elif cmd==6:
+        item=input("Enter Config Item Name>")
+        value=input('{} = {}, Enter New Value>'.format(item,bmscore.configinmem[item]['value']))
+        bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
+        print (bmscore.configinmem[item]['value'])
+      elif cmd==7:
+        reg=input("Enter Config Register Address>")
+        for i in bmscore.configmem:
+          if bmscore.configinmem[i]['reg']==item:
+            item=i
+            break
 
-  def switchfets(self,port='/dev/ttyUSB0'):
-    """ switch charge and discharge fets """
-    print ('(00)=Both FETs off')
-    print ('(01)=Charge FET on, Discharge FET off')
-    print ('(02)=Charge FET off, Discharge FET on')
-    print ('(03)=Both FETs on')
-    usercmd = input("Enter numeric option> ")
-    ser = self.openbms(port)
-    command = bytes.fromhex('DD 5A 00 02 56 78 FF 30 77')
-    self.getbmsdat(ser,command)
-    usercmd=b'\xE1\x02\x00'+bytes.fromhex(usercmd)
-    command = b'\xDD\x5A'+usercmd+self.crccalc(usercmd).to_bytes(2, byteorder='big')+b'\x77'
-    self.getbmsdat(ser,command)
-    command = bytes.fromhex('DD 5A 01 02 00 00 FF FD 77')
-    self.getbmsdat(ser,command)
-
-
-  def configitems(self,list,port='/dev/ttyUSB0',write=False):
-    """ returns read or write data from all data registers in list"""
-
-    ser = self.openbms(port)
-    command = bytes.fromhex('DD A5 03 00 FF FD 77')
-    print ('command=',binascii.hexlify(command))
-    data=self.getbmsdat(ser,command)
-    print ('reply=',binascii.hexlify(data))
-    command = bytes.fromhex('DD A5 04 00 FF FC 77')
-    print ('command=',binascii.hexlify(command))
-    data=self.getbmsdat(ser,command)
-    print ('reply=',binascii.hexlify(data))
-    command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
-    print ('command=',binascii.hexlify(command))
-    data=self.getbmsdat(ser,command)
-    print ('reply=',binascii.hexlify(data))
-
-    for configitem in list:
-      print (configitem)
-
-      if write:
-        packet=bytes.fromhex(self.bmsconfig[configitem]['reg'])+b'\x02' \
-        +self.bmsconfig[configitem]['value'].to_bytes(2, byteorder='big')
-        packet=b'\xDD\x5A'+packet+self.crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-      else:
-        packet=bytes.fromhex(self.bmsconfig[configitem]['reg'])+b'\x00'
-        packet=b'\xDD\xA5'+packet+self.crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-      print ('command=',binascii.hexlify(packet))
-      data=self.getbmsdat(ser,packet)
-      self.bmsconfig[configitem]['value']=int.from_bytes(data, byteorder = 'big')
-      print ('register reply=',binascii.hexlify(data),int.from_bytes(data, byteorder = 'big'))
-    command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
-    print ('command=',binascii.hexlify(command))
-    data=self.getbmsdat(ser,command)
-    print ('reply=',binascii.hexlify(data))
-
-  def getdat(self,port='/dev/ttyUSB0'):
-    """ Get data from BMS board"""
-    ser = self.openbms(port)
-    command = bytes.fromhex('DD A5 03 00 FF FD 77')
-    dat = self.getbmsdat(ser,command)
-    rawi = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
-    print ("I=",rawi)
-  #  line1 = [ 0 for i in range(int(len(dat)))]
-  #  for i in range(0,int(len(dat))):
-  #    print (dat[i*2:i*2+2])
-  #    print (int.from_bytes(dat[i:i+1], byteorder = 'big'))
-  #    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
-    print (binascii.hexlify(dat))
-  #  print (line1)
-
-
-    # voltages
-    command = bytes.fromhex('DD A5 04 00 FF FC 77')
-    voltages = self.getbmsdat(ser,command)
-    ser.close
-    print (binascii.hexlify(voltages))
-    rawv = [ 0.0 for i in range(15)]
-    for i in range(15):
-      rawv[i] = int.from_bytes(voltages[i*2:i*2+2], byteorder = 'big')/1000.00
-      rawv[i] = rawv[i]+rawv[i-1]
-    print (rawv)
-
-    command = bytes.fromhex('DD A5 05 00 FF FB 77')
-    dat = self.getbmsdat(ser,command)
-
-  #  line1 = [ 0 for i in range(int(len(dat)))]
-  #  for i in range(0,int(len(dat))):
-  #    print (dat[i*2:i*2+2])
-  #    print (int.from_bytes(dat[i:i+1], byteorder = 'big'))
-  #    line1[i] = int.from_bytes(dat[i:i+1], byteorder = 'big')
-    print (binascii.hexlify(dat))
-  #  print (line1)
-
-  def crccalc(self,data):
-    """returns crc as integer from byte stream"""
-    crc=0x10000
-    for i in data:
-      crc=crc-int(i)
-    return crc
+        value=input('Register {} = {}, Enter New Value>'.format(item,bmscore.configinmem[item]['value']))
+        bmscore.configinmem[item]['value']=value
+      elif cmd==8:
+        for i in bmscore.configinmem:
+          print (i,bmscore.configinmem[i])
 
 if __name__ == "__main__":
   """if run from command line, piptest [command] [port]
   default port /dev/ttyUSB1, if no command ask user"""
-
-  print (sys.argv)
-  if len(sys.argv) == 2:
-    sendcmd(sys.argv[1])
-  else:
-    if len(sys.argv) == 3:
-      sendcmd(sys.argv[1],sys.argv[2])
-    else:
-      self.loop()
+  main()
