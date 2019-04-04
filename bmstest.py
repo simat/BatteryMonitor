@@ -16,6 +16,7 @@
 
 import bmscore
 import sys
+import binascii
 
 def getcmd():
   """gets command from user"""
@@ -65,7 +66,7 @@ def getdat(port='/dev/ttyUSB0'):
 
   # voltages
   command = bytes.fromhex('DD A5 04 00 FF FC 77')
-  voltages = bsmcore.getbmsdat(ser,command)
+  voltages = bmscore.getbmsdat(ser,command)
   ser.close
   print (binascii.hexlify(voltages))
   rawv = [ 0.0 for i in range(15)]
@@ -75,7 +76,7 @@ def getdat(port='/dev/ttyUSB0'):
   print (rawv)
 
   command = bytes.fromhex('DD A5 05 00 FF FB 77')
-  dat = getbmsdat(ser,command)
+  dat = bmscore.getbmsdat(ser,command)
 
 #  line1 = [ 0 for i in range(int(len(dat)))]
 #  for i in range(0,int(len(dat))):
