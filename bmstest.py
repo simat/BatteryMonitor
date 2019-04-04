@@ -16,6 +16,7 @@
 
 import bmscore
 import sys
+import binascii
 
 def getcmd():
   """gets command from user"""
