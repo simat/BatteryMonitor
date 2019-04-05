@@ -54,7 +54,11 @@ def getdat(port='/dev/ttyUSB0'):
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
   dat = bmscore.getbmsdat(ser,command)
   rawi = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
-  print ("I=",rawi)
+  rawv = int.from_bytes(dat[0:2], byteorder = 'big',signed=True)
+  balance = int.from_bytes(dat[12:14], byteorder = 'big',signed=True)
+  state = int.from_bytes(dat[16:18], byteorder = 'big',signed=True)
+  fets = int.from_bytes(dat[20:21], byteorder = 'big',signed=True)
+  print ("V={} I={} bal={} state={} fets={}".format(rawv,rawi,balance,state,fets))
 #  line1 = [ 0 for i in range(int(len(dat)))]
 #  for i in range(0,int(len(dat))):
 #    print (dat[i*2:i*2+2])
@@ -86,6 +90,29 @@ def getdat(port='/dev/ttyUSB0'):
   print (binascii.hexlify(dat))
 #  print (line1)
 
+def changereg():
+  """Changes individual register in memory"""
+
+  cmd=int(input('By Name (1) or by register number (2)?>'))
+  if cmd==1:
+    item=input("Enter Config Item Name>")
+  elif cmd==2:
+    item=input("Enter Config Register Address>")
+    for i in bmscore.configinmem:
+      if bmscore.configinmem[i]['reg']==item:
+        item=i
+        break
+  value=input("{} = {}, Enter New Value, [return] for don't write>" \
+        .format(item,bmscore.configinmem[item]['value']))
+  if value != None:
+    valueint=int(value)
+    bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
+    print (bmscore.configinmem[item]['value'])
+  else:
+    item=None
+  return item
+
+
 def main():
   print (sys.argv)
   if len(sys.argv) == 2:
@@ -110,14 +137,14 @@ def main():
       bmscore.openbms(port)
 
       print('Enter option')
-      print('(1) Load config data from BMS PCB')
-      print('(2) Read config data from disk')
-      print('(3) Write config data to BMS PCB')
-      print('(4) Write config data to disk')
-      print('(5) Dump config data')
-      print('(6) Change config item by name')
-      print('(7) Change config item by register address')
-      print('(8) Dump raw config data')
+      print('(1) Load all config data from BMS to memory')
+      print('(2) Read all config data from disk to memory')
+      print('(3) Write all config data from memory to BMS')
+      print('(4) Write all config data from memory to disk')
+      print('(5) Dump all config data in memory')
+      print('(6) Dump raw config data in memory')
+      print('(7) Read/Write config item in memory')
+      print('(8) Read/Write single register in memory and on BMS PCB')
 
       cmd=int(getcmd())
       if cmd==1:
@@ -133,23 +160,17 @@ def main():
       elif cmd ==5:
         for i in bmscore.configinmem:
           print ('{}={}{}'.format(i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units']))
-      elif cmd==6:
-        item=input("Enter Config Item Name>")
-        value=input('{} = {}, Enter New Value>'.format(item,bmscore.configinmem[item]['value']))
-        bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
-        print (bmscore.configinmem[item]['value'])
       elif cmd==7:
-        reg=input("Enter Config Register Address>")
-        for i in bmscore.configmem:
-          if bmscore.configinmem[i]['reg']==item:
-            item=i
-            break
-
-        value=input('Register {} = {}, Enter New Value>'.format(item,bmscore.configinmem[item]['value']))
-        bmscore.configinmem[item]['value']=value
-      elif cmd==8:
+        changereg()
+      elif cmd==6:
         for i in bmscore.configinmem:
           print (i,bmscore.configinmem[i])
+      elif cmd==8:
+        reg=changereg()
+        print (reg)
+        bmscore.configitems(reg,port,write=True)
+
+
 
 if __name__ == "__main__":
   """if run from command line, piptest [command] [port]
