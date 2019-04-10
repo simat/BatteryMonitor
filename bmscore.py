@@ -53,17 +53,13 @@ def openbms(port='/dev/ttyUSB0'):
 def getbmsdat(port,command):
   """ Issue BMS command and return data as byte data """
   """ assumes data port is open and configured """
-#  print (command)
+  print ('command=',binascii.hexlify(command))
   port.write(command)
   reply = port.read(4)
-
-#  print (reply)
   x = int.from_bytes(reply[3:5], byteorder = 'big')
-#  print (x)
   data = port.read(x)
   end = port.read(3)
-#  print (data)
-#  print (binascii.hexlify(data))
+  print ('reply=',binascii.hexlify(data))
   return data
 
 def configitems(list,port='/dev/ttyUSB0',write=False):
@@ -71,37 +67,39 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
   global configinmem
   ser = openbms(port)
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
-  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print ('reply=',binascii.hexlify(data))
   command = bytes.fromhex('DD A5 04 00 FF FC 77')
-  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print ('reply=',binascii.hexlify(data))
   command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
-  print ('command=',binascii.hexlify(command))
   data=getbmsdat(ser,command)
-  print ('reply=',binascii.hexlify(data))
 
   for configitem in list:
-    print (configitem)
 
     if write:
+      print (configitem,configinmem[configitem]['reg'],configinmem[configitem]['value'])
       value=configinmem[configitem]['value']
-      print (value)
-      packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x02' \
+      if isinstance(value,int):
+        packetlength=b'0x02'
+      else:
+        packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
+      packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
       +eval(configinmem[configitem]['encode'])
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-      print (packet)
+      getbmsdat(ser,packet)
     else:
       packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x00'
       packet=b'\xDD\xA5'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-      print ('command=',binascii.hexlify(packet))
       value=getbmsdat(ser,packet)
+      valueascii=value.decode("Latin-1")
       valueint=int.from_bytes(value, byteorder = 'big')
       configinmem[configitem]['value']=eval(configinmem[configitem]['decode'])
       print ('register reply=',binascii.hexlify(value),int.from_bytes(value, byteorder = 'big'))
-  command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
-  print ('command=',binascii.hexlify(command))
-  data=getbmsdat(ser,command)
-  print ('reply=',binascii.hexlify(data))
+
+  if write:
+    command = bytes.fromhex('dd 5a 01 02 28 28 ff ad 77')
+    data=getbmsdat(ser,command)
+#    command = bytes.fromhex('dd a5 aa 00 ff 56 77')
+#    data=getbmsdat(ser,command)"""
+  else:
+    command = bytes.fromhex('dd 5a 01 02 00 00 ff fd 77')
+    data=getbmsdat(ser,command)

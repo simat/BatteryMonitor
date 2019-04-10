@@ -104,8 +104,13 @@ def changereg():
         break
   value=input("{} = {}, Enter New Value, [return] for don't write>" \
         .format(item,bmscore.configinmem[item]['value']))
-  if value != None:
-    valueint=int(value)
+  print (value)
+  valueascii=" "+value
+  if value:
+    try:
+      valueint=int(value)
+    except ValueError:
+      valueint=None
     bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
     print (bmscore.configinmem[item]['value'])
   else:
@@ -122,8 +127,8 @@ def main():
   elif len(sys.argv) == 1:
 
     print ('Enter BMS port address option [3]')
-    print ('(1) /ttyUSB0')
-    print ('(2) /ttyUSB1')
+    print ('(1) /dev/ttyUSB0')
+    print ('(2) /dev/ttyUSB1')
     print ('(3) other')
     port=int(getcmd())
     if port==1:
@@ -160,17 +165,18 @@ def main():
       elif cmd ==5:
         for i in bmscore.configinmem:
           print ('{}={}{}'.format(i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units']))
+          x=input()
       elif cmd==7:
         changereg()
       elif cmd==6:
         for i in bmscore.configinmem:
           print (i,bmscore.configinmem[i])
+          x=input()
       elif cmd==8:
-        reg=changereg()
-        print (reg)
-        bmscore.configitems(reg,port,write=True)
-
-
+        reg=[]
+        reg.append(changereg())
+        if reg!=[None]:
+          bmscore.configitems(reg,port,write=True)
 
 if __name__ == "__main__":
   """if run from command line, piptest [command] [port]

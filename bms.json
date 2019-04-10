@@ -48,8 +48,8 @@
   "?20":{"reg":"3e","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?"},
   "?21":{"reg":"3f","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?"},
   "?22":{"reg":"3f","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?"},
-  "SN":{"reg":"a0","value":"ABCD","decode":"value[1:-1]","encode":"value[1:-1]","units":""},
-  "Model":{"reg":"a1","value":"ABCD","decode":"value[1:-1]","encode":"value[1:-1]","units":""},
-  "?23":{"reg":"a2","value":0,"decode":"binascii.hexlify(value)","encode":"bytes.fromhex(value)","units":"?"},
-  "?24":{"reg":"aa","value":0,"decode":"binascii.hexlify(value)","encode":"bytes.fromhex(value)","units":"?"}
+  "SN":{"reg":"a0","value":"ABCD","decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":""},
+  "Model":{"reg":"a1","value":"ABCD","decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":""},
+  "?23":{"reg":"a2","value":0,"decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"?"},
+  "?24":{"reg":"aa","value":0,"decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"?"}
 }
