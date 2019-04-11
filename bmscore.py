@@ -76,7 +76,6 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
   for configitem in list:
 
     if write:
-      print (configitem,configinmem[configitem]['reg'],configinmem[configitem]['value'])
       value=configinmem[configitem]['value']
       if isinstance(value,int):
         packetlength=b'0x02'

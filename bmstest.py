@@ -104,7 +104,6 @@ def changereg():
         break
   value=input("{} = {}, Enter New Value, [return] for don't write>" \
         .format(item,bmscore.configinmem[item]['value']))
-  print (value)
   valueascii=" "+value
   if value:
     try:
@@ -112,7 +111,6 @@ def changereg():
     except ValueError:
       valueint=None
     bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
-    print (bmscore.configinmem[item]['value'])
   else:
     item=None
   return item
@@ -163,15 +161,22 @@ def main():
         file=str(input("Enter filename>"))
         bmscore.wrjson(file,bmscore.configinmem)
       elif cmd ==5:
+        count = 0
         for i in bmscore.configinmem:
           print ('{}={}{}'.format(i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units']))
-          x=input()
+          count=count+1
+          if count%30==0:
+            x=input("press return for next page")
+
       elif cmd==7:
         changereg()
       elif cmd==6:
+        count=0
         for i in bmscore.configinmem:
           print (i,bmscore.configinmem[i])
-          x=input()
+          count=count+1
+          if count%30==0:
+            x=input("press return for next page")
       elif cmd==8:
         reg=[]
         reg.append(changereg())
