@@ -117,11 +117,14 @@ $pos = strpos($config,"name",$pos);
 $pos = strpos($config,"'",$pos);
 $batname = substr($config,$pos+1);
 $batname = strstr($batname,"'",true);
-
 $summary = file_get_contents($summary);
 $pos = strpos($config,"capacity");
 $batcapacity = substr($config,$pos);
 sscanf($batcapacity, "capacity = %u",$batcapacity);
+$pos = strpos($config,"numcells");
+$numbercells = substr($config,$pos);
+sscanf($numbercells, "numcells = %u",$numbercells);
+$numbercells=intval($numbercells);
 $pos = strpos($config,"overvoltage",$pos);
 $highv = substr($config,$pos);
 sscanf($highv, "overvoltage = %f",$highv);
@@ -169,7 +172,7 @@ $dayminloadv = getdat("minvoltages");
 $dayah = getdat("ah");
 $power = getdat("power");
 
-$numbercells = count($batvolts)-1;
+/*$numbercells = count($batvolts)-1;*/
 $batwidth = $numbercells*38;
 $batcolour = array_fill(0,$numbercells,"yellow");
 
