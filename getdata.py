@@ -29,18 +29,18 @@ class Readings:
     self.measured = config['calibrate']['measured']
     self.displayed = config['calibrate']['displayed']
 
-    self.ratio = [ 1.0 for i in range(numcells+1)]
-    for i in range(1, numcells+1):
+    self.ratio = [ 1.0 for i in range(len(self.measured))]
+    for i in range(1, len(self.measured)):
       self.ratio[i] = self.measured[i]/self.displayed[i]
-    self.calvolts = [ 0.0 for i in range(numcells+1)]
+    self.calvolts = [ 0.0 for i in range(len(self.measured))]
 
     #  calvolts = [measureddelta[i] - displayeddelta[i] for i in range(numcells+1)]
-    self.deltav = [ 3.25 for i in range(numcells+1)]
-    self.deltav[0] = 0.0
-    self.rawvolts = [ 0.0 for i in range(numcells+1)]
-    self.batvolts = [ i*3.25 for i in range(numcells+1)]
-    self.uncalvolts = [ i*3.25 for i in range(numcells+1)]
-    self.batvoltsav = [ i*3.25 for i in range(numcells+1)]
+    self.voltsav = [ 3.25 for i in range(len(self.measured)+1)]
+    self.voltsav[0] = 0.0
+    self.rawvolts = [ 0.0 for i in range(len(self.measured))]
+    self.batvolts = [ i*3.25 for i in range(len(self.measured))]
+    self.uncalvolts = [ i*3.25 for i in range(len(self.measured))]
+    self.batvoltsav = [ i*3.25 for i in range(len(self.measured))]
     self.balflg = [ 0.0 for i in range(numcells)]
     self.baltime = [ 0.0 for i in range(numcells)]
     self.temp = [ 0.0 for i in range(len(config['TemperatureInputs']))]
@@ -89,7 +89,7 @@ class Readings:
         sn=sn.group()
       exec("import " + interface)
       if sn==None:
-        exec('self.'+i+'='+interface+'.Rawdat()')
+        exec('self.'+i +'='+interface+'.Rawdat()')
       else:
         exec('self.'+i+'='+interface+".Rawdat('"+str(sn[1:])+"')")
 
@@ -114,7 +114,7 @@ class Readings:
     for i in sorted(config['Status']):
       self.chgstat = self.chgstat + [config['Status'][i]]
 
-    self.sampletime = time.time()
+      self.sampletime = time.time()
 
     self.getvi()
     self.batvoltsav = self.batvolts
@@ -179,17 +179,23 @@ class Readings:
       else:
         self.kWhout[i] = self.kWhout[i]+self.currentav[i]*self.deltatime*self.batvoltsav[numcells]/1000
 
-    for i in range(1,numcells+1):
+    for i in range(1,len(self.measured)):
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
                            + self.batvolts[i])/samplesav
+
+    for i in range(numcells+1):
       if self.balflg[i-1]:
         self.baltime[i-1]= self.baltime[i-1]+self.deltatime # update time balancers are on
-    self.deltav[0]=round(self.batvolts[0],3)
+
+    self.voltsav[0]=round(self.batvolts[0],3)
     self.lastmincellv=self.mincellv
     self.lastmaxcellv=self.maxcellv
     self.mincellv=100.0
     self.maxcellv=0.0
-    for i in range(numcells,0,-1):
-      self.deltav[i]=round((self.batvoltsav[i]-self.batvoltsav[i-1]-config['calibrate']['delta'][i-1]),3)
-      self.mincellv = min(self.deltav[i],self.mincellv)
-      self.maxcellv = max(self.deltav[i],self.maxcellv)
+    for i in range(numcells,0,-1): # caculate cell voltages
+      self.voltsav[i]=round((self.batvoltsav[i]-self.batvoltsav[i-1]-config['calibrate']['delta'][i-1]),3)
+      self.mincellv = min(self.voltsav[i],self.mincellv)
+      self.maxcellv = max(self.voltsav[i],self.maxcellv)
+
+    for i in range(numcells+1,len(self.measured)): # do other voltages
+      self.voltsav[i]=round(self.batvoltsav[i],2)

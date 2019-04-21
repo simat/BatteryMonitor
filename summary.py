@@ -124,8 +124,8 @@ class Summary:
     batdata.iall=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0
-    for i in range(numcells):
-      summary['current']['maxvoltages'][i] = round(batdata.deltav[i+1],3)
+    for i in range(len(summary['current']['maxvoltages'])):
+      summary['current']['maxvoltages'][i] = round(batdata.voltsav[i+1],3)
       maxmaxvoltage = max(maxmaxvoltage, summary['current']['maxvoltages'][i])
       minmaxvoltage = min(minmaxvoltage, summary['current']['maxvoltages'][i])
       summary['current']['minvoltages'][i] = summary['current']['maxvoltages'][i]
@@ -133,8 +133,10 @@ class Summary:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
       if batdata.currentav[0] < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
+
+    for i in range(numcells):
       summary['current']['baltime'][i]=round(batdata.baltime[i],4)
-      batdata.vcells=batdata.vcells+str(round(batdata.deltav[i+1],3)).ljust(5,'0')+' '
+      batdata.vcells=batdata.vcells+str(round(batdata.voltsav[i+1],3)).ljust(5,'0')+' '
 
     vprint=vprint + batdata.vcells
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
