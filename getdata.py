@@ -166,7 +166,10 @@ class Readings:
     self.batah = self.currentav[-3]*self.deltatime
     self.batahadj = (self.currentav[-3]+config['battery']['ahloss'])*self.deltatime
     self.inah = self.currentav[-2]*self.deltatime
-    batvoltsav = self.batvoltsav[config['battery']['numcells']]
+    for i in range(1,len(self.measured)):
+      self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
+                           + self.batvolts[i])/samplesav
+    batvoltsav = self.batvoltsav[config['battery']['numcells']+1]
     self.pwrin = self.inah*batvoltsav/1000 # gross input power
     self.pwrbat = self.batah*batvoltsav/1000 # battery power in/out
     self.batpwr1hrav = self.batpwr1hrav \
@@ -175,13 +178,9 @@ class Readings:
     for i in range(0,self.numiins):
       self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
       if self.currentav[i] < 0:
-        self.kWhin[i] = self.kWhin[i]+self.currentav[i]*self.deltatime*self.batvoltsav[numcells]/1000
+        self.kWhin[i] = self.kWhin[i]+self.currentav[i]*self.deltatime*batvoltsav/1000
       else:
-        self.kWhout[i] = self.kWhout[i]+self.currentav[i]*self.deltatime*self.batvoltsav[numcells]/1000
-
-    for i in range(1,len(self.measured)):
-      self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
-                           + self.batvolts[i])/samplesav
+        self.kWhout[i] = self.kWhout[i]+self.currentav[i]*self.deltatime*batvoltsav/1000
 
     for i in range(numcells+1):
       if self.balflg[i-1]:
