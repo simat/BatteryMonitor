@@ -148,6 +148,7 @@ def main():
       print('(6) Dump raw config data in memory')
       print('(7) Read/Write config item in memory')
       print('(8) Read/Write single register in memory and on BMS PCB')
+      print('(9) Read BMS data')
 
       cmd=int(getcmd())
       if cmd==1:
@@ -182,8 +183,9 @@ def main():
         reg.append(changereg())
         if reg!=[None]:
           bmscore.configitems(reg,port,write=True)
+      elif cmd==9:
+        getdat(port)
 
 if __name__ == "__main__":
-  """if run from command line, piptest [command] [port]
-  default port /dev/ttyUSB1, if no command ask user"""
+  """if run from command line"""
   main()
