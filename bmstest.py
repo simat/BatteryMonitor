@@ -150,7 +150,7 @@ def main():
       print('(7) Read/Write config item in memory')
       print('(8) Read/Write single register in memory and on BMS PCB')
       print('(9) Read BMS data')
-
+      print('(10) Switch charge/discharge FETs')
       cmd=int(getcmd())
       if cmd==1:
         bmscore.configitems(bmscore.fullconfiglist,port)
@@ -186,6 +186,8 @@ def main():
           bmscore.configitems(reg,port,write=True)
       elif cmd==9:
         getdat(port)
+      elif cmd ==10:
+        switchfets(port)
 
 if __name__ == "__main__":
   """if run from command line"""
