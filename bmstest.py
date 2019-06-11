@@ -40,7 +40,8 @@ def switchfets(port='/dev/ttyUSB0'):
   data=bmscore.getbmsdat(ser,command)
   print ('reply=',binascii.hexlify(data))
   command = bytes.fromhex('DD 5A 00 02 56 78 FF 30 77')
-  getbmsdat(ser,command)
+  data=bmscore.getbmsdat(ser,command)
+  print ('reply=',binascii.hexlify(data))
   usercmd=b'\xE1\x02\x00'+bytes.fromhex(usercmd)
   command = b'\xDD\x5A'+usercmd+bmscore.crccalc(usercmd).to_bytes(2, byteorder='big')+b'\x77'
   print (binascii.hexlify(command))
