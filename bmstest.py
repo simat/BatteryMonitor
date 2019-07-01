@@ -26,8 +26,8 @@ def getcmd():
 def switchfets(port='/dev/ttyUSB0'):
   """ switch charge and discharge fets """
   print ('(03)=Both FETs off')
-  print ('(01)=Charge FET on, Discharge FET off')
-  print ('(02)=Charge FET off, Discharge FET on')
+  print ('(01)=Discharge FET on, Charge FET off')
+  print ('(02)=Discharge FET off, Charge FET on')
   print ('(00)=Both FETs on')
   usercmd = input("Enter numeric option> ")
   ser = bmscore.openbms(port)
