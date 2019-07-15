@@ -39,7 +39,7 @@
   "20%Cap":{"reg":"35","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV"},
   "HardCellOVP":{"reg":"36","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV"},
   "HardCellUVP":{"reg":"37","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV"},
-  "ControlBits":{"reg":"38","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":""},
+  "ControlBits":{"reg":"38","value":0,"decode":"bin(valueint*1)","encode":"int(value*1,2).to_bytes(2, byteorder='big')","units":""},
   "?15":{"reg":"39","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?"},
   "?16":{"reg":"3a","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?"},
   "?17":{"reg":"3b","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?"},
