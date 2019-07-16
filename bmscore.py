@@ -78,7 +78,7 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
     if write:
       value=configinmem[configitem]['value']
       if isinstance(value,int):
-        packetlength=b'0x02'
+        packetlength=b'\x02'
       else:
         packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
       packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
