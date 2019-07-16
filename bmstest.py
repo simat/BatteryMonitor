@@ -166,7 +166,7 @@ def main():
         count = 0
         for i in bmscore.configinmem:
           print ('{}={}{} {}'.format \
-          (i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units']bmscore.configinmem[i]['comment']))
+          (i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units'],bmscore.configinmem[i]['comment']))
           count=count+1
           if count%30==0:
             x=input("press return for next page")
