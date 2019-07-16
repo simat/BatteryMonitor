@@ -52,4 +52,4 @@
   "Model":{"reg":"a1","value":"ABCD","decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"","comment":""},
   "?23":{"reg":"a2","value":0,"decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"?","comment":""},
   "?24":{"reg":"aa","value":0,"decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"?","comment":""}
-,"comment":""}
+}
