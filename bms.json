@@ -70,6 +70,6 @@
   "CalibrateCell13":{"reg":"bc","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":"Enter measured cell voltage"},
   "CalibrateCell14":{"reg":"bd","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":"Enter measured cell voltage"},
   "CalibrateCell15":{"reg":"be","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":"Enter measured cell voltage"},
-  "CalibrateCell16":{"reg":"bf","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":"Enter measured cell voltage"},
+  "CalibrateCell16":{"reg":"bf","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":"Enter measured cell voltage"}
 
 }
