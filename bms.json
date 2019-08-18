@@ -39,7 +39,7 @@
   "20%Cap":{"reg":"35","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":""},
   "HardCellOVP":{"reg":"36","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":""},
   "HardCellUVP":{"reg":"37","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"mV","comment":""},
-  "DscOCP2+ControlBits":{"reg":"38","value":0,"decode":"bin(valueint*1)","encode":"int(value*1,2).to_bytes(2, byteorder='big')","units":"DscOCP2 bottom byte","comment":""},
+  "DscOCP2+ControlBits":{"reg":"38","value":0,"decode":"bin(valueint*1)","encode":"int(value*1,2).to_bytes(2, byteorder='big')","units":"","comment":"DscOCP2 bottom byte, "},
   "?15":{"reg":"39","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?","comment":""},
   "?16":{"reg":"3a","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?","comment":""},
   "?17":{"reg":"3b","value":0,"decode":"valueint*1","encode":"int(value*1).to_bytes(2, byteorder='big')","units":"?","comment":""},
@@ -52,4 +52,7 @@
   "Model":{"reg":"a1","value":"ABCD","decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"","comment":""},
   "?23":{"reg":"a2","value":0,"decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"?","comment":""},
   "?24":{"reg":"aa","value":0,"decode":"valueascii[1:]","encode":"bytes(value.encode('ascii'))","units":"?","comment":""}
+  "CalibrateChg":{"reg":"ae","value":0,"decode":"valueint*0.01","encode":"int(value*0.01).to_bytes(2, byteorder='big')","units":"A","comment":""},
+  "CalibrateDchg":{"reg":"af","value":0,"decode":"valueint*0.01","encode":"int(value*0.01).to_bytes(2, byteorder='big')","units":"A","comment":""},
+
 }
