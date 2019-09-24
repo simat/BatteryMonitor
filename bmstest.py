@@ -91,14 +91,14 @@ def getdat(port='/dev/ttyUSB0'):
   print (binascii.hexlify(dat))
 #  print (line1)
 
-def changereg():
+def enterreg():
   """Changes individual register in memory"""
 
   cmd=int(input('By Name (1) or by register number (2)?>'))
   if cmd==1:
     item=input("Enter Config Item Name>")
   elif cmd==2:
-    item=input("Enter Config Register Address>")
+    item=str.upper(input("Enter Config Register Address>"))
     for i in bmscore.configinmem:
       if bmscore.configinmem[i]['reg']==item:
         item=i
@@ -111,11 +111,19 @@ def changereg():
       valueint=int(value)
     except ValueError:
       valueint=None
-    bmscore.configinmem[item]['value']=eval(bmscore.configinmem[item]['decode'])
+    regvalueall ={}
+    reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
+    chgreg()
   else:
     item=None
   return item
 
+def chgreg(reginfo):
+  """Stores Values in reginfo dictionary"""
+  for reg in reginfo:
+    valueint=i[valueint]
+    valueascii=i[valueascii]
+    bmscore.configinmem[reg]['value']=eval(bmscore.configinmem[item]['decode'])
 
 def main():
   print (sys.argv)
@@ -151,6 +159,7 @@ def main():
       print('(8) Read/Write single register in memory and on BMS PCB')
       print('(9) Read BMS data')
       print('(10) Switch charge/discharge FETs')
+      print('(11) Calibrate BMS')
       cmd=int(getcmd())
       if cmd==1:
         bmscore.configitems(bmscore.fullconfiglist,port)
@@ -172,7 +181,8 @@ def main():
             x=input("press return for next page")
 
       elif cmd==7:
-        changereg()
+        reg=enterreg()
+        changereg(reg)
       elif cmd==6:
         count=0
         for i in bmscore.configinmem:
@@ -181,14 +191,42 @@ def main():
           if count%30==0:
             x=input("press return for next page")
       elif cmd==8:
-        reg=[]
-        reg.append(changereg())
+        reg=enterreg()
+        changereg(reg)
         if reg!=[None]:
+          reglist=[]
+          reglist.append(reg)
           bmscore.configitems(reg,port,write=True)
       elif cmd==9:
         getdat(port)
       elif cmd ==10:
         switchfets(port)
+      elif cmd ==11:
+        print ('Enter Item to Calibrate?')
+        print ('(1) Cell Voltages')
+        print ('(2) Idle Current')
+        print ('(3) Charge Current')
+        print ('(4) Discharge Current')
+        item=int(getcmd())
+        if item==1:
+          print ()
+          item=input("Enter cell number/s e.g. '1-4,5'?")
+          for part in item.split(','):
+            x=part.split('-')
+            result.update(range(int(x[0]),int(x[-1])+1))
+          celllist=sorted(result)
+          print ("Enter cell voltage/s in mV?")
+          cellvolts=int(getcmd())
+          for i in range(len(celllist)):
+            reglist[i]=str.lower(item[i]+0xAF)
+#          bmscore.configitems(item,port,write=True)
+          print(item)
+
+        elif port == 2:
+          port='/dev/ttyUSB1'
+        else:
+          port=str(input("Enter port name>"))
+
 
 if __name__ == "__main__":
   """if run from command line"""
