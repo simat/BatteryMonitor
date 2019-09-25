@@ -91,6 +91,16 @@ def getdat(port='/dev/ttyUSB0'):
   print (binascii.hexlify(dat))
 #  print (line1)
 
+def findregname(reg):
+  """Find register name given register address"""
+
+  regname=None
+  for i in bmscore.configinmem:
+    if bmscore.configinmem[i]['reg']==reg:
+      regname=i
+      break
+  return regname
+
 def enterreg():
   """Changes individual register in memory"""
 
@@ -99,11 +109,8 @@ def enterreg():
     item=input("Enter Config Item Name>")
   elif cmd==2:
     item=str.upper(input("Enter Config Register Address>"))
-    for i in bmscore.configinmem:
-      if bmscore.configinmem[i]['reg']==item:
-        item=i
-        break
-  value=input("{} = {}, Enter New Value, [return] for don't write>" \
+    item=findregname(item)
+    value=input("{} = {}, Enter New Value, [return] for don't write>" \
         .format(item,bmscore.configinmem[item]['value']))
   valueascii=" "+value
   if value:
@@ -111,7 +118,7 @@ def enterreg():
       valueint=int(value)
     except ValueError:
       valueint=None
-    regvalueall ={}
+    reginfo ={}
     reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
     chgreg()
   else:
@@ -121,9 +128,9 @@ def enterreg():
 def chgreg(reginfo):
   """Stores Values in reginfo dictionary"""
   for reg in reginfo:
-    valueint=i[valueint]
-    valueascii=i[valueascii]
-    bmscore.configinmem[reg]['value']=eval(bmscore.configinmem[item]['decode'])
+    valueint=reginfo[reg]['valueint']
+    valueascii=reginfo[reg]['valueascii']
+    bmscore.configinmem[reg]['value']=eval(bmscore.configinmem[reg]['decode'])
 
 def main():
   print (sys.argv)
@@ -182,7 +189,7 @@ def main():
 
       elif cmd==7:
         reg=enterreg()
-        changereg(reg)
+        chgreg(reg)
       elif cmd==6:
         count=0
         for i in bmscore.configinmem:
@@ -192,7 +199,7 @@ def main():
             x=input("press return for next page")
       elif cmd==8:
         reg=enterreg()
-        changereg(reg)
+        chgreg(reg)
         if reg!=[None]:
           reglist=[]
           reglist.append(reg)
@@ -210,17 +217,19 @@ def main():
         item=int(getcmd())
         if item==1:
           print ()
-          item=input("Enter cell number/s e.g. '1-4,5'?")
+          item=input("Enter cell number/s e.g. '1-4,5'?> ")
+          result=set()
           for part in item.split(','):
             x=part.split('-')
             result.update(range(int(x[0]),int(x[-1])+1))
           celllist=sorted(result)
-          print ("Enter cell voltage/s in mV?")
-          cellvolts=int(getcmd())
+          cellvolts=int(input("Enter cell voltage/s in mV?> "))
+          reglist={}
           for i in range(len(celllist)):
-            reglist[i]=str.lower(item[i]+0xAF)
-#          bmscore.configitems(item,port,write=True)
-          print(item)
+            reg=findregname(str.upper(format(celllist[i]+0xAF,'02x')))
+            reglist[reg]={'valueint':cellvolts,'valueascii':None}
+          chgreg(reglist)
+          bmscore.configitems(reglist,port,write=True)
 
         elif port == 2:
           port='/dev/ttyUSB1'
