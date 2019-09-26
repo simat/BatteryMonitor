@@ -78,7 +78,7 @@ def getdat(port='/dev/ttyUSB0'):
   rawv = [ 0.0 for i in range(15)]
   for i in range(15):
     rawv[i] = int.from_bytes(voltages[i*2:i*2+2], byteorder = 'big')/1000.00
-    rawv[i] = rawv[i]+rawv[i-1]
+#    rawv[i] = rawv[i]+rawv[i-1]
   print (rawv)
 
   command = bytes.fromhex('DD A5 05 00 FF FB 77')
