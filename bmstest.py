@@ -54,6 +54,7 @@ def getdat(port='/dev/ttyUSB0'):
   ser = bmscore.openbms(port)
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
   dat = bmscore.getbmsdat(ser,command)
+  dat = bmscore.getbmsdat(ser,command)
   rawi = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
   rawv = int.from_bytes(dat[0:2], byteorder = 'big',signed=True)
   balance = int.from_bytes(dat[12:14], byteorder = 'big',signed=True)
