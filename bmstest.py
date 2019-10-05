@@ -121,10 +121,9 @@ def enterreg():
       valueint=None
     reginfo ={}
     reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
-    chgreg()
   else:
     item=None
-  return item
+  return reginfo
 
 def chgreg(reginfo):
   """Stores Values in reginfo dictionary"""
@@ -203,7 +202,7 @@ def main():
         chgreg(reg)
         if reg!=[None]:
           reglist=[]
-          reglist.append(reg)
+          reglist.append(*reg)
           bmscore.configitems(reg,port,write=True)
       elif cmd==9:
         getdat(port)
