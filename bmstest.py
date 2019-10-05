@@ -114,15 +114,13 @@ def enterreg():
     value=input("{} = {}, Enter New Value, [return] for don't write>" \
         .format(item,bmscore.configinmem[item]['value']))
   valueascii=" "+value
+  reginfo ={}
   if value:
     try:
       valueint=int(value)
     except ValueError:
       valueint=None
-    reginfo ={}
     reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
-  else:
-    reginfo=None
   return reginfo
 
 def chgreg(reginfo):
