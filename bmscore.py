@@ -86,7 +86,7 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
       getbmsdat(ser,packet)
     else:
-      if configinmem[configitem]['read?']==True
+      if configinmem[configitem]['read?']==True:
         packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x00'
         packet=b'\xDD\xA5'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
         value=getbmsdat(ser,packet)
