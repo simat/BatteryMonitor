@@ -198,7 +198,7 @@ def main():
       elif cmd==8:
         reg=enterreg()
         chgreg(reg)
-        if reg!=[None]:
+        if reg!={}:
           reglist=[]
           reglist.append(*reg)
           bmscore.configitems(reg,port,write=True)
