@@ -86,13 +86,14 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
       getbmsdat(ser,packet)
     else:
-      packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x00'
-      packet=b'\xDD\xA5'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-      value=getbmsdat(ser,packet)
-      valueascii=value.decode("Latin-1")
-      valueint=int.from_bytes(value, byteorder = 'big')
-      configinmem[configitem]['value']=eval(configinmem[configitem]['decode'])
-      print ('register reply=',binascii.hexlify(value),int.from_bytes(value, byteorder = 'big'))
+      if configinmem[configitem]['read?']==True
+        packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x00'
+        packet=b'\xDD\xA5'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
+        value=getbmsdat(ser,packet)
+        valueascii=value.decode("Latin-1")
+        valueint=int.from_bytes(value, byteorder = 'big')
+        configinmem[configitem]['value']=eval(configinmem[configitem]['decode'])
+        print ('register reply=',binascii.hexlify(value),int.from_bytes(value, byteorder = 'big'))
 
   if write:
     command = bytes.fromhex('dd 5a 01 02 28 28 ff ad 77')
