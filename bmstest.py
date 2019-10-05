@@ -122,7 +122,7 @@ def enterreg():
     reginfo ={}
     reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
   else:
-    item=None
+    reginfo=None
   return reginfo
 
 def chgreg(reginfo):
