@@ -76,11 +76,11 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
   for configitem in list:
 
     if write:
-      value=configinmem[configitem]['value']
-      if isinstance(value,int):
+      valueint=configinmem[configitem]['value']
+      if isinstance(valueint,int):
         packetlength=b'\x02'
       else:
-        packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
+        packetlength=(len(valueint)+1).to_bytes(1,'big')+len(valueint).to_bytes(1,'big')
       packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
       +eval(configinmem[configitem]['encode'])
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
