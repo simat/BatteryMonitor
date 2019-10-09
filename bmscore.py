@@ -77,12 +77,13 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
 
     if write:
       valueint=configinmem[configitem]['value']
+      valueint=eval(configinmem[configitem]['encode'])
       if isinstance(valueint,int):
         packetlength=b'\x02'
       else:
         packetlength=(len(valueint)+1).to_bytes(1,'big')+len(valueint).to_bytes(1,'big')
       packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
-      +eval(configinmem[configitem]['encode'])
+      +valueint
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
       getbmsdat(ser,packet)
     else:
