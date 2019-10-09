@@ -5,6 +5,7 @@
 <h1>Battery Stats</h1>
 <?php
 //Replace location of battery config file with the location on your system
+$config = file_get_contents("battery.cfg");
 $pos = strpos($config,"summary");
 $pos = strpos($config,"'",$pos);
 $summary = substr($config,$pos+1);
