@@ -119,7 +119,10 @@ def enterreg():
     try:
       valueint=int(value)
     except ValueError:
-      valueint=None
+      try:
+        valueint=int(value,2)
+      except ValueError:  
+        valueint=None
     reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
   return reginfo
 
