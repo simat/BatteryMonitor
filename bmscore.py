@@ -59,6 +59,10 @@ def getbmsdat(port,command):
   x = int.from_bytes(reply[3:5], byteorder = 'big')
   data = port.read(x)
   end = port.read(3)
+  if len(data)<x:
+    print ('Serial Timeout')
+  if crccalc(data)!=int.from_bytes(end[0:1],byteorder ='big'):
+    print('CRC Error')
   print ('reply=',binascii.hexlify(data))
   return data
 
