@@ -61,8 +61,7 @@ def getbmsdat(port,command):
   end = port.read(3)
   if len(data)<x:
     print ('Serial Timeout')
-  print (crccalc(reply[2:3]+data),int.from_bytes(end[0:1],byteorder ='big'))
-  if crccalc(reply[2:3]+data)!=int.from_bytes(end[0:1],byteorder ='big'):
+  if crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder ='big'):
     print('CRC Error')
   print ('reply=',binascii.hexlify(data))
   return data
@@ -82,13 +81,13 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
 
     if write:
       valueint=configinmem[configitem]['value']
-      if isinstance(valueint,str):
-        if valueint[0:1]=='0b':
-          packetlength=b'\x02'
-      elif isinstance(valueint,int):
+      if isinstance(valueint,int):
         packetlength=b'\x02'
       else:
-        packetlength=(len(valueint)+1).to_bytes(1,'big')+len(valueint).to_bytes(1,'big')
+        if valueint[0:2]=='0b':
+          packetlength=b'\x02'
+        else:
+          packetlength=(len(valueint)+1).to_bytes(1,'big')+len(valueint).to_bytes(1,'big')
       packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
       +eval(configinmem[configitem]['encode'])
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
