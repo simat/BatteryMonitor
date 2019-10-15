@@ -57,10 +57,18 @@ def getdat(port='/dev/ttyUSB0'):
   dat = bmscore.getbmsdat(ser,command)
   rawi = int.from_bytes(dat[2:4], byteorder = 'big',signed=True)
   rawv = int.from_bytes(dat[0:2], byteorder = 'big',signed=True)
-  balance = int.from_bytes(dat[12:14], byteorder = 'big',signed=True)
-  state = int.from_bytes(dat[16:18], byteorder = 'big',signed=True)
-  fets = int.from_bytes(dat[20:21], byteorder = 'big',signed=True)
+  balance = bin(int.from_bytes(dat[12:14], byteorder = 'big',signed=True))
+  state = bin(int.from_bytes(dat[16:18], byteorder = 'big',signed=True))
+  fets = bin(int.from_bytes(dat[20:21], byteorder = 'big',signed=True))
   print ("V={} I={} bal={} state={} fets={}".format(rawv,rawi,balance,state,fets))
+  errors=['Cell Overvoltage','Cell Undervoltage','Battery Overvoltage', \
+          'Battery Undervoltage','Charge Overtemp','Charge Undertemp', \
+          'Discharge Overtemp','Discharge Undertemp','Charge Overcurrent' \
+          'Discharge Overcurrent','Short Circuit','IC Fault','Software MOS lock']
+  for i in range(state.bit_length()):
+    if 2**i & state:
+      print (errors[i])
+
 #  line1 = [ 0 for i in range(int(len(dat)))]
 #  for i in range(0,int(len(dat))):
 #    print (dat[i*2:i*2+2])
@@ -121,7 +129,7 @@ def enterreg():
     except ValueError:
       try:
         valueint=int(value,2)
-      except ValueError:  
+      except ValueError:
         valueint=None
     reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
   return reginfo
