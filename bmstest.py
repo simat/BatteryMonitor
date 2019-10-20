@@ -250,7 +250,7 @@ def main():
             reg='CalibrateDchgA'
           current=int(input("Enter Measured Current in A> "))
           reginfo={reg:{'valueint':current,'valueascii':""}}
-          chgreg(reglist)
+          chgreg(reginfo)
           bmscore.configitems(reginfo,port,write=True)
 
 if __name__ == "__main__":
