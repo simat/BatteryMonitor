@@ -139,7 +139,7 @@ def chgreg(reginfo):
   for reg in reginfo:
     valueint=reginfo[reg]['valueint']
     valueascii=reginfo[reg]['valueascii']
-    bmscore.configinmem[reg]['value']=eval(bmscore.configinmem[reg]['decode'])
+    bmscore.configinmem[reg]['value']=eval(bmscore.configinmem[reg]['encode'])
 
 def main():
   print (sys.argv)
