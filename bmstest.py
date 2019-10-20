@@ -220,12 +220,9 @@ def main():
       elif cmd ==11:
         print ('Enter Item to Calibrate?')
         print ('(1) Cell Voltages')
-        print ('(2) Idle Current')
-        print ('(3) Charge Current')
-        print ('(4) Discharge Current')
+        print ('(2) Battery Current')
         item=int(getcmd())
         if item==1:
-          print ()
           item=input("Enter cell number/s e.g. '1-4,5'?> ")
           result=set()
           for part in item.split(','):
@@ -239,12 +236,22 @@ def main():
             reglist[reg]={'valueint':cellvolts,'valueascii':None}
           chgreg(reglist)
           bmscore.configitems(reglist,port,write=True)
-
-        elif port == 2:
-          port='/dev/ttyUSB1'
-        else:
-          port=str(input("Enter port name>"))
-
+        elif item ==2:
+          print("Enter current type?> ")
+          print ('(1) Idle Current')
+          print ('(2) Charge Current')
+          print ('(3) Discharge Current')
+          item=int(getcmd())
+          if item==1:
+            reg='CalibrateIdleA'
+          elif item==2:
+            reg='CalibrateChgA'
+          elif item==3:
+            reg='CalibrateDchgA'
+          current=int(input("Enter Measured Current in A> "))
+          reginfo={reg:{'valueint':current,'valueascii=""'}}
+          chgreg(reglist)
+          bmscore.configitems(reginfo,port,write=True)
 
 if __name__ == "__main__":
   """if run from command line"""
