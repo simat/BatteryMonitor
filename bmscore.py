@@ -80,8 +80,8 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
   for configitem in list:
 
     if write:
-      print (configitem)
       valueint=configinmem[configitem]['value']
+      print (valueint)
       if isinstance(valueint,int):
         packetlength=b'\x02'
       else:
