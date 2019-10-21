@@ -121,26 +121,15 @@ def enterreg():
     item=findregname(item)
     value=input("{} = {}, Enter New Value, [return] for don't write>" \
         .format(item,bmscore.configinmem[item]['value']))
-  valueascii=" "+value
-  reginfo ={}
-  if value:
-    try:
-      valueint=int(value)
-    except ValueError:
-      try:
-        valueint=int(value,2)
-      except ValueError:
-        valueint=None
-    reginfo={item:{"valueint":valueint,"valueascii":valueascii}}
+  reginfo ={item:value}
   return reginfo
 
 def chgreg(reginfo):
   """Stores Values in reginfo dictionary"""
   for reg in reginfo:
-    valueint=reginfo[reg]['valueint']
-    valueascii=reginfo[reg]['valueascii']
-    bmscore.configinmem[reg]['value']=eval(bmscore.configinmem[reg]['encode'])
-
+    if "valueint" in bmscore.configinmem[reg]['decode']:
+      reginfo[reg]=float(reginfo[reg])  
+  bmscore.configinmem[reg]['value']=reginfo[reg]
 def main():
   print (sys.argv)
   if len(sys.argv) == 2:
@@ -249,7 +238,7 @@ def main():
           elif item==3:
             reg='CalibrateDchgA'
           current=int(input("Enter Measured Current in A> "))
-          reginfo={reg:{'valueint':current,'valueascii':""}}
+          reginfo={reg:{'value':current}}
           chgreg(reginfo)
           bmscore.configitems(reginfo,port,write=True)
 

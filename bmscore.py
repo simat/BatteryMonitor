@@ -80,15 +80,13 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
   for configitem in list:
 
     if write:
-      valueint=configinmem[configitem]['value']
-      print (valueint)
-      if isinstance(valueint,int):
+      value=configinmem[configitem]['value']
+      if "valueint" in bmscore.configinmem[configitem]['decode']:
         packetlength=b'\x02'
+        valueint=int(value)
       else:
-        if valueint[0:2]=='0b':
-          packetlength=b'\x02'
-        else:
-          packetlength=(len(valueint)+1).to_bytes(1,'big')+len(valueint).to_bytes(1,'big')
+        valueascii=value
+        packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
       packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
       +eval(configinmem[configitem]['encode'])
       packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
