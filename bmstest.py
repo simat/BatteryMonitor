@@ -111,7 +111,7 @@ def findregname(reg):
   return regname
 
 def enterreg():
-  """Changes individual register in memory"""
+  """Get user entry of register address and value"""
 
   cmd=int(input('By Name (1) or by register number (2)?>'))
   if cmd==1:
@@ -127,9 +127,11 @@ def enterreg():
 def chgreg(reginfo):
   """Stores Values in reginfo dictionary"""
   for reg in reginfo:
-    if "valueint" in bmscore.configinmem[reg]['decode']:
-      reginfo[reg]=float(reginfo[reg])  
-  bmscore.configinmem[reg]['value']=reginfo[reg]
+    if reginfo[reg]:
+      if "valueint" in bmscore.configinmem[reg]['decode']:
+        reginfo[reg]=float(reginfo[reg])
+      bmscore.configinmem[reg]['value']=reginfo[reg]
+
 def main():
   print (sys.argv)
   if len(sys.argv) == 2:
