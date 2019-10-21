@@ -77,8 +77,8 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
   command = bytes.fromhex('dd 5a 00 02 56 78 ff 30 77')
   data=getbmsdat(ser,command)
 
-  command = bytes.fromhex('DD A5 2E 00 FF D2 77')
-  data=getbmsdat(ser,command)
+#  command = bytes.fromhex('DD A5 2E 00 FF D2 77')
+#  data=getbmsdat(ser,command)
 
 
   for configitem in list:
