@@ -199,10 +199,8 @@ def main():
             x=input("press return for next page")
       elif cmd==8:
         reg=enterreg()
-        chgreg(reg)
-        if reg!={}:
-          reglist=[]
-          reglist.append(*reg)
+        if reginfo[reg]:
+          chgreg(reg)
           bmscore.configitems(reg,port,write=True)
       elif cmd==9:
         getdat(port)
@@ -224,7 +222,7 @@ def main():
           reglist={}
           for i in range(len(celllist)):
             reg=findregname(str.upper(format(celllist[i]+0xAF,'02x')))
-            reglist[reg]={'valueint':cellvolts,'valueascii':None}
+            reglist[reg]=cellvolts
           chgreg(reglist)
           bmscore.configitems(reglist,port,write=True)
         elif item ==2:
@@ -240,7 +238,7 @@ def main():
           elif item==3:
             reg='CalibrateDchgA'
           current=int(input("Enter Measured Current in A> "))
-          reginfo={reg:{'value':current}}
+          reginfo={reg:current}
           chgreg(reginfo)
           bmscore.configitems(reginfo,port,write=True)
 
