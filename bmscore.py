@@ -81,7 +81,7 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
 
     if write:
       value=configinmem[configitem]['value']
-      if "valueint" in bmscore.configinmem[configitem]['decode']:
+      if "valueint" in configinmem[configitem]['decode']:
         packetlength=b'\x02'
         valueint=int(value)
       else:
