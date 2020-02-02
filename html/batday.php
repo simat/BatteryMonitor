@@ -47,7 +47,7 @@ set_error_handler("customError");
 #batdata {
     margin-top:-0.9em;
     margin-bottom:0em;
-    width:240px;
+    width:250px;
     height:330px;
     float:left;
     padding:10px;
