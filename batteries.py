@@ -27,7 +27,7 @@ import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
-
+from demandmanager import solaravailable
 from getdata import Readings
 from alarms import Alarms
 #exec(config['files']['alarms'])  # import alarm code
@@ -115,6 +115,7 @@ def deamon(soc=-1):
   # update summaries
           logsummary.update(summary, batdata)
           if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
+            batdata.pwravailable=solaravailable()
             loadconfig()
             logsummary.updatesection(summary, 'hour', 'current')
             logsummary.updatesection(summary, 'alltime','current')

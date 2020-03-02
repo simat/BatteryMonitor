@@ -47,9 +47,12 @@ class Readings:
     self.numiins = len(config['CurrentInputs'])
     self.current = [ 0.0 for i in range(self.numiins)]
     self.currentav = [ 0.0 for i in range(self.numiins)]
+    self.ibatminute =  0.0 #sum of last minutes battery current readings
+    self.ibatnuminmin = 0  # numvber of samples in last minute
     self.kWhin = [ 0.0 for i in range(self.numiins)]
     self.kWhout = [ 0.0 for i in range(self.numiins)]
     self.chargestates = [ b'00' for i in range(len(config['Status']))]
+    self.pwravailable = 0.0  # amount of excess solar power available
 
     #  rawcurrent = 0.0
     #  batcurrent = 0.0
@@ -174,7 +177,8 @@ class Readings:
     self.pwrbat = self.batah*batvoltsav/1000 # battery power in/out
     self.batpwr1hrav = self.batpwr1hrav \
                     +(self.currentav[-3]*batvoltsav/1000-self.batpwr1hrav)/self.sampleshr # caculate battery power 1hr running av in kW
-
+    self.ibatminuteav = self.ibatminuteav+self.currentav[-3]
+    self.ibatnuminmin += 1
     for i in range(0,self.numiins):
       self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
       if self.currentav[i] < 0:
