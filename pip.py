@@ -20,6 +20,7 @@ import time
 import serial
 import binascii
 import glob
+from threading import Thread
 from config import config
 numcells = config['battery']['numcells']
 import logger
@@ -40,6 +41,7 @@ class Rawdat():
     self.reply ='' # placeholder for reply from sendcmd
     self.pipdown=0.0
     self.sn=sn
+    self.timeslaveon=0  # time slave inverter was turned on
     try:
       self.findpip()
     except serial.serialutil.SerialException as err:
@@ -54,6 +56,9 @@ class Rawdat():
     self.lowv=44.0
     self.stashok=False
     self.command=b''  # last command sent to PIP
+    self.acloadav=0.0
+    self.timeoverload=0.0  #time overload started
+    self.time=0.0
 
   def findpip(self):
     """Scan ports to find PIP port"""
@@ -132,6 +137,36 @@ class Rawdat():
     except serial.serialutil.SerialException:
       pass
 
+  def backgroundswapinv(self):
+    """Turns slave pip inverter on, waits for powerup and them turns
+       master pip inverter off"""
+
+    try:
+      self.opensetparam('MNCHGC1498')
+    except serial.serialutil.SerialException:
+      pass
+    else:
+      time.sleep(20) # wait for second inverter to power up and syncronise
+      try:
+        self.opensetparam('MNCHGC0497')
+      except serial.serialutil.SerialException:
+        pass
+
+  def swapinverter(self):
+    """turns on inverter controlled by Pi pin number if on arg and turns off
+       inverter controlled by Pi pin number in off arg"""
+    Thread(target=self.backgroundswapinv).start()
+
+  def slaveinvon(self):
+    """turns on slave inverter, waits for power draw to be less than 60% of
+       inverter load for half an hout then shuts down"""
+
+    self.timeoverload=time.time()
+    try:
+      self.opensetparam('MNCHGC1498')  # turn on slave
+    except serial.serialutil.SerialException:
+      pass
+
   def getdata(self):
     """returns dictionary with data from Pip4048"""
 #    log.debug('open')
@@ -180,3 +215,16 @@ class Rawdat():
         else:
           self.pipdown=0.0
           log.info("PIP sn {} interface back up".format(self.sn))
+
+    self.acloadav = (self.acloadav*2 + self.rawdat['ACW'])/3  # running average
+    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
+    if self.timeoverload !=0.0:
+      self.time=time.time()
+      if self.acloadav*config['Inverters']['numinverters']>config['Inverters']['turnonslave']:
+        self.timeoverload=self.time
+      if self.time-self.timeoverload > config['Inverters']['minruntime']:
+        self.timeoverload =0.0
+        try:
+          self.opensetparam('MNCHGC1497')  # turn off slave
+        except serial.serialutil.SerialException:
+          pass
