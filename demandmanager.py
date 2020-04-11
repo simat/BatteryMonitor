@@ -18,7 +18,7 @@ from config import config
 IBatZero = 0.5   # 'Zero' battery current flow to calculate available power
 
 
-def solaravailable():
+def solaravailable(batdata):
   """Returns max amount of surpus solar energy available without using battery Power
      Calculates the difference between amount of power being consumed vesus
      power that could be consumed to get battery current=IBatZero"""
@@ -29,6 +29,8 @@ def solaravailable():
 
   iavailable=(IBatZero-ibatminuteav)
   soc=1-batdata.socadj/config['battery']['capacity']
-  iavailable=iavailable+config['battery']['maxchargerate']*20*(0.95-soc)
-  pwravailable=iavailable*batdata.batvoltsav[batdata.numcells+1]
+  iavailable=iavailable+config['battery']['maxchargerate']* \
+             (soc-config['battery']['targetsoc'])*20
+  pwravailable=iavailable*batdata.batvoltsav[config['battery']['numcells']+1]
+  print (iavailable,soc,pwravailable)
   return pwravailable
