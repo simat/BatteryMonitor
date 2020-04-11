@@ -47,7 +47,7 @@ set_error_handler("customError");
 #batdata {
     margin-top:-0.9em;
     margin-bottom:0em;
-    width:250px;
+    width:220px;
     height:330px;
     float:left;
     padding:10px;
@@ -290,8 +290,8 @@ echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>
 <?php echo $capacity."%"; ?></p>
 <p style="font-size:1.5em;line-height:0.0em;color:LightGray"><?php echo $amps[count($amps)-3]."A"?></p>
 <p style="font-size:0.5em;line-height:0.0em;"><?php echo "In ".$amps[count($amps)-2]."A Out ".$amps[count($amps)-1]."A"?></p>
-<p style="font-size:0.5em;line-height:0.0em;"><?php echo "1Hr Bat Power ".$batpwr1hrav[0]."kW"?></p>
-<p style="font-size:0.5em;line-height:1.0em;"><?php foreach ($state as $value) {
+<p style="font-size:0.4em;line-height:0.0em;"><?php echo "1Hr Bat Power ".$batpwr1hrav[0]."kW"?></p>
+<p style="font-size:0.4em;line-height:1.0em;"><?php foreach ($state as $value) {
   echo "Charge State $value <br>";
 }
 ?></p>
