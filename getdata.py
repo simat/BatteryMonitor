@@ -173,11 +173,11 @@ class Readings:
       self.batvoltsav[i] = (self.batvoltsav[i]*(samplesav-1) \
                            + self.batvolts[i])/samplesav
     batvoltsav = self.batvoltsav[config['battery']['numcells']+1]
-    self.pwrin = self.inah*batvoltsav/1000 # gross input power
-    self.pwrbat = self.batah*batvoltsav/1000 # battery power in/out
+    self.pwrin = self.inah*batvoltsav/1000 # gross input energy
+    self.pwrbat = self.batah*batvoltsav/1000 # battery energy in/out
     self.batpwr1hrav = self.batpwr1hrav \
                     +(self.currentav[-3]*batvoltsav/1000-self.batpwr1hrav)/self.sampleshr # caculate battery power 1hr running av in kW
-    self.ibatminuteav = self.ibatminuteav+self.currentav[-3]
+    self.ibatminute = self.ibatminute+self.currentav[-3]
     self.ibatnuminmin += 1
     for i in range(0,self.numiins):
       self.currentav[i] = (self.currentav[i]*(samplesav-1)+self.current[i])/samplesav # running av current
