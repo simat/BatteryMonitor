@@ -76,9 +76,9 @@ class Summary:
     """ Update 'current' section of summary data with 'batdata' and write realtime log """
     summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
     summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
-    if batdata.currentav[0] > -config['battery']['ilowcurrent']:
+    if batdata.batcurrentav > -config['battery']['ilowcurrent']:
       summary['current']['maxnocharge'][numcells] = summary['current']['maxvoltages'][numcells]
-    if batdata.currentav[0] < config['battery']['ilowcurrent']:
+    if batdata.batcurrentav < config['battery']['ilowcurrent']:
       summary['current']['minnoload'][numcells] = summary['current']['minvoltages'][numcells]
     summary['current']['ah'][2] = round(batdata.soc,2)
     summary['current']['ah'][0] = summary['current']['ah'][2]
@@ -128,9 +128,9 @@ class Summary:
     for i in range(len(summary['current']['maxvoltages'])):
       summary['current']['maxvoltages'][i] = round(batdata.voltsav[i+1],3)
       summary['current']['minvoltages'][i] = summary['current']['maxvoltages'][i]
-      if batdata.currentav[0] > -config['battery']['ilowcurrent']:
+      if batdata.batcurrentav > -config['battery']['ilowcurrent']:
         summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
-      if batdata.currentav[0] < config['battery']['ilowcurrent']:
+      if batdata.batcurrentav < config['battery']['ilowcurrent']:
         summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
 
     for i in range(numcells):
@@ -141,7 +141,7 @@ class Summary:
 
     vprint=vprint + batdata.vcells
     summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
-    if batdata.currentav[0] < config['battery']['ilowcurrent']:
+    if batdata.batcurrentav < config['battery']['ilowcurrent']:
       summary['current']['deltav'][1] = summary['current']['deltav'][0]
     summary['current']['deltav'][2] = summary['current']['deltav'][0]
     batdata.vbat=str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0')+' '
