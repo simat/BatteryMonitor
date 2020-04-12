@@ -217,7 +217,7 @@ class Rawdat():
           log.info("PIP sn {} interface back up".format(self.sn))
 
     self.acloadav = (self.acloadav*2 + self.rawdat['ACW'])/3  # running average
-    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
+#    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
     if self.timeoverload !=0.0:
       self.time=time.time()
       if self.acloadav*config['Inverters']['numinverters']>config['Inverters']['turnonslave']:

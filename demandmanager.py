@@ -32,5 +32,5 @@ def solaravailable(batdata):
   iavailable=iavailable+config['battery']['maxchargerate']* \
              (soc-config['battery']['targetsoc'])*20
   pwravailable=iavailable*batdata.batvoltsav[config['battery']['numcells']+1]
-  print (iavailable,soc,pwravailable)
+#  print (iavailable,soc,pwravailable)
   return pwravailable
