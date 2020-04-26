@@ -158,14 +158,22 @@ class Rawdat():
     Thread(target=self.backgroundswapinv).start()
 
   def slaveinvon(self):
-    """turns on slave inverter, waits for power draw to be less than 60% of
-       inverter load for half an hout then shuts down"""
+    """turns on slave inverter, set overload timer, timer set to zero when
+       power draw less than 60% of inverter load for half an hour"""
 
     self.timeoverload=time.time()
     try:
       self.opensetparam('MNCHGC1498')  # turn on slave
     except serial.serialutil.SerialException:
       pass
+
+  def slaveinvoff(self):
+    """turn slave inverter off"""
+    try:
+      self.opensetparam('MNCHGC1497')  # turn off slave
+    except serial.serialutil.SerialException:
+      pass
+
 
   def getdata(self):
     """returns dictionary with data from Pip4048"""
@@ -224,7 +232,3 @@ class Rawdat():
         self.timeoverload=self.time
       if self.time-self.timeoverload > config['Inverters']['minruntime']:
         self.timeoverload =0.0
-        try:
-          self.opensetparam('MNCHGC1497')  # turn off slave
-        except serial.serialutil.SerialException:
-          pass
