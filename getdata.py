@@ -155,7 +155,7 @@ class Readings:
     for i in range(len(self.tin)): # get temperatures
       self.temp[i] = eval(self.tin[i])
 
-    for i in range(len(self.balf)): # get balance flags
+    for i in range(numcells): # get balance flags
       self.balflg[i] = eval(self.balf[i])
 
     for i in range(len(self.chgstat)): # get PIP charge states
