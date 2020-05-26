@@ -27,7 +27,7 @@ logfile=logging.FileHandler(config['files']['logfile'])
 
 
 # create formatter
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s/n%(filename)s,%(module)s,%(funcName)s,%(lineno)d')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(filename)s,%(module)s,%(funcName)s,%(lineno)d')
 alarmformat = logging.Formatter('%(asctime)s - %(message)s')
 logformat = logging.Formatter('%(message)s')
 # add formatter to ch
