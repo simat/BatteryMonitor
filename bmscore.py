@@ -61,13 +61,14 @@ def getbmsdat(port,command):
   end = port.read(3)
   if len(data)<x:
     print ('Serial Timeout')
-  if crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder ='big'):
+  if crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder ='big') and x!=0:
     print('CRC Error')
   print ('reply=',binascii.hexlify(data))
   return data
 
-def configitems(list,port='/dev/ttyUSB0',write=False):
-  """ returns read or write data from all data registers in list"""
+def configitems(list,port='/dev/ttyUSB0',write=False,calibrate=False):
+  """ returns read or write data from all data registers in list
+      skips any items if calibrate=False and read?=False """
   global configinmem
   ser = openbms(port)
   command = bytes.fromhex('DD A5 03 00 FF FD 77')
@@ -79,24 +80,25 @@ def configitems(list,port='/dev/ttyUSB0',write=False):
 
 #  command = bytes.fromhex('DD A5 2E 00 FF D2 77')
 #  data=getbmsdat(ser,command)
-
+  valueint=0
+  valueascii=''
 
   for configitem in list:
-
-    if write:
-      value=configinmem[configitem]['value']
-      if "valueint" in configinmem[configitem]['decode']:
-        packetlength=b'\x02'
-        valueint=int(value)
+    print (configitem)
+    if configinmem[configitem]['read?'] or calibrate:
+      if write:
+        value=configinmem[configitem]['value']
+        if "valueint" in configinmem[configitem]['decode']:
+          packetlength=b'\x02'
+          valueint=int(value)
+        else:
+          valueascii=value
+          packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
+        packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
+        +eval(configinmem[configitem]['encode'])
+        packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
+        getbmsdat(ser,packet)
       else:
-        valueascii=value
-        packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
-      packet=bytes.fromhex(configinmem[configitem]['reg'])+packetlength \
-      +eval(configinmem[configitem]['encode'])
-      packet=b'\xDD\x5A'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
-      getbmsdat(ser,packet)
-    else:
-      if configinmem[configitem]['read?']==True:
         packet=bytes.fromhex(configinmem[configitem]['reg'])+b'\x00'
         packet=b'\xDD\xA5'+packet+crccalc(packet).to_bytes(2, byteorder='big')+b'\x77'
         value=getbmsdat(ser,packet)

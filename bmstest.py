@@ -119,8 +119,8 @@ def enterreg():
   elif cmd==2:
     item=str.upper(input("Enter Config Register Address>"))
     item=findregname(item)
-    value=input("{} = {}, Enter New Value, [return] for don't write>" \
-        .format(item,bmscore.configinmem[item]['value']))
+  value=input("{} = {}, Enter New Value, [return] for don't write>" \
+      .format(item,bmscore.configinmem[item]['value']))
   reginfo ={item:value}
   return reginfo
 
@@ -224,7 +224,7 @@ def main():
             reg=findregname(str.upper(format(celllist[i]+0xAF,'02x')))
             reglist[reg]=cellvolts
           chgreg(reglist)
-          bmscore.configitems(reglist,port,write=True)
+          bmscore.configitems(reglist,port,write=True,calibrate=True)
         elif item ==2:
           print("Enter current type?> ")
           print ('(1) Idle Current')
@@ -240,7 +240,7 @@ def main():
           current=int(input("Enter Measured Current in A> "))
           reginfo={reg:current}
           chgreg(reginfo)
-          bmscore.configitems(reginfo,port,write=True)
+          bmscore.configitems(reginfo,port,write=True,calibrate=True)
 
 if __name__ == "__main__":
   """if run from command line"""
