@@ -199,7 +199,8 @@ def main():
             x=input("press return for next page")
       elif cmd==8:
         reg=enterreg()
-        if reg[[*reg][0]]:
+        val, =dict.values(reg)
+        if val:
           chgreg(reg)
           bmscore.configitems(reg,port,write=True)
       elif cmd==9:
