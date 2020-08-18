@@ -167,7 +167,11 @@ def main():
       print('(9) Read BMS data')
       print('(10) Switch charge/discharge FETs')
       print('(11) Calibrate BMS')
-      cmd=int(getcmd())
+      while True:
+        cmd=int(getcmd())
+        if isinstance(cmd,int) and cmd>0 and cmd<11:
+          break
+        print('Invalid input')
       if cmd==1:
         bmscore.configitems(bmscore.fullconfiglist,port)
       elif cmd==2:
