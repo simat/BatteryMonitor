@@ -89,10 +89,10 @@ def configitems(list,port='/dev/ttyUSB0',write=False,calibrate=False):
     if configinmem[configitem]['read?'] or calibrate:
       if write:
         value=configinmem[configitem]['value']
-        if "valueint" in configinmem[configitem]['decode']:
+        if "valueint" in configinmem[configitem]['encode']:
           packetlength=b'\x02'
           valueint=int(value)
-        elif "valuebin" in configinmem[configitem]['decode']:
+        elif "valuebin" in configinmem[configitem]['encode']:
           packetlength=b'\x02'
           valuebin=value
         else:
