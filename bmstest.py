@@ -168,84 +168,87 @@ def main():
       print('(10) Switch charge/discharge FETs')
       print('(11) Calibrate BMS')
       while True:
-        cmd=int(getcmd())
-        if isinstance(cmd,int) and cmd>0 and cmd<11:
+        try:
+          cmd=int(getcmd())
+        except ValueError:
+          print('Invalid input')
           break
-        print('Invalid input')
-      if cmd==1:
-        bmscore.configitems(bmscore.fullconfiglist,port)
-      elif cmd==2:
-        file=str(input("Enter filename>"))
-        bmscore.configinmem=bmscore.rdjson(file)
-      elif cmd==3:
-        bmscore.configitems(bmscore.fullconfiglist,port,write=True)
-      elif cmd==4:
-        file=str(input("Enter filename>"))
-        bmscore.wrjson(file,bmscore.configinmem)
-      elif cmd ==5:
-        count = 0
-        for i in bmscore.configinmem:
-          print ('{}={}{} {}'.format \
-          (i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units'],bmscore.configinmem[i]['comment']))
-          count=count+1
-          if count%30==0:
-            x=input("press return for next page")
+        if cmd==1:
+          bmscore.configitems(bmscore.fullconfiglist,port)
+        elif cmd==2:
+          file=str(input("Enter filename>"))
+          bmscore.configinmem=bmscore.rdjson(file)
+        elif cmd==3:
+          bmscore.configitems(bmscore.fullconfiglist,port,write=True)
+        elif cmd==4:
+          file=str(input("Enter filename>"))
+          bmscore.wrjson(file,bmscore.configinmem)
+        elif cmd ==5:
+          count = 0
+          for i in bmscore.configinmem:
+            print ('{}={}{} {}'.format \
+            (i,bmscore.configinmem[i]['value'],bmscore.configinmem[i]['units'],bmscore.configinmem[i]['comment']))
+            count=count+1
+            if count%30==0:
+              x=input("press return for next page")
 
-      elif cmd==7:
-        reg=enterreg()
-        chgreg(reg)
-      elif cmd==6:
-        count=0
-        for i in bmscore.configinmem:
-          print (i,bmscore.configinmem[i])
-          count=count+1
-          if count%30==0:
-            x=input("press return for next page")
-      elif cmd==8:
-        reg=enterreg()
-        val, =dict.values(reg)
-        if val:
+        elif cmd==7:
+          reg=enterreg()
           chgreg(reg)
-          bmscore.configitems(reg,port,write=True)
-      elif cmd==9:
-        getdat(port)
-      elif cmd ==10:
-        switchfets(port)
-      elif cmd ==11:
-        print ('Enter Item to Calibrate?')
-        print ('(1) Cell Voltages')
-        print ('(2) Battery Current')
-        item=int(getcmd())
-        if item==1:
-          item=input("Enter cell number/s e.g. '1-4,5'?> ")
-          result=set()
-          for part in item.split(','):
-            x=part.split('-')
-            result.update(range(int(x[0]),int(x[-1])+1))
-          celllist=sorted(result)
-          cellvolts=int(input("Enter cell voltage/s in mV?> "))
-          reglist={}
-          for i in range(len(celllist)):
-            reg=findregname(str.upper(format(celllist[i]+0xAF,'02x')))
-            reglist[reg]=cellvolts
-          chgreg(reglist)
-          bmscore.configitems(reglist,port,write=True,calibrate=True)
-        elif item ==2:
-          print("Enter current type?> ")
-          print ('(1) Idle Current')
-          print ('(2) Charge Current')
-          print ('(3) Discharge Current')
+        elif cmd==6:
+          count=0
+          for i in bmscore.configinmem:
+            print (i,bmscore.configinmem[i])
+            count=count+1
+            if count%30==0:
+              x=input("press return for next page")
+        elif cmd==8:
+          reg=enterreg()
+          val, =dict.values(reg)
+          if val:
+            chgreg(reg)
+            bmscore.configitems(reg,port,write=True)
+        elif cmd==9:
+          getdat(port)
+        elif cmd ==10:
+          switchfets(port)
+        elif cmd ==11:
+          print ('Enter Item to Calibrate?')
+          print ('(1) Cell Voltages')
+          print ('(2) Battery Current')
           item=int(getcmd())
           if item==1:
-            reg='CalibrateIdleA'
-          elif item==2:
-            reg='CalibrateChgA'
-          elif item==3:
-            reg='CalibrateDchgA'
-          current=int(input("Enter Measured Current in A> "))
-          reginfo={reg:current}
-          chgreg(reginfo)
-          bmscore.configitems(reginfo,port,write=True,calibrate=True)
+            item=input("Enter cell number/s e.g. '1-4,5'?> ")
+            result=set()
+            for part in item.split(','):
+              x=part.split('-')
+              result.update(range(int(x[0]),int(x[-1])+1))
+            celllist=sorted(result)
+            cellvolts=int(input("Enter cell voltage/s in mV?> "))
+            reglist={}
+            for i in range(len(celllist)):
+              reg=findregname(str.upper(format(celllist[i]+0xAF,'02x')))
+              reglist[reg]=cellvolts
+            chgreg(reglist)
+            bmscore.configitems(reglist,port,write=True,calibrate=True)
+          elif item ==2:
+            print("Enter current type?> ")
+            print ('(1) Idle Current')
+            print ('(2) Charge Current')
+            print ('(3) Discharge Current')
+            item=int(getcmd())
+            if item==1:
+              reg='CalibrateIdleA'
+            elif item==2:
+              reg='CalibrateChgA'
+            elif item==3:
+              reg='CalibrateDchgA'
+            current=int(input("Enter Measured Current in A> "))
+            reginfo={reg:current}
+            chgreg(reginfo)
+            bmscore.configitems(reginfo,port,write=True,calibrate=True)
+        else:
+          print('No such Command')
 
 if __name__ == "__main__":
   """if run from command line"""

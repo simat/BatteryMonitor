@@ -82,6 +82,7 @@ def configitems(list,port='/dev/ttyUSB0',write=False,calibrate=False):
 #  data=getbmsdat(ser,command)
   valueint=0
   valueascii=''
+  valuebin='0b0'
 
   for configitem in list:
     print (configitem)
@@ -91,6 +92,9 @@ def configitems(list,port='/dev/ttyUSB0',write=False,calibrate=False):
         if "valueint" in configinmem[configitem]['decode']:
           packetlength=b'\x02'
           valueint=int(value)
+        elif "valuebin" in configinmem[configitem]['decode']:
+          packetlength=b'\x02'
+          valuebin=value
         else:
           valueascii=value
           packetlength=(len(value)+1).to_bytes(1,'big')+len(value).to_bytes(1,'big')
