@@ -228,7 +228,8 @@ class Rawdat():
 #    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
     if self.timeoverload !=0.0:
       self.time=time.time()
-      if self.acloadav*config['Inverters']['numinverters']>config['Inverters']['turnonslave']:
+      if self.acloadav*config['Inverters']['numinverters']>config['Inverters']['turnonslave']  \
+         or self.rawdat['ACW']*config['Inverters']['numinverters']>config['Inverters']['turnonslave']*1.3:
         self.timeoverload=self.time
       if self.time-self.timeoverload > config['Inverters']['minruntime']:
         self.timeoverload =0.0
