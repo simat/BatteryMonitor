@@ -17,7 +17,7 @@
   "DsgUTPrel":{"reg":"1F","read?":true,"value":0,"decode":"valueint//10-273","encode":"((valueint+273)*10+1).to_bytes(2, byteorder='big')","units":"C","comment":""},
   "PackOVPtrig":{"reg":"20","read?":true,"value":0,"decode":"valueint*0.01","encode":"(valueint*100).to_bytes(2, byteorder='big')","units":"V","comment":""},
   "PackOVPrel":{"reg":"21","read?":true,"value":0,"decode":"valueint*0.01","encode":"(valueint*100).to_bytes(2, byteorder='big')","units":"V","comment":""},
-  ".rig":{"reg":"22","read?":true,"value":0,"decode":"valueint*0.01","encode":"(valueint*100).to_bytes(2, byteorder='big')","units":"V","comment":""},
+  "PackUVPtrig":{"reg":"22","read?":true,"value":0,"decode":"valueint*0.01","encode":"(valueint*100).to_bytes(2, byteorder='big')","units":"V","comment":""},
   "PackUVPrel":{"reg":"23","read?":true,"value":0,"decode":"valueint*0.01","encode":"(valueint*100).to_bytes(2, byteorder='big')","units":"V","comment":""},
   "CellOVPtrig":{"reg":"24","read?":true,"value":0,"decode":"valueint*1","encode":"(valueint*1).to_bytes(2, byteorder='big')","units":"mV","comment":""},
   "CellOVPrel":{"reg":"25","read?":true,"value":0,"decode":"valueint*1","encode":"(valueint*1).to_bytes(2, byteorder='big')","units":"mV","comment":""},
