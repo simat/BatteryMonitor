@@ -155,7 +155,9 @@ class Rawdat():
   def swapinverter(self):
     """turns on inverter controlled by Pi pin number if on arg and turns off
        inverter controlled by Pi pin number in off arg"""
-    Thread(target=self.backgroundswapinv).start()
+       
+    if self.timeoverload==0: only swap inverters if no overload
+      Thread(target=self.backgroundswapinv).start()
 
   def slaveinvon(self):
     """turns on slave inverter, set overload timer, timer set to zero when
