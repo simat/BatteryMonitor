@@ -18,7 +18,9 @@ tmax = [0.0, 0.0]
 tmin = [100.0, 100.0]
 baltime = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 state = ['No Sun']
-batpwr1hrav = [0.0]
+batpwr1hrav = [0.363]
+excesssolar = [-75]
+mindemandpwr = [0]
 
 [hour]
 timestamp = '20140101000000 '

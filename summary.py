@@ -107,6 +107,7 @@ class Summary:
                                      summary['current']['power'][2] + \
                                      summary['current']['power'][1] ,6 )  # current to loads
     summary['current']['batpwr1hrav'][0]=round(batdata.batpwr1hrav,3)
+    summary['current']['mindemandpwr'][0]=round(batdata.mindemandpwr)
     summary['current']['excesssolar'][0]=round(batdata.pwravailable)
     for i in range(len(batdata.chargestates)):
       if batdata.chargestates[i] == b'00':
