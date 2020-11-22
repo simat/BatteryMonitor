@@ -45,7 +45,13 @@ class Rawdat():
         'self.test=localtime().tm_hour==18', \
         'batdata.pi.swapinverter(on=7,off=11)', \
         'self.test=localtime().tm_hour==6', \
-        'batdata.pi.swapinverter(on=11,off=7)']"""
+        'batdata.pi.swapinverter(on=11,off=7)']
+acoverload = ['pass',  \
+	'self.test=batdata.pip.acloadav+batdata.pip2.acloadav>config["Inverters"]["turnonslave"]',  \
+	'batdata.pi.allinvon()',  \
+	'self.test=batdata.pip.timeoverload==0.0',  \
+	'batdata.pi.restoreinverters()']
+"""
 
   def allinvon(self,pins):
     """ turn on inverters in pins list, save current inverter map"""
