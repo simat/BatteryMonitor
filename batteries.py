@@ -116,7 +116,7 @@ def deamon(soc=-1):
           logsummary.update(summary, batdata)
           if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
             loadconfig()
-            batdata.pwravailable=solaravailable(batdata)
+            batdata.pwravailable,batdata.mindemandpwr=solaravailable(batdata)
             logsummary.updatesection(summary, 'hour', 'current')
             logsummary.updatesection(summary, 'alltime','current')
             logsummary.updatesection(summary, 'currentday','current')
