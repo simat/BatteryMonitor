@@ -26,6 +26,8 @@ def backgroundswapinv(on,off):
 class Rawdat():
   """class for using the raspberry Pi for IO"""
 
+  self.savedinvertermap ={}
+
   def __init__(self):
     self.gpio=gpio
     gpio.setmode(gpio.BOARD)
@@ -38,3 +40,21 @@ class Rawdat():
     """turns on inverter controlled by Pi pin number if on arg and turns off
        inverter controlled by Pi pin number in off arg"""
     threading.Thread(target=backgroundswapinv,args=(on,off)).start()
+
+"""swapinverter = ['batdata.pi.gpio.setup(7, batdata.pi.gpio.OUT, initial = 1) \nbatdata.pi.gpio.setup(11, batdata.pi.gpio.OUT, initial = 0)', \
+        'self.test=localtime().tm_hour==18', \
+        'batdata.pi.swapinverter(on=7,off=11)', \
+        'self.test=localtime().tm_hour==6', \
+        'batdata.pi.swapinverter(on=11,off=7)']"""
+
+  def allinvon(self,pins):
+    """ turn on inverters in pins list, save current inverter map"""
+
+    for pin in pins:
+      self.savedinvertermap[pin]=gpio.input(pin)
+      gpio.output(pin,0)
+
+  def restoreinverters(self):
+    """ restore saved invertermap"""
+    for pin in self.savedinvertermap:
+      gpio.output(pin,savedinvertermap[pin])
