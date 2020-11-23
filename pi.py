@@ -44,7 +44,8 @@ class Rawdat():
   def allinvon(self,pins):
     """ turn on inverters in pins list, save current inverter map"""
 
-    global savedinvertermap
+    global savedinvertermaps
+    batdata.pip.timeoverload=time.time()
     for pin in pins:
       self.savedinvertermap[pin]=self.gpio.input(pin)
       self.gpio.output(pin,1)
