@@ -25,7 +25,7 @@ class Rawdat():
 
   def __init__(self):
     self.gpio=gpio
-    gpio.setmode(gpio.BOARD)
+    self.gpio.setmode(self.gpio.BOARD)
 
   def getdata(self):
     pass
