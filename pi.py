@@ -51,5 +51,5 @@ class Rawdat():
 
   def restoreinverters(self):
     """ restore saved invertermap"""
-    for pin in savedinvertermap:
+    for pin in self.savedinvertermap:
       self.gpio.output(pin,self.savedinvertermap[pin])
