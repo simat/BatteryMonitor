@@ -41,7 +41,7 @@ class Rawdat():
        inverter controlled by Pi pin number in off arg"""
     threading.Thread(target=backgroundswapinv,args=(on,off)).start()
 
-    def allinvon(self,pins):
+  def allinvon(self,pins):
     """ turn on inverters in pins list, save current inverter map"""
 
     global savedinvertermap
