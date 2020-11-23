@@ -26,7 +26,7 @@ def backgroundswapinv(on,off):
 class Rawdat():
   """class for using the raspberry Pi for IO"""
 
-  self.savedinvertermap ={}
+  savedinvertermap ={}
 
   def __init__(self):
     self.gpio=gpio
@@ -56,11 +56,12 @@ class Rawdat():
   def allinvon(self,pins):
     """ turn on inverters in pins list, save current inverter map"""
 
+    global savedinvertermap
     for pin in pins:
-      self.savedinvertermap[pin]=gpio.input(pin)
+      savedinvertermap[pin]=gpio.input(pin)
       gpio.output(pin,0)
 
   def restoreinverters(self):
     """ restore saved invertermap"""
-    for pin in self.savedinvertermap:
+    for pin in savedinvertermap:
       gpio.output(pin,savedinvertermap[pin])
