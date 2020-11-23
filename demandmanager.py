@@ -15,22 +15,32 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from config import config
-IBatZero = 0.5   # 'Zero' battery current flow to calculate available power
-
+IBatZero = 0.0   # 'Zero' battery current flow to calculate available power
+mindemandpwr = -1
 
 def solaravailable(batdata):
   """Returns max amount of surpus solar energy available without using battery Power
      Calculates the difference between amount of power being consumed vesus
      power that could be consumed to get battery current=IBatZero"""
 
+  global mindemandpwr
   ibatminuteav=batdata.ibatminute/batdata.ibatnuminmin
   batdata.ibatminute = 0.0
   batdata.ibatnuminmin = 0
 
   iavailable=(IBatZero-ibatminuteav)
+  minsoc = config['battery']['targetsoc'] -config['battery']['minsocdif']
   soc=1-batdata.socadj/config['battery']['capacity']
-  iavailable=iavailable+config['battery']['maxchargerate']* \
-             (soc-config['battery']['targetsoc'])*20
-  pwravailable=iavailable*batdata.batvoltsav[-2]
-#  print (iavailable,soc,pwravailable)
-  return pwravailable
+  #iavailable=iavailable+config['battery']['maxchargerate']* \
+  #           (soc-config['battery']['targetsoc'])*20
+  iavailable=(soc\
+             -config['battery']['targetsoc'])*config['battery']['capacity']\
+             *config['DemandManager']['socfeedback'] \
+             -ibatminuteav*config['DemandManager']['currentfeedback']
+  pwravailable=iavailable*batdata.batvoltsav[config['battery']['numcells']+1]
+  if soc<minsoc:
+    mindemandpwr=-1
+  elif soc>=config['battery']['targetsoc']:
+    mindemandpwr=0
+  print (ibatminuteav,iavailable,soc,pwravailable,mindemandpwr)
+  return pwravailable,mindemandpwr
