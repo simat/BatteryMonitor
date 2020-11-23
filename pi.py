@@ -47,7 +47,7 @@ class Rawdat():
     global savedinvertermap
     for pin in pins:
       self.savedinvertermap[pin]=self.gpio.input(pin)
-      self.gpio.output(pin,0)
+      self.gpio.output(pin,1)
 
   def restoreinverters(self):
     """ restore saved invertermap"""
