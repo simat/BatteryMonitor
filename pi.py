@@ -16,36 +16,36 @@
 import RPi.GPIO as gpio
 import threading
 from time import sleep
-
+from time import time
 
 class Rawdat():
   """class for using the raspberry Pi for IO"""
 
   savedinvertermap ={}
-
   def __init__(self):
     self.gpio=gpio
     self.gpio.setmode(self.gpio.BOARD)
+    self.gpio.setup(11, self.gpio.OUT, initial = 1)
+    self.gpio.setup(13, self.gpio.OUT, initial = 0)
 
   def getdata(self):
-    pass
+    print (self.gpio.input(11),self.gpio.input(13))
 
   def backgroundswapinv(self,on,off):
     print(on,off)
-    self.gpio.output(on,0)
+    self.gpio.output(on,1)
     sleep(20) # wait for second inverter to power up and syncronise
-    self.gpio.output(off,1)
+    self.gpio.output(off,0)
 
   def swapinverter(self,on,off):
     """turns on inverter controlled by Pi pin number if on arg and turns off
        inverter controlled by Pi pin number in off arg"""
     threading.Thread(target=self.backgroundswapinv,args=(self,on,off)).start()
 
-  def allinvon(self,pins):
+  def allinvon(self,batdata,pins):
     """ turn on inverters in pins list, save current inverter map"""
 
-    global savedinvertermaps
-    batdata.pip.timeoverload=time.time()
+    batdata.pip.timeoverload=time()
     for pin in pins:
       self.savedinvertermap[pin]=self.gpio.input(pin)
       self.gpio.output(pin,1)
