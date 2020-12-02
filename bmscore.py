@@ -81,6 +81,7 @@ def configitems(list,port='/dev/ttyUSB0',write=False,calibrate=False):
 #  command = bytes.fromhex('DD A5 2E 00 FF D2 77')
 #  data=getbmsdat(ser,command)
   valueint=0
+  valuefloat=0.0
   valueascii=''
   valuebin='0b0'
 
