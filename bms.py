@@ -62,7 +62,7 @@ class Bms:
     return crc
 
   def openbms(self,port):
-    self.port = serial.Serial(port,timeout=2)  # open serial port
+    self.port = serial.Serial(port,timeout=5)  # open serial port
 
   def getbmsdat(self,port,command):
     """ Issue BMS command and return data as byte data """
@@ -87,9 +87,9 @@ class Bms:
 #    print (x)
     data = self.port.read(x)
     end = self.port.read(3)
-#        print (data,end,self.crccalc(reply[2:4]+data),end[0:2])
+#    print (data,end,self.crccalc(reply[2:4]+data),end[0:2])
     if self.crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder='big'):
-      raise serial.serialutil.SerialException('CRC error in reply')
+      raise serial.serialutil.SerialException('CRC data= {} calCRC={} CRC={}'.format(data,self.crccalc(reply[2:4]+data),int.from_bytes(end[0:2],byteorder='big')))
 #    print (data)
 
 
@@ -130,7 +130,7 @@ class Rawdat(Bms):
         break
       except ValueError as err:
         log.error('{}\n{}'.format(err,reply))
-        time.sleep(0.5)
+        time.sleep(1.0)
         if i==4:
           raise
       except Exception as err:

@@ -92,6 +92,9 @@ def configitems(list,port='/dev/ttyUSB0',write=False,calibrate=False):
         if "valueint" in configinmem[configitem]['encode']:
           packetlength=b'\x02'
           valueint=int(value)
+        elif "valuefloat" in configinmem[configitem]['encode']:
+          packetlength=b'\x02'
+          valueint=float(value)
         elif "valuebin" in configinmem[configitem]['encode']:
           packetlength=b'\x02'
           valuebin=value
