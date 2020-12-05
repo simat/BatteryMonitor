@@ -212,7 +212,7 @@ class Summary:
       section['kwinmax'][i] = min(section['kwinmax'][i], source['kwinmax'][i])
       section['kwhin'][i] = round(source['kwhin'][i]+section['kwhin'][i], 5)
       section['kwhout'][i] = round(source['kwhout'][i]+section['kwhout'][i], 5)
-    for i in range(numcells+1):
+    for i in range(len(summary['current']['maxvoltages'])):
       section['maxvoltages'][i] = max(section['maxvoltages'][i], source['maxvoltages'][i])
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
       section['maxnocharge'][i] = max(section['maxnocharge'][i], source['maxnocharge'][i])
