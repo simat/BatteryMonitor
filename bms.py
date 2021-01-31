@@ -77,32 +77,32 @@ class Bms:
 
   def sendbms(self,port,packet):
         """Send complete command string with crc to BMS"""
-    try:
-      for i in range(3):
-      self.port.flushInput()
-      self.port.write(packet)
-      reply = self.port.read(4)
-  #        raise serial.serialutil.SerialException('hithere')
+  try:
+    for i in range(3):
+    self.port.flushInput()
+    self.port.write(packet)
+    reply = self.port.read(4)
+#        raise serial.serialutil.SerialException('hithere')
 
-  #    print (reply)
-      x = int.from_bytes(reply[3:5], byteorder = 'big')
-  #    print (x)
-      data = self.port.read(x)
-      end = self.port.read(3)
-  #    print (data,end,self.crccalc(reply[2:4]+data),end[0:2])
-      if data = b'':
-        raise serial.serialutil.SerialException('No Reply')
+#    print (reply)
+    x = int.from_bytes(reply[3:5], byteorder = 'big')
+#    print (x)
+    data = self.port.read(x)
+    end = self.port.read(3)
+#    print (data,end,self.crccalc(reply[2:4]+data),end[0:2])
+    if data = b'':
+      raise serial.serialutil.SerialException('No Reply')
 
-      if self.crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder='big'):
-        raise serial.serialutil.SerialException('CRC data= {} calCRC={} CRC={}'.format(data,self.crccalc(reply[2:4]+data),int.from_bytes(end[0:2],byteorder='big')))
-  #    print (data)
-    except serial.serialutil.SerialException:
-      if i=2:
-        raise
-      else:
-        pass
+    if self.crccalc(reply[2:4]+data)!=int.from_bytes(end[0:2],byteorder='big'):
+      raise serial.serialutil.SerialException('CRC data= {} calCRC={} CRC={}'.format(data,self.crccalc(reply[2:4]+data),int.from_bytes(end[0:2],byteorder='big')))
+#    print (data)
+  except serial.serialutil.SerialException:
+    if i=2:
+      raise
+    else:
+      pass
 
-    return data
+  return data
 
 
 class Rawdat(Bms):
