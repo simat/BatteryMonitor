@@ -215,7 +215,7 @@ class Rawdat():
           self.port.close()
     else:
       downtime=time.time()-self.pipdown
-      if downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
+      if downtime!=0 and downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
         try:
           self.findpip()
         except serial.serialutil.SerialException:
