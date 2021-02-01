@@ -53,7 +53,7 @@ class Readings:
     self.kWhout = [ 0.0 for i in range(self.numiins)]
     self.chargestates = [ b'00' for i in range(len(config['Status']))]
     self.pwravailable = 0.0  # amount of excess solar power available
-    self.mindemandpwr = 0.0 # minimum amount of power than should be used
+    self.minmaxdemandpwr = [0.0,0.0] # min and max amount of excess power
 
     #  rawcurrent = 0.0
     #  batcurrent = 0.0

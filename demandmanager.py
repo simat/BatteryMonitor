@@ -16,14 +16,14 @@
 
 from config import config
 IBatZero = 0.0   # 'Zero' battery current flow to calculate available power
-mindemandpwr = -1
+minmaxdemandpwr = [0,0]
 
 def solaravailable(batdata):
   """Returns max amount of surpus solar energy available without using battery Power
      Calculates the difference between amount of power being consumed vesus
      power that could be consumed to get battery current=IBatZero"""
 
-  global mindemandpwr
+  global minmaxdemandpwr
   ibatminuteav=batdata.ibatminute/batdata.ibatnuminmin
   batdata.ibatminute = 0.0
   batdata.ibatnuminmin = 0
@@ -39,8 +39,8 @@ def solaravailable(batdata):
              -ibatminuteav*config['DemandManager']['currentfeedback']
   pwravailable=iavailable*batdata.batvoltsav[config['battery']['numcells']+1]
   if soc<minsoc:
-    mindemandpwr=-1
+    minmaxdemandpwr[1]=0
   elif soc>=config['battery']['targetsoc']:
-    mindemandpwr=0
-  print (ibatminuteav,iavailable,soc,pwravailable,mindemandpwr)
-  return pwravailable,mindemandpwr
+    minmaxdemandpwr[1]=5000
+  print (ibatminuteav,iavailable,soc,pwravailable,minmaxdemandpwr)
+  return pwravailable,minmaxdemandpwr

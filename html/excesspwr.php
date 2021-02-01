@@ -44,7 +44,7 @@ function getdat($dataname) {
 }
 
 $excesssolar = getdat("excesssolar");
-$mindemandpwr = getdat("mindemandpwr")
+$minmaxdemandpwr = getdat("minmaxdemandpwr")
 ?>
 
 <!-- <meta http-equiv="refresh" content="60"> -->
@@ -55,8 +55,10 @@ $mindemandpwr = getdat("mindemandpwr")
 <p><?php echo "Timestamp ".$timestamp; ?></p>
 <p><?php echo "Excess solar power available ".$excesssolar[0]."W"; ?></p>
 <p><?php echo "Excess solar power available ".$excesssolar[0]."W"; ?></p>
-<p><?php echo "Minimum demand energy ".$mindemandpwr[0]."W"; ?></p>
-<p><?php echo "Minimum demand energy ".$mindemandpwr[0]."W"; ?></p>
+<p><?php echo "Minimum demand energy ".$minmaxdemandpwr[0]."W"; ?></p>
+<p><?php echo "Minimum demand energy ".$minmaxdemandpwr[0]."W"; ?></p>
+<p><?php echo "Maximum demand energy ".$minmaxdemandpwr[1]."W"; ?></p>
+<p><?php echo "Maximum demand energy ".$minmaxdemandpwr[1]."W"; ?></p>
 
 </body>
 </html>
