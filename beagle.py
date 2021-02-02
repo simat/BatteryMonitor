@@ -23,9 +23,12 @@ class Rawdat():
   """class for using the raspberry Pi for IO"""
 
   def __init__(self):
-gpio.setup("P9_41", GPIO.OUT)
-adc.setup()
-self.rawdat={'ADCP9_39':0.0}
+    gpio.setup("P9_41", gpio.OUT)
+    adc.setup()
+    self.rawdat={'ADCP9_39':0.0}
+
+  def chargeonoff(onoroff):
+    gpio.output("P9_41",onoroff)
 
   def getdata(self):
     self.rawdat['ADCP9_39'] = adc.read("P9_39")
