@@ -155,14 +155,15 @@ def deamon(soc=-1):
       mainloop()
     except KeyboardInterrupt:
       sys.stdout.write('\n')
+      logsummary.close()
   #    sys.exit(9)
       break
     except Exception as err:
       log.critical(err)
       if numtries==maxtries-1:
+        logsummary.close()
         raise
-    finally:
-      logsummary.close()
+
 
 if __name__ == "__main__":
   print (sys.argv)
