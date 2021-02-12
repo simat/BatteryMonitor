@@ -64,82 +64,81 @@ def initmain(soc):
 def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
 
-  while True:
-    prevbatvoltage = batdata.batvoltsav[numcells]
-    for i in range(config['sampling']['samplesav']):
+  prevbatvoltage = batdata.batvoltsav[numcells]
+  for i in range(config['sampling']['samplesav']):
 #          printvoltage = ''
 #          for i in range(numcells+1):
 #            printvoltage = printvoltage + str(round(batdata.batvolts[i],3)).ljust(5,'0') + ' '
 #         print (printvoltage)
-      batdata.getraw()
+    batdata.getraw()
 
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
 #          print batdata.socadj/(float(summary['current']['dod'][3])*24.0)
-      if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
-      and prevbatvoltage >= config['battery']['vreset'] \
-      and summary['current']['dod'][3] != 0 \
-      and -batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
+    if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
+    and prevbatvoltage >= config['battery']['vreset'] \
+    and summary['current']['dod'][3] != 0 \
+    and -batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
 
-        if summary['current']['dod'][3] <= 0 :
-          socerr=0
-        else:
-          socerr=batdata.socadj/(float(summary['current']['dod'][3])*24.0)
-          socerr=max(socerr,-0.01)
-          socerr=min(socerr,0.01)
-        config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
-        batconfigdata=SafeConfigParser()
-        batconfigdata.read('battery.cfg')
-        batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
-        with open('battery.cfg', 'w') as batconfig:
-          batconfigdata.write(batconfig)
-        batconfig.closed
-
-        batdata.soc = 0.0
-        batdata.socadj = 0.0
-        summary['current']['dod'][3] = 0
+      if summary['current']['dod'][3] <= 0 :
+        socerr=0
       else:
-        batdata.soc = batdata.soc + batdata.batah
-        batdata.socadj = batdata.socadj +batdata.batahadj
-      batdata.ah = batdata.ah + batdata.batah
-      batdata.inahtot = batdata.inahtot + batdata.inah
-      batdata.pwrbattot = batdata.pwrbattot + batdata.pwrbat
-      batdata.pwrintot = batdata.pwrintot + batdata.pwrin
+        socerr=batdata.socadj/(float(summary['current']['dod'][3])*24.0)
+        socerr=max(socerr,-0.01)
+        socerr=min(socerr,0.01)
+      config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
+      batconfigdata=SafeConfigParser()
+      batconfigdata.read('battery.cfg')
+      batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
+      with open('battery.cfg', 'w') as batconfig:
+        batconfigdata.write(batconfig)
+      batconfig.closed
+
+      batdata.soc = 0.0
+      batdata.socadj = 0.0
+      summary['current']['dod'][3] = 0
+    else:
+      batdata.soc = batdata.soc + batdata.batah
+      batdata.socadj = batdata.socadj +batdata.batahadj
+    batdata.ah = batdata.ah + batdata.batah
+    batdata.inahtot = batdata.inahtot + batdata.inah
+    batdata.pwrbattot = batdata.pwrbattot + batdata.pwrbat
+    batdata.pwrintot = batdata.pwrintot + batdata.pwrin
 # check alarms
-    alarms.scanalarms(batdata)
+  alarms.scanalarms(batdata)
 # update summaries
-    logsummary.update(summary, batdata)
-    if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
-      loadconfig()
-      batdata.pwravailable,batdata.minmaxdemandpwr=solaravailable(batdata)
-      logsummary.updatesection(summary, 'hour', 'current')
-      logsummary.updatesection(summary, 'alltime','current')
-      logsummary.updatesection(summary, 'currentday','current')
-      logsummary.updatesection(summary, 'monthtodate', 'current')
-      logsummary.updatesection(summary, 'yeartodate', 'current')
-      logsummary.writesummary()
-      batdata.ah = 0.0
-      batdata.ahadj = 0.0
-      batdata.inahtot = 0.0
-      batdata.pwrbattot = 0.0
-      batdata.pwrintot = 0.0
-      for i in range(batdata.numiins):
-        batdata.kWhin[i] = 0.0
-        batdata.kWhout[i] = 0.0
-      for i in range(numcells):
-        batdata.baltime[i]=0
+  logsummary.update(summary, batdata)
+  if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
+    loadconfig()
+    batdata.pwravailable,batdata.minmaxdemandpwr=solaravailable(batdata)
+    logsummary.updatesection(summary, 'hour', 'current')
+    logsummary.updatesection(summary, 'alltime','current')
+    logsummary.updatesection(summary, 'currentday','current')
+    logsummary.updatesection(summary, 'monthtodate', 'current')
+    logsummary.updatesection(summary, 'yeartodate', 'current')
+    logsummary.writesummary()
+    batdata.ah = 0.0
+    batdata.ahadj = 0.0
+    batdata.inahtot = 0.0
+    batdata.pwrbattot = 0.0
+    batdata.pwrintot = 0.0
+    for i in range(batdata.numiins):
+      batdata.kWhin[i] = 0.0
+      batdata.kWhout[i] = 0.0
+    for i in range(numcells):
+      batdata.baltime[i]=0
 
 
-    if logsummary.currenttime[3] != logsummary.prevtime[3]:  # new hour
-      logsummary.starthour(summary)
+  if logsummary.currenttime[3] != logsummary.prevtime[3]:  # new hour
+    logsummary.starthour(summary)
 
-    if logsummary.currenttime[3] < logsummary.prevtime[3]: # newday
-      logsummary.startday(summary)
+  if logsummary.currenttime[3] < logsummary.prevtime[3]: # newday
+    logsummary.startday(summary)
 
-    if logsummary.currenttime[1] != logsummary.prevtime[1]: # new month
-      logsummary.startmonth(summary)
+  if logsummary.currenttime[1] != logsummary.prevtime[1]: # new month
+    logsummary.startmonth(summary)
 
-    if logsummary.currenttime[0] != logsummary.prevtime[0]: # new year
-      logsummary.startyear(summary)
+  if logsummary.currenttime[0] != logsummary.prevtime[0]: # new year
+    logsummary.startyear(summary)
 
 import summary
 logsummary = summary.Summary()
@@ -149,21 +148,22 @@ alarms = Alarms(batdata,summary) # initialise alarms
 def deamon(soc=-1):
   """Battery Management deamon to run in background"""
 
-  for numtries in range(maxtries):
-    try:
-      initmain(soc)
+  numtries=0
+  try:
+    initmain(soc)
+    while True:
       mainloop()
-    except KeyboardInterrupt:
-      sys.stdout.write('\n')
+      numtries=0
+  except KeyboardInterrupt:
+    sys.stdout.write('\n')
+    logsummary.close()
+#    sys.exit(9)
+  except Exception as err:
+    log.critical(err)
+    numtries+=1
+    if numtries==maxtries:
       logsummary.close()
-  #    sys.exit(9)
-      break
-    except Exception as err:
-      log.critical(err)
-      if numtries==maxtries-1:
-        logsummary.close()
-        raise
-
+      raise
 
 if __name__ == "__main__":
   print (sys.argv)
