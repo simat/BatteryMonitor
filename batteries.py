@@ -142,7 +142,6 @@ def mainloop():
 
 import summary
 logsummary = summary.Summary()
-summary = logsummary.summary
 batdata = Readings()  # initialise batdata
 alarms = Alarms(batdata,summary) # initialise alarms
 def deamon(soc=-1):
@@ -150,6 +149,7 @@ def deamon(soc=-1):
 
   numtries=0
   while True:
+    summary = logsummary.summary
     try:
       initmain(soc)
       while True:
