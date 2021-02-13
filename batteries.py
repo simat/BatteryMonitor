@@ -149,21 +149,22 @@ def deamon(soc=-1):
   """Battery Management deamon to run in background"""
 
   numtries=0
-  try:
-    initmain(soc)
-    while True:
-      mainloop()
-      numtries=0
-  except KeyboardInterrupt:
-    sys.stdout.write('\n')
-    logsummary.close()
-#    sys.exit(9)
-  except Exception as err:
-    log.critical(err)
-    numtries+=1
-    if numtries==maxtries:
+  while True:
+    try:
+      initmain(soc)
+      while True:
+        mainloop()
+        numtries=0
+    except KeyboardInterrupt:
+      sys.stdout.write('\n')
       logsummary.close()
-      raise
+  #    sys.exit(9)
+    except Exception as err:
+      log.critical(err)
+      numtries+=1
+      if numtries==maxtries:
+        logsummary.close()
+        raise
 
 if __name__ == "__main__":
   print (sys.argv)
