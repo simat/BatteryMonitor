@@ -156,12 +156,14 @@ def deamon(soc=-1):
         mainloop()
         numtries=0
     except KeyboardInterrupt:
+      numtries=maxtries
       sys.stdout.write('\n')
       logsummary.close()
   #    sys.exit(9)
     except Exception as err:
       log.critical(err)
       numtries+=1
+    finally:
       if numtries==maxtries:
         logsummary.close()
         raise
