@@ -34,17 +34,6 @@ summaryfile.read(config['files']['summaryfile'])
 #logdata =logger.logging.getlogger()
 #logdata.setLevel(logger.logging.INFO)
 #log.addHandler(logger.logfile)
-def loadsummary():
-    summary = {}
-    for section in summaryfile.sections():
-      summary[section] = {}
-      for key, val in summaryfile.items(section):
-        summary[section][key] = literal_eval(val)
-#      daysummaryfile = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/daysummary','r')
-#      self.daydata = literal_eval(daysummaryfile.read())
-#      daysummaryfile.close()
-    return summary
-
 
 class Summary:
   """Handles battery summary data"""
@@ -55,7 +44,7 @@ class Summary:
     self.logfile = open(config['files']['logfile'],'at',buffering=1)
     self.sampletime = time.time()
     self.prevtime = time.localtime()
-    self.summary=loadsummary()
+    self.summary=self.loadsummary()
 
 #      summary = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/summary','w')
 #      pickle.dump(hivolts, summary)
@@ -70,6 +59,16 @@ class Summary:
     if self.summary['yeartodate']['timestamp'][0:4] != printtime[0:4]:
       self.summary['yeartodate'] = deepcopy(self.summary['current'])
 
+  def loadsummary(self):
+      summary = {}
+      for section in summaryfile.sections():
+        summary[section] = {}
+        for key, val in summaryfile.items(section):
+          summary[section][key] = literal_eval(val)
+  #      daysummaryfile = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/daysummary','r')
+  #      self.daydata = literal_eval(daysummaryfile.read())
+  #      daysummaryfile.close()
+      return summary
 
 
   def update(self, summary, batdata):
