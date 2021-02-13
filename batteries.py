@@ -93,8 +93,8 @@ def mainloop():
         batconfigdata.write(batconfig)
       batconfig.closed
 
-      batdata.soc = 0.0
-      batdata.socadj = 0.0
+      batdata.soc = config['battery']['socreset']
+      batdata.socadj = batdata.soc
       summary['current']['dod'][3] = 0
     else:
       batdata.soc = batdata.soc + batdata.batah
