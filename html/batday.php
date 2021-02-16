@@ -132,11 +132,8 @@ $pos = strpos($config,"undervoltage");
 $lowv = substr($config,$pos);
 sscanf($lowv, "undervoltage = %f",$lowv);
 $pos = strpos($summary,"[current]");
-
-$pos = strpos($summary,"'",$pos);
-$timestamp = substr($summary,$pos+1);
-$timestamp = strstr($timestamp,"'",true);
-
+$pos = strpos($summary, "timestamp = ",$pos);
+$timestamp = substr($summary,$pos+12,14);
 function getdat($dataname) {
    global $summary, $pos;
    $pos = strpos($summary, $dataname, $pos);
@@ -250,7 +247,7 @@ for($x = 0; $x < $arrlength; $x++) {
 
 <?php
 echo ("<h2>" . $batname." Battery Data </h2>");
-echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime($timestamp)) . "</b></p>"); ?>
+echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime(strval($timestamp))) . "</b></p>"); ?>
 </div>
 <div id="bat">
 <table align="left" border="1" cellpadding="1" cellspacing="4" style="height:300px; width:<?php echo ($numbercells*38); ?>px">

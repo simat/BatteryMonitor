@@ -39,138 +39,138 @@ class Summary:
   """Handles battery summary data"""
 
   def __init__(self):
-    self.currenttime = time.localtime()
-    printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
+    self.currenttime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
+    printtime = str(self.currenttime)
     self.logfile = open(config['files']['logfile'],'at',buffering=1)
     self.sampletime = time.time()
-    self.prevtime = time.localtime()
+    self.prevtime = self.currenttime
     self.summary=self.loadsummary()
 
 #      summary = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/summary','w')
 #      pickle.dump(hivolts, summary)
 #      pickle.dump(lowvolts, summary)
 #      summary.close()
-    if self.summary['hour']['timestamp'][0:10] != printtime[0:10]:
+    if str(self.summary['hour']['timestamp'])[0:10] != printtime[0:10]:
       self.summary['hour'] = deepcopy(self.summary['current'])
-    if self.summary['currentday']['timestamp'][0:8] != printtime[0:8]:
+    if str(self.summary['currentday']['timestamp'])[0:8] != printtime[0:8]:
       self.summary['currentday'] = deepcopy(self.summary['current'])
-    if self.summary['monthtodate']['timestamp'][0:6] != printtime[0:6]:
+    if str(self.summary['monthtodate']['timestamp'])[0:6] != printtime[0:6]:
       self.summary['monthtodate'] = deepcopy(self.summary['current'])
-    if self.summary['yeartodate']['timestamp'][0:4] != printtime[0:4]:
+    if str(self.summary['yeartodate']['timestamp'])[0:4] != printtime[0:4]:
       self.summary['yeartodate'] = deepcopy(self.summary['current'])
 
   def loadsummary(self):
-      summary = {}
-      for section in summaryfile.sections():
-        summary[section] = {}
-        for key, val in summaryfile.items(section):
-          summary[section][key] = literal_eval(val)
-  #      daysummaryfile = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/daysummary','r')
-  #      self.daydata = literal_eval(daysummaryfile.read())
-  #      daysummaryfile.close()
-      return summary
+    summary = {}
+    for section in summaryfile.sections():
+      summary[section] = {}
+      for key, val in summaryfile.items(section):
+        summary[section][key] = literal_eval(val)
+#      daysummaryfile = open('/media/75cc9171-4331-4f88-ac3f-0278d132fae9/daysummary','r')
+#      self.daydata = literal_eval(daysummaryfile.read())
+#      daysummaryfile.close()
+    print(summary['current']['timestamp'])
+    return summary
 
 
   def update(self, summary, batdata):
     """ Update 'current' section of summary data with 'batdata' and write realtime log """
-    summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
-    summary['current']['minvoltages'][numcells] = summary['current']['maxvoltages'][numcells]
+    self.summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
+    self.summary['current']['minvoltages'][numcells] = self.summary['current']['maxvoltages'][numcells]
     if batdata.currentav[-3] > -config['battery']['ilowcurrent']:
-      summary['current']['maxnocharge'][numcells] = summary['current']['maxvoltages'][numcells]
+      self.summary['current']['maxnocharge'][numcells] = self.summary['current']['maxvoltages'][numcells]
     if batdata.currentav[-3] < config['battery']['ilowcurrent']:
-      summary['current']['minnoload'][numcells] = summary['current']['minvoltages'][numcells]
-    summary['current']['ah'][2] = round(batdata.soc,2)
-    summary['current']['ah'][0] = summary['current']['ah'][2]
-    summary['current']['ah'][1] = summary['current']['ah'][2]
-    summary['current']['ah'][6] = round(batdata.inahtot,2)  # current from solar etc
-    summary['current']['dod'][2] = round(batdata.socadj,2)
-    summary['current']['dod'][0] = summary['current']['dod'][2]
-    summary['current']['dod'][1] = summary['current']['dod'][2]
-#    summary['current']['amps'][1] = round(batdata.currentav[0], 1)
-#    summary['current']['amps'][0] = summary['current']['amps'][1]
-#    summary['current']['amps'][2] = round(batdata.currentav[1], 1)
+      self.summary['current']['minnoload'][numcells] = self.summary['current']['minvoltages'][numcells]
+    self.summary['current']['ah'][2] = round(batdata.soc,2)
+    self.summary['current']['ah'][0] = self.summary['current']['ah'][2]
+    self.summary['current']['ah'][1] = self.summary['current']['ah'][2]
+    self.summary['current']['ah'][6] = round(batdata.inahtot,2)  # current from solar etc
+    self.summary['current']['dod'][2] = round(batdata.socadj,2)
+    self.summary['current']['dod'][0] = self.summary['current']['dod'][2]
+    self.summary['current']['dod'][1] = self.summary['current']['dod'][2]
+#    self.summary['current']['amps'][1] = round(batdata.currentav[0], 1)
+#    self.summary['current']['amps'][0] = self.summary['current']['amps'][1]
+#    self.summary['current']['amps'][2] = round(batdata.currentav[1], 1)
     if batdata.ah > 0.0:
-      summary['current']['ah'][5] = round(batdata.ah,2)
-      summary['current']['ah'][4] = 0.0
+      self.summary['current']['ah'][5] = round(batdata.ah,2)
+      self.summary['current']['ah'][4] = 0.0
     else:
-      summary['current']['ah'][4] = round(batdata.ah,2)
-      summary['current']['ah'][5] = 0.0
+      self.summary['current']['ah'][4] = round(batdata.ah,2)
+      self.summary['current']['ah'][5] = 0.0
     if batdata.pwrbat > 0.0:
-      summary['current']['power'][1] = round(batdata.pwrbattot,6)
-      summary['current']['power'][0] = 0.0
+      self.summary['current']['power'][1] = round(batdata.pwrbattot,6)
+      self.summary['current']['power'][0] = 0.0
     else:
-      summary['current']['power'][0] = round(batdata.pwrbattot,6)
-      summary['current']['power'][1] = 0.0
-    summary['current']['power'][2] = round(batdata.pwrintot,6)
-    summary['current']['power'][3] = round(summary['current']['power'][0] - \
-                                     summary['current']['power'][2] + \
-                                     summary['current']['power'][1] ,6 )  # current to loads
-    summary['current']['batpwr1hrav'][0]=round(batdata.batpwr1hrav,3)
-    summary['current']['minmaxdemandpwr']=batdata.minmaxdemandpwr
-    summary['current']['excesssolar'][0]=round(batdata.pwravailable)
+      self.summary['current']['power'][0] = round(batdata.pwrbattot,6)
+      self.summary['current']['power'][1] = 0.0
+    self.summary['current']['power'][2] = round(batdata.pwrintot,6)
+    self.summary['current']['power'][3] = round(self.summary['current']['power'][0] - \
+                                     self.summary['current']['power'][2] + \
+                                     self.summary['current']['power'][1] ,6 )  # current to loads
+    self.summary['current']['batpwr1hrav'][0]=round(batdata.batpwr1hrav,3)
+    self.summary['current']['minmaxdemandpwr']=batdata.minmaxdemandpwr
+    self.summary['current']['excesssolar'][0]=round(batdata.pwravailable)
     for i in range(len(batdata.chargestates)):
       if batdata.chargestates[i] == b'00':
-        summary['current']['state'][i] ='Offline'
+        self.summary['current']['state'][i] ='Offline'
       elif batdata.chargestates[i] == b'10':
-        summary['current']['state'][i] ='No Sun'
+        self.summary['current']['state'][i] ='No Sun'
       elif batdata.chargestates[i] == b'11':
-        summary['current']['state'][i] ='Bulk'
+        self.summary['current']['state'][i] ='Bulk'
       elif batdata.chargestates[i] == b'12':
-        summary['current']['state'][i] ='Absorb'
+        self.summary['current']['state'][i] ='Absorb'
       elif batdata.chargestates[i] == b'13':
-        summary['current']['state'][i] ='Float'
+        self.summary['current']['state'][i] ='Float'
 
     vprint=''
     batdata.vcells=''
     batdata.iall=''
     maxmaxvoltage = 0.0
     minmaxvoltage = 5.0
-    for i in range(len(summary['current']['maxvoltages'])):
-      summary['current']['maxvoltages'][i] = round(batdata.voltsav[i+1],3)
-      summary['current']['minvoltages'][i] = summary['current']['maxvoltages'][i]
+    for i in range(len(self.summary['current']['maxvoltages'])):
+      self.summary['current']['maxvoltages'][i] = round(batdata.voltsav[i+1],3)
+      self.summary['current']['minvoltages'][i] = self.summary['current']['maxvoltages'][i]
       if batdata.currentav[-3] > -config['battery']['ilowcurrent']:
-        summary['current']['maxnocharge'][i] = summary['current']['maxvoltages'][i]
+        self.summary['current']['maxnocharge'][i] = self.summary['current']['maxvoltages'][i]
       if batdata.currentav[-3] < config['battery']['ilowcurrent']:
-        summary['current']['minnoload'][i] = summary['current']['minvoltages'][i]
+        self.summary['current']['minnoload'][i] = self.summary['current']['minvoltages'][i]
 
     for i in range(numcells):
-      maxmaxvoltage = max(maxmaxvoltage, summary['current']['maxvoltages'][i])
-      minmaxvoltage = min(minmaxvoltage, summary['current']['maxvoltages'][i])
-      summary['current']['baltime'][i]=round(batdata.baltime[i],4)
+      maxmaxvoltage = max(maxmaxvoltage, self.summary['current']['maxvoltages'][i])
+      minmaxvoltage = min(minmaxvoltage, self.summary['current']['maxvoltages'][i])
+      self.summary['current']['baltime'][i]=round(batdata.baltime[i],4)
       batdata.vcells=batdata.vcells+str(round(batdata.voltsav[i+1],3)).ljust(5,'0')+' '
 
     vprint=vprint + batdata.vcells
-    summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
+    self.summary['current']['deltav'][0] = round(maxmaxvoltage - minmaxvoltage, 3)
     if batdata.currentav[-3] < config['battery']['ilowcurrent']:
-      summary['current']['deltav'][1] = summary['current']['deltav'][0]
-    summary['current']['deltav'][2] = summary['current']['deltav'][0]
+      self.summary['current']['deltav'][1] = self.summary['current']['deltav'][0]
+    self.summary['current']['deltav'][2] = self.summary['current']['deltav'][0]
     batdata.vbat=str(round(batdata.batvoltsav[numcells],2)).ljust(5,'0')+' '
     vprint = vprint +batdata.vbat
-    batdata.vdelta= str(summary['current']['deltav'][0]).ljust(5,'0')+' '
+    batdata.vdelta= str(self.summary['current']['deltav'][0]).ljust(5,'0')+' '
     vprint = vprint+batdata.vdelta
 
     for i in range(batdata.numiins):
-      summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
-      summary['current']['iinmax'][i] = summary['current']['ioutmax'][i]
+      self.summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
+      self.summary['current']['iinmax'][i] = self.summary['current']['ioutmax'][i]
       batdata.iall=batdata.iall+str(round(batdata.currentav[i],1)).ljust(5,'0')+' '
       if batdata.currentav[i] > 0:
-        summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+        self.summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
       else:
-        summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
-      summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
-      summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
+        self.summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      self.summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
+      self.summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
 
     for i in range(len(batdata.tin)): # get temperatures
-      summary['current']['tmax'][i] = batdata.temp[i]
-      summary['current']['tmin'][i] = summary['current']['tmax'][i]
+      self.summary['current']['tmax'][i] = batdata.temp[i]
+      self.summary['current']['tmin'][i] = self.summary['current']['tmax'][i]
 
     vprint = vprint +batdata.iall
     batdata.soctxt=str(round(batdata.soc,2)).ljust(6,'0') +' '
     batdata.socadjtxt=str(round(batdata.socadj,2)).ljust(6,'0') + ' '  #  + '\033[1A'
     self.prevtime = self.currenttime
-    self.currenttime = time.localtime()
-    self.printtime = time.strftime("%Y%m%d%H%M%S ", self.currenttime)
-    summary['current']['timestamp'] = "'" + self.printtime + "'"
+    self.currenttime = int(time.strftime("%Y%m%d%H%M%S ", time.localtime()))
+    self.summary['current']['timestamp'] = str(self.currenttime)
     sys.stdout.write(eval(config['logging']['data'])+'\n')  #  + '\033[1A'
     self.logfile.write(eval(config['logging']['data'])+'\n')
 
@@ -179,8 +179,8 @@ class Summary:
   def updatesection(self, summary, section, source):
     """ Update 'summary' section 'section' with data from 'source' """
 
-    section = summary[section]
-    source = summary[source]
+    section = self.summary[section]
+    source = self.summary[source]
     section['deltav'][1] = max(section['deltav'][1], source['deltav'][1])
     section['deltav'][2] = max(section['deltav'][2], source['deltav'][2])
     section['deltav'][0] = min(section['deltav'][0], source['deltav'][0])
@@ -211,7 +211,7 @@ class Summary:
       section['kwinmax'][i] = min(section['kwinmax'][i], source['kwinmax'][i])
       section['kwhin'][i] = round(source['kwhin'][i]+section['kwhin'][i], 5)
       section['kwhout'][i] = round(source['kwhout'][i]+section['kwhout'][i], 5)
-    for i in range(len(summary['current']['maxvoltages'])):
+    for i in range(len(self.summary['current']['maxvoltages'])):
       section['maxvoltages'][i] = max(section['maxvoltages'][i], source['maxvoltages'][i])
       section['minvoltages'][i] = min(section['minvoltages'][i], source['minvoltages'][i])
       section['maxnocharge'][i] = max(section['maxnocharge'][i], source['maxnocharge'][i])
@@ -221,7 +221,7 @@ class Summary:
     for i in range(len(config['TemperatureInputs'])):
       section['tmax'][i] = max(section['tmax'][i], source['tmax'][i])
       section['tmin'][i] = min(section['tmin'][i], source['tmin'][i])
-    section['timestamp'] = summary['current']['timestamp']
+    section['timestamp'] = self.summary['current']['timestamp']
 
   def writesummary(self):
     """ Write summary file """
@@ -259,34 +259,34 @@ class Summary:
   def starthour(self, summary):
     """ Start new hour """
     self.writeperiod('hoursummaryfile', 'hour')
-    summary['hour']['ah'][3] = 0 # zero # of samples for av
-    summary['hour'] = deepcopy(summary['current'])
+    self.summary['hour']['ah'][3] = 0 # zero # of samples for av
+    self.summary['hour'] = deepcopy(self.summary['current'])
 
   def startday(self, summary):
     """ Start new Day """
 
     self.writeperiod('daysummaryfile', 'currentday')
-    summary['prevday'] = deepcopy(summary['currentday'])
-    summary['currentday']['ah'][3] = 0 # zero number of samples for av
-    summary['current']['dod'][3] += 1
-    summary['currentday'] = deepcopy(summary['current'])
+    self.summary['prevday'] = deepcopy(self.summary['currentday'])
+    self.summary['currentday']['ah'][3] = 0 # zero number of samples for av
+    self.summary['current']['dod'][3] += 1
+    self.summary['currentday'] = deepcopy(self.summary['current'])
 
   def startmonth(self, summary):
     """ Start new month """
 
     self.writeperiod('monthsummaryfile', 'monthtodate')
-    summary['monthtodate']['ah'][3] = 0  # zero number of samples for av
-    summary['monthtodate'] = deepcopy(summary['current'])
-    filecopy(config['files']['summaryfile'],config['files']['summaryfile']+ self.printtime[0:8])
+    self.summary['monthtodate']['ah'][3] = 0  # zero number of samples for av
+    self.summary['monthtodate'] = deepcopy(self.summary['current'])
+    filecopy(config['files']['summaryfile'],config['files']['summaryfile']+ str(self.currenttime)[0:8])
 
   def startyear(self, summary):
     """ Start new year """
 
     self.writeperiod('yearsummaryfile', 'yeartodate')
-    summary['yeartodate']['ah'][3] = 0  # zero number of samples for av
-    summary['yeartodate'] = deepcopy(summary['current'])
+    self.summary['yeartodate']['ah'][3] = 0  # zero number of samples for av
+    self.summary['yeartodate'] = deepcopy(self.summary['current'])
     self.logfile.close()
-    rename(config['files']['logfile'],config['files']['logfile']+str(int(self.printtime[0:4])-1))
+    rename(config['files']['logfile'],config['files']['logfile']+str(int(str(self.currenttime)[0:4])-1))
     self.logfile = open(config['files']['logfile'],'a')
 
   def close(self):

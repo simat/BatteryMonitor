@@ -36,14 +36,16 @@ maxtries=3 # number of error retries befor abort
 
 def initmain(soc):
   """ initialise main loop, soc is SOC to start battery DOD to"""
-  printtime = time.strftime("%Y%m%d%H%M%S ", time.localtime())
-  while int(printtime) <= int(summary['current']['timestamp']):
+  summary = logsummary.summary
+  printtime = int(time.strftime("%Y%m%d%H%M%S ", time.localtime()))
+  print (int(summary['current']['timestamp']),printtime)
+  while printtime < int(summary['current']['timestamp']):
     print(printtime,summary['current']['timestamp'])
     print ("Error: Current time before last sample time")
     time.sleep(30)
-    printtime = time.strftime("%Y%m%d%H%M%S", time.localtime())
+    printtime = int(time.strftime("%Y%m%d%H%M%S", time.localtime()))
 
-  print (str(printtime))
+  print (printtime)
   filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
   if soc > config['battery']['capacity']:
     print ("Battery DOD must be less than Battery Capacity")
@@ -107,7 +109,9 @@ def mainloop():
   alarms.scanalarms(batdata)
 # update summaries
   logsummary.update(summary, batdata)
-  if logsummary.currenttime[4] != logsummary.prevtime[4]:  # new minute
+  currenttime=str(logsummary.currenttime)
+  prevtime=str(logsummary.prevtime)
+  if currenttime[10:12] != prevtime[10:12]:  # new minute
     loadconfig()
     batdata.pwravailable,batdata.minmaxdemandpwr=solaravailable(batdata)
     logsummary.updatesection(summary, 'hour', 'current')
@@ -127,21 +131,20 @@ def mainloop():
     for i in range(numcells):
       batdata.baltime[i]=0
 
-
-  if logsummary.currenttime[3] != logsummary.prevtime[3]:  # new hour
+  if currenttime[8:10] != prevtime[8:10]:  # new hour
     logsummary.starthour(summary)
 
-  if logsummary.currenttime[3] < logsummary.prevtime[3]: # newday
+  if currenttime[6:8] < prevtime[6:8]: # newday
     logsummary.startday(summary)
 
-  if logsummary.currenttime[1] != logsummary.prevtime[1]: # new month
+  if currenttime[4:6] != prevtime[4:6]: # new month
     logsummary.startmonth(summary)
 
-  if logsummary.currenttime[0] != logsummary.prevtime[0]: # new year
+  if currenttime[0:4] != prevtime[0:4]: # new year
     logsummary.startyear(summary)
 
 import summary
-logsummary = summary.Summary()
+logsummary=summary.Summary()
 batdata = Readings()  # initialise batdata
 alarms = Alarms(batdata,summary) # initialise alarms
 def deamon(soc=-1):
@@ -149,7 +152,6 @@ def deamon(soc=-1):
 
   numtries=0
   while True:
-    summary = logsummary.summary
     try:
       initmain(soc)
       while True:
@@ -159,14 +161,16 @@ def deamon(soc=-1):
       numtries=maxtries
       sys.stdout.write('\n')
       logsummary.close()
+      raise
   #    sys.exit(9)
     except Exception as err:
+      raise
       log.critical(err)
       numtries+=1
-    finally:
       if numtries==maxtries:
         logsummary.close()
         raise
+
 
 if __name__ == "__main__":
   print (sys.argv)

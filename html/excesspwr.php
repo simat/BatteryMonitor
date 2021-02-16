@@ -29,9 +29,8 @@ $summary = strstr($summary,"'",true);
 $summary = file_get_contents($summary);
 
 $pos = strpos($summary,"[current]");
-$pos = strpos($summary,"'",$pos);
-$timestamp = substr($summary,$pos+1);
-$timestamp = strstr($timestamp,"'",true);
+$pos = strpos($summary, "timestamp = ",$pos);
+$timestamp = substr($summary,$pos+12,14);
 
 function getdat($dataname) {
    global $summary, $pos;
@@ -44,7 +43,7 @@ function getdat($dataname) {
 }
 
 $excesssolar = getdat("excesssolar");
-$minmaxdemandpwr = getdat("minmaxdemandpwr")
+$minmaxdemandpwr = getdat("minmaxdemandpwr");
 ?>
 
 <!-- <meta http-equiv="refresh" content="60"> -->
