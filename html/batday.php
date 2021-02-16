@@ -247,7 +247,11 @@ for($x = 0; $x < $arrlength; $x++) {
 
 <?php
 echo ("<h2>" . $batname." Battery Data </h2>");
-echo "<p><b>" . (date("l jS \of F Y h:i:s A", strtotime(strval($timestamp))) . "</b></p>"); ?>
+echo ("<p");
+if ($timestamp < date('Ymdhis') - 100) {
+  echo ( " style='color:red'");
+}
+echo ("><b>" . date("l jS \of F Y h:i:s A", strtotime(strval($timestamp))) . "</b></p>"); ?>
 </div>
 <div id="bat">
 <table align="left" border="1" cellpadding="1" cellspacing="4" style="height:300px; width:<?php echo ($numbercells*38); ?>px">
