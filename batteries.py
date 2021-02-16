@@ -134,7 +134,7 @@ def mainloop():
   if currenttime[8:10] != prevtime[8:10]:  # new hour
     logsummary.starthour(summary)
 
-  if currenttime[6:8] < prevtime[6:8]: # newday
+  if currenttime[6:8] != prevtime[6:8]: # newday
     logsummary.startday(summary)
 
   if currenttime[4:6] != prevtime[4:6]: # new month
