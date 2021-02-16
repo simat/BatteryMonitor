@@ -27,9 +27,9 @@ class Rawdat():
     adc.setup()
     self.rawdat={'ADCP9_39':0.0}
 
-  def chargeonoff(onoroff):
+  def chargeonoff(self,onoroff):
     gpio.output("P9_41",onoroff)
 
   def getdata(self):
     self.rawdat['ADCP9_39'] = adc.read("P9_39")
-    print self.rawat['ADCP_39']
+    print (self.rawdat['ADCP9_39'])
