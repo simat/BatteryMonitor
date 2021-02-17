@@ -166,6 +166,7 @@ def deamon(soc=-1):
     except Exception as err:
       log.critical(err)
       numtries+=1
+      soc=-1
       if numtries==maxtries:
         logsummary.close()
         raise
