@@ -164,7 +164,6 @@ def deamon(soc=-1):
       raise
   #    sys.exit(9)
     except Exception as err:
-      raise
       log.critical(err)
       numtries+=1
       if numtries==maxtries:
