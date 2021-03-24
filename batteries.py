@@ -66,7 +66,7 @@ def initmain(soc):
 def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
 
-    for i in range(config['sampling']['samplesav']):
+  for i in range(config['sampling']['samplesav']):
 #          printvoltage = ''
 #          for i in range(numcells+1):
 #            printvoltage = printvoltage + str(round(batdata.batvolts[i],3)).ljust(5,'0') + ' '
@@ -75,35 +75,35 @@ def mainloop():
 
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
 #          print batdata.socadj/(float(summary['current']['dod'][3])*24.0)
-    if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
-    and prevbatvoltage >= config['battery']['vreset'] \
-    and summary['current']['dod'][3] != 0 \
-    and -batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
+  if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
+  and prevbatvoltage >= config['battery']['vreset'] \
+  and summary['current']['dod'][3] != 0 \
+  and -batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
 
-      if summary['current']['dod'][3] <= 0 :
-        socerr=0
-      else:
-        socerr=batdata.socadj/(float(summary['current']['dod'][3])*24.0)
-        socerr=max(socerr,-0.01)
-        socerr=min(socerr,0.01)
-      config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
-      batconfigdata=SafeConfigParser()
-      batconfigdata.read('battery.cfg')
-      batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
-      with open('battery.cfg', 'w') as batconfig:
-        batconfigdata.write(batconfig)
-      batconfig.closed
-
-      batdata.soc = config['battery']['socreset']
-      batdata.socadj = batdata.soc
-      summary['current']['dod'][3] = 0
+    if summary['current']['dod'][3] <= 0 :
+      socerr=0
     else:
-      batdata.soc = batdata.soc + batdata.batah
-      batdata.socadj = batdata.socadj +batdata.batahadj
-    batdata.ah = batdata.ah + batdata.batah
-    batdata.inahtot = batdata.inahtot + batdata.inah
-    batdata.pwrbattot = batdata.pwrbattot + batdata.pwrbat
-    batdata.pwrintot = batdata.pwrintot + batdata.pwrin
+      socerr=batdata.socadj/(float(summary['current']['dod'][3])*24.0)
+      socerr=max(socerr,-0.01)
+      socerr=min(socerr,0.01)
+    config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
+    batconfigdata=SafeConfigParser()
+    batconfigdata.read('battery.cfg')
+    batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
+    with open('battery.cfg', 'w') as batconfig:
+      batconfigdata.write(batconfig)
+    batconfig.closed
+
+    batdata.soc = config['battery']['socreset']
+    batdata.socadj = batdata.soc
+    summary['current']['dod'][3] = 0
+  else:
+    batdata.soc = batdata.soc + batdata.batah
+    batdata.socadj = batdata.socadj +batdata.batahadj
+  batdata.ah = batdata.ah + batdata.batah
+  batdata.inahtot = batdata.inahtot + batdata.inah
+  batdata.pwrbattot = batdata.pwrbattot + batdata.pwrbat
+  batdata.pwrintot = batdata.pwrintot + batdata.pwrin
   prevbatvoltage = batdata.batvoltsav[numcells]
 # check alarms
   alarms.scanalarms(batdata)
