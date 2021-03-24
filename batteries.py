@@ -66,8 +66,7 @@ def initmain(soc):
 def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
 
-  prevbatvoltage = batdata.batvoltsav[numcells]
-  for i in range(config['sampling']['samplesav']):
+    for i in range(config['sampling']['samplesav']):
 #          printvoltage = ''
 #          for i in range(numcells+1):
 #            printvoltage = printvoltage + str(round(batdata.batvolts[i],3)).ljust(5,'0') + ' '
@@ -105,6 +104,7 @@ def mainloop():
     batdata.inahtot = batdata.inahtot + batdata.inah
     batdata.pwrbattot = batdata.pwrbattot + batdata.pwrbat
     batdata.pwrintot = batdata.pwrintot + batdata.pwrin
+  prevbatvoltage = batdata.batvoltsav[numcells]
 # check alarms
   alarms.scanalarms(batdata)
 # update summaries
