@@ -79,7 +79,7 @@ def mainloop():
   if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
   and prevbatvoltage >= config['battery']['vreset'] \
   and summary['current']['dod'][3] != 0 \
-  and -batdata.currentav[0] < config['battery']['ireset']:  # reset SOC counter?
+  and -batdata.currentav[-3] < config['battery']['ireset']:  # reset SOC counter?
 
     if summary['current']['dod'][3] <= 0 :
       socerr=0
