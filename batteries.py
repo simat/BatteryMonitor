@@ -63,10 +63,11 @@ def initmain(soc):
 #    logsummary.startday(summary)
 #    logsummary.starthour(summary)
 
+prevbatvoltage =0
 def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
-  prevbatvoltage = batdata.batvoltsav[numcells]
 
+global prevbatvoltage
   for i in range(config['sampling']['samplesav']):
 #          printvoltage = ''
 #          for i in range(numcells+1):
@@ -102,6 +103,7 @@ def mainloop():
     batdata.soc = batdata.soc + batdata.batah
     batdata.socadj = batdata.socadj +batdata.batahadj
 
+  prevbatvoltage = batdata.batvoltsav[numcells]
   batdata.ah = batdata.ah + batdata.batah
   batdata.inahtot = batdata.inahtot + batdata.inah
   batdata.pwrbattot = batdata.pwrbattot + batdata.pwrbat
