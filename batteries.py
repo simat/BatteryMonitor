@@ -67,7 +67,7 @@ prevbatvoltage =0
 def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
 
-global prevbatvoltage
+  global prevbatvoltage
   for i in range(config['sampling']['samplesav']):
 #          printvoltage = ''
 #          for i in range(numcells+1):
