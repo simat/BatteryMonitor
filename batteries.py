@@ -38,14 +38,13 @@ def initmain(soc):
   """ initialise main loop, soc is SOC to start battery DOD to"""
   summary = logsummary.summary
   printtime = int(time.strftime("%Y%m%d%H%M%S ", time.localtime()))
-  print (int(summary['current']['timestamp']),printtime)
+#  print (int(summary['current']['timestamp']),printtime)
   while printtime < int(summary['current']['timestamp']):
     print(printtime,summary['current']['timestamp'])
     print ("Error: Current time before last sample time")
     time.sleep(30)
     printtime = int(time.strftime("%Y%m%d%H%M%S", time.localtime()))
 
-  print (printtime)
   filecopy(config['files']['summaryfile'],config['files']['summaryfile']+"R" + str(int(printtime)))
   if soc > config['battery']['capacity']:
     print ("Battery DOD must be less than Battery Capacity")
@@ -68,6 +67,7 @@ def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
 
   global prevbatvoltage
+  summary = logsummary.summary
   for i in range(config['sampling']['samplesav']):
 #          printvoltage = ''
 #          for i in range(numcells+1):
@@ -77,10 +77,11 @@ def mainloop():
 
 #          if batdata.batvoltsav[numcells] >= 55.2 and prevbatvoltage < 55.2:  # reset SOC counter?
 #          print batdata.socadj/(float(summary['current']['dod'][3])*24.0)
+
   if batdata.batvoltsav[numcells] < config['battery']['vreset'] \
-  and prevbatvoltage >= config['battery']['vreset'] \
-  and summary['current']['dod'][3] != 0 \
-  and -batdata.currentav[-3] < config['battery']['ireset']:  # reset SOC counter?
+                      and prevbatvoltage >= config['battery']['vreset'] \
+                      and summary['current']['dod'][3] != 0 \
+                      and -batdata.currentav[-3] < config['battery']['ireset']:  # reset SOC counter?
 
     if summary['current']['dod'][3] <= 0 :
       socerr=0
