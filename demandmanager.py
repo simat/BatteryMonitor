@@ -41,6 +41,6 @@ def solaravailable(batdata):
   if soc<minsoc:
     minmaxdemandpwr[1]=0
   elif soc>=config['battery']['targetsoc']:
-    minmaxdemandpwr[1]=5000
+    minmaxdemandpwr[1]=config['DemandManager']['maxdemandpwr']
   print (ibatminuteav,iavailable,soc,pwravailable,minmaxdemandpwr)
   return pwravailable,minmaxdemandpwr
