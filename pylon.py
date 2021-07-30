@@ -19,14 +19,16 @@ import numpy as np
 import sys
 import time
 import serial
-    import glob
+import glob
 from config import config
 numcells = config['battery']['numcells']
 import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
-
+initrawdat ={'DataValid':False,'BatI':0.0,'SOC':100.0,\
+               'CellV':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\
+               'Temp':[-50.0,-50.0,-50.0,-50.0,-50.0,-50.0,-50.0,-50.0]}
 
 
 class Rawdat():
@@ -34,15 +36,14 @@ class Rawdat():
   When class is instantiated the SN of the PIP is used to tie the instance of
   the class to the particular machine"""
 
-  def __init__(self,sn):
+  def __init__(self):
     self.rawdat = dict.copy(initrawdat)
     self.reply ='' # placeholder for reply from sendcmd
-    self.pythondown=0.0
-    self.sn=sn
+    self.pylondown=0.0
     try:
-      self.findpython()
+      self.findpylon()
     except serial.serialutil.SerialException as err:
-      self.pythondown=time.time() # flag pylontech is down
+      self.pylondown=time.time() # flag pylontech is down
       log.error(err)
 
 
@@ -50,7 +51,7 @@ class Rawdat():
     self.bulkv=48.0
     self.rechargev=48.0
     self.lowv=44.0
-    self.command=b''  # last command sent to pylontech
+#    self.command=b''  # last command sent to pylontech
     self.time=0.0
 
   def findpylon(self):
@@ -60,97 +61,94 @@ class Rawdat():
     for dev in glob.glob(config['Ports']['pylonport']):
       try:
         self.openpylon(dev)
-      except IOError:
-        pass
-      else:
-          self.sendcmd('\r\n')
-          self.reply=self.reply.decode()
-          if 'pylon>' in self.reply:
-            break
-          else:
-            raise serial.serialutil.SerialException('No pylon> prompt'):
-      self.sendcmp('info')  # get Pylontech info
-      if self.sn in reply:
-        self.pylonport=dev
-        break
-      except serial.serialutil.SerialException:
+        reply=self.sendcmd('\n')
+        print (reply,dev)
+        if b'pylon>' in reply:
+          self.pylonport=dev
+          break
+      except (IOError, serial.serialutil.SerialException):
         pass
       finally:
-        self.port.close
-    if self.pylonport!="":
-      break
-    else:
-      raise serial.serialutil.SerialException("Couldn't find PIP sn {}".format(self.sn))
+        self.openport.close
+    if self.pylonport=="":
+      raise serial.serialutil.SerialException("Couldn't find Pylontech battery")
 
   def openpylon(self,port):
     self.openport = serial.Serial(port,baudrate=115200,timeout=1)  # open serial port
 
-  def sendcmd(command,replylen=2048):
+  def sendcmd(self,command,replylen=2048):
     """send command/query to Pylontech battery, port must be open, return reply"""
 
     retries=2
     for tries in range(retries):
       try:
         cmd=command.encode('ascii','strict')
+        print ('command ={}'.format(cmd))
         self.openport.write(cmd)
         reply = b''
         starttime=time.time()
         for i in range(replylen):
           char=self.openport.read(1)
-          if char=='': #timeout
-            raise serial.serialutil.SerialException('No reply from Pylontech')
-          reply = reply + char
-          if char==b'$':
-            if openport.read(1)==b'$':
-              break
-          elif char==b'>'
+          if char==b'': #timeout
             break
+          reply = reply + char
+#          if char==b'$':
+#             if self.openport.read(1)==b'$':
+#              break
+          if char==b'>':
+            break
+        if reply:
+          break
       except IOError as err:
         print(err.args)
         if tries==retries-1:
           raise
+    print (reply)
+    return reply
 
-initrawdat ={'DataValid':False,'BatI':0.0,\
-             'CellV':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\
-             'Temp':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}
-batcmdidx ={'Volt':9,'current':18,'temp':27,'SOC':88}
+  batcmdidx ={'Volt':9,'current':18,'temp':27,'SOC':88}
   def getdata(self):
     """returns dictionary with data from Pylontech battery"""
 #    log.debug('open')
+    print (initrawdat)
     self.rawdat = dict.copy(initrawdat)
     if self.pylondown==0.0:
       for i in range(5):
         try:
           self.openpylon(self.pylonport)
-          cellv=np.empty((8,15))
+          cellv=np.empty((8,15), dtype=np.uint16)
           for bat in range(8):
-            self.sendcmd('bat {}'.format(bat))
-            self.reply=self.reply.decode()
-            if 'Invalid command or fail to excute.' in self.reply:
-              numbats=bats+1
+            reply=self.sendcmd('bat {}\n'.format(bat+1))
+            reply=reply.decode()
+            if 'Invalid command or fail to excute.' in reply:
+              numbats=bat+1
               break
             else:
-              idx=self.reply.index('Coulomb     \r\r\n')+8
-              x=idx+batcmdidx['current']
-              self.rawdat['BatI']=float(self.reply[x:x+4])
-              x=idx+batcmdidx['SOC']
-              self.rawdat['SOC']=int(self.reply[x:x+3])
+              idx=reply.index('Coulomb     \r\r\n')+15
               for cell in range(15):
-                x=idx+batcmdidx['Volt']
-                cellv[bat][cell]=float(self.reply[x:x+4])/1000
-
-          cellv.resize(numbats,15)
-          maxv, minv=np.amax(cellv,axis=0),np.amin(cellv,axis=0)
-          cellav=np.median(cellv,axis=0)
+                cellv[bat,cell]=int(reply[idx+9:idx+13])
+                self.rawdat['BatI']+=float(reply[idx+14:idx+20])
+                self.rawdat['Temp'][bat]=max(self.rawdat['Temp'][bat],float(reply[idx+27:idx+33])/1000)
+                self.rawdat['SOC']=min(self.rawdat['SOC'],float(reply[idx+88:idx+91]))
+                idx+=110
+          self.rawdat['BatI']=self.rawdat['BatI']/(15*numbats)
+          cellv.resize(numbats-1,15)
+          print (cellv)
+          maxvs, minvs=np.amax(cellv,axis=0),np.amin(cellv,axis=0)
+          maxv,minv=0,5000
+          for cell in range(15):
+            maxv,minv=max(maxv,maxvs[cell]),min(minv,minvs[cell])
+          cellavs=np.median(cellv,axis=0)
+          print (maxvs,maxv,minvs,minv,cellavs)
           #if max or min cell voltage in current cell # store that otherwise average
           for cell in range(15):
-            for bat in range(numbats):
-              curcell=cellv[cell][bat]
+            for bat in range(numbats-1):
+              curcell=cellv[bat][cell]
               if curcell==maxv or curcell==minv:
-                self.rawdat['CellV'][cell]=curcell
+                self.rawdat['CellV'][cell]=curcell/1000
                 break
             if self.rawdat['CellV'][cell]==0:
-              self.rawdat['CellV'][cell]=cellav[cell]
+              self.rawdat['CellV'][cell]=cellavs[cell]/1000
 
           self.rawdat['DataValid']=True
           break
@@ -167,7 +165,8 @@ batcmdidx ={'Volt':9,'current':18,'temp':27,'SOC':88}
             self.pylondown=time.time() # flag pylon is down
             log.error("Pylon interface down")
         finally:
-          self.port.close()
+          self.openport.close()
+          print (self.rawdat)
     else:
       downtime=time.time()-self.pylondown
       if downtime!=0 and downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
