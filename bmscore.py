@@ -47,6 +47,7 @@ def rdallconfig(port='/dev/ttyUSB0'):
 
 def openbms(port='/dev/ttyUSB0'):
     ser = serial.Serial(port)  # open serial port
+<<<<<<< HEAD
     ser.timeout = 1
     return ser
 
