@@ -37,7 +37,7 @@ class Rawdat():
   When class is instantiated the SN of the PIP is used to tie the instance of
   the class to the particular machine"""
 
-  def __init__(self):
+  def __init__(self,interfacesinuse):
     self.rawdat = deepcopy(initrawdat)
     self.reply ='' # placeholder for reply from sendcmd
     self.pylondown=0.0
@@ -132,7 +132,7 @@ class Rawdat():
                 self.rawdat['Temp'][bat]=max(self.rawdat['Temp'][bat],float(reply[idx+27:idx+33])/1000)
                 self.rawdat['SOC']=min(self.rawdat['SOC'],float(reply[idx+88:idx+91]))
                 idx+=110
-          self.rawdat['BatI']=self.rawdat['BatI']/(15000*numbats)
+          self.rawdat['BatI']=self.rawdat['BatI']/(15000)
           cellv.resize(numbats,15)
           # print (cellv)
           maxvs, minvs=np.amax(cellv,axis=0),np.amin(cellv,axis=0)
