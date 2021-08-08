@@ -27,13 +27,13 @@ zeroamps=[0.0 for i in range(len(config['CurrentInputs']))]
 section={}
 section['timestamp']=20140101000000
 section['maxvoltages'],section['maxnocharge']=zerovolts,zerovolts
-section['minnolod'],section['minvoltages']=fivevolts,fivevolts
+section['minnoload'],section['minvoltages']=fivevolts,fivevolts
 section['deltav']=[5.0,0.0,0.0]
 section['ioutmax'],section['kwoutmax'],section['kwhout']=zeroamps,zeroamps,zeroamps
 section['iinmax'],section['kwinmax'],section['kwhin']=zeroamps,zeroamps,zeroamps
 section['ah']=[10000.0, 0.0, -1000.0, 0.0, 0.0, 0.0, 0.0]
 section['dod']=[10000.0, 0.0, -1000.0, 0]
-section['power']=[10000.0, 0.0, -1000.0, 0]
+section['power']=[0.0, 0.0, 0.0, 0]
 section['tmax']=[-60.0 for i in range(len(config['TemperatureInputs']))]
 section['tmin']=[120.0 for i in range(len(config['TemperatureInputs']))]
 section['baltime']=[ 0.0 for i in range(config['battery']['numcells'])]
@@ -41,7 +41,7 @@ section['baltime']=[ 0.0 for i in range(config['battery']['numcells'])]
 order='timestamp',\
       'maxvoltages',\
       'maxnocharge',\
-      'minnolod',\
+      'minnoload',\
       'minvoltages',\
       'deltav',\
       'ioutmax',\
@@ -79,8 +79,8 @@ def writesummaryfile():
 
 
 try:
-  with open (config['files']['summaryfile'],x) as summaryfile:
-  writesummaryfile()
+  with open (config['files']['summaryfile'],'x') as summaryfile:
+    writesummaryfile()
 except FileExistsError:
   x=input('Summary file exists, do you want to overwrite it?[y]')
   if not x or x=='y' or x=='Y':
