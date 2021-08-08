@@ -16,6 +16,7 @@
 
 #!/usr/bin/python
 import numpy as np
+from copy import deepcopy
 import sys
 import time
 import serial
@@ -37,7 +38,7 @@ class Rawdat():
   the class to the particular machine"""
 
   def __init__(self):
-    self.rawdat = dict.copy(initrawdat)
+    self.rawdat = deepcopy(initrawdat)
     self.reply ='' # placeholder for reply from sendcmd
     self.pylondown=0.0
     try:
@@ -62,7 +63,7 @@ class Rawdat():
       try:
         self.openpylon(dev)
         reply=self.sendcmd('\n')
-        print (reply,dev)
+        # print (reply,dev)
         if b'pylon>' in reply:
           self.pylonport=dev
           break
@@ -83,7 +84,7 @@ class Rawdat():
     for tries in range(retries):
       try:
         cmd=command.encode('ascii','strict')
-        print ('command ={}'.format(cmd))
+        # print ('command ={}'.format(cmd))
         self.openport.write(cmd)
         reply = b''
         starttime=time.time()
@@ -103,15 +104,15 @@ class Rawdat():
         print(err.args)
         if tries==retries-1:
           raise
-    print (reply)
+#      print (reply)
     return reply
 
   batcmdidx ={'Volt':9,'current':18,'temp':27,'SOC':88}
   def getdata(self):
     """returns dictionary with data from Pylontech battery"""
 #    log.debug('open')
-    print (initrawdat)
-    self.rawdat = dict.copy(initrawdat)
+    # print (initrawdat)
+    self.rawdat =deepcopy(initrawdat)
     if self.pylondown==0.0:
       for i in range(5):
         try:
@@ -121,35 +122,38 @@ class Rawdat():
             reply=self.sendcmd('bat {}\n'.format(bat+1))
             reply=reply.decode()
             if 'Invalid command or fail to excute.' in reply:
-              numbats=bat+1
+              numbats=bat
               break
             else:
               idx=reply.index('Coulomb     \r\r\n')+15
               for cell in range(15):
                 cellv[bat,cell]=int(reply[idx+9:idx+13])
-                self.rawdat['BatI']+=float(reply[idx+14:idx+20])
+                self.rawdat['BatI']+=float(reply[idx+14:idx+27])
                 self.rawdat['Temp'][bat]=max(self.rawdat['Temp'][bat],float(reply[idx+27:idx+33])/1000)
                 self.rawdat['SOC']=min(self.rawdat['SOC'],float(reply[idx+88:idx+91]))
                 idx+=110
-          self.rawdat['BatI']=self.rawdat['BatI']/(15*numbats)
-          cellv.resize(numbats-1,15)
-          print (cellv)
+          self.rawdat['BatI']=self.rawdat['BatI']/(15000*numbats)
+          cellv.resize(numbats,15)
+          # print (cellv)
           maxvs, minvs=np.amax(cellv,axis=0),np.amin(cellv,axis=0)
           maxv,minv=0,5000
           for cell in range(15):
             maxv,minv=max(maxv,maxvs[cell]),min(minv,minvs[cell])
           cellavs=np.median(cellv,axis=0)
-          print (maxvs,maxv,minvs,minv,cellavs)
+          # print (maxvs,maxv,minvs,minv,cellavs)
           #if max or min cell voltage in current cell # store that otherwise average
           for cell in range(15):
-            for bat in range(numbats-1):
+            for bat in range(numbats):
               curcell=cellv[bat][cell]
               if curcell==maxv or curcell==minv:
-                self.rawdat['CellV'][cell]=curcell/1000
+                self.rawdat['CellV'][cell]+=float(curcell)/1000.0
+                if cell < 15-1:
+                  self.rawdat['CellV'][cell+1]=self.rawdat['CellV'][cell]
                 break
-            if self.rawdat['CellV'][cell]==0:
-              self.rawdat['CellV'][cell]=cellavs[cell]/1000
-
+              elif bat==numbats-1:
+                self.rawdat['CellV'][cell]+=int(cellavs[cell])/1000.0
+                if cell < 15-1:
+                  self.rawdat['CellV'][cell+1]=self.rawdat['CellV'][cell]
           self.rawdat['DataValid']=True
           break
         except ValueError as err:
