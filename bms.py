@@ -31,24 +31,26 @@ class Bms:
 #  def __init__(self,sn):
 
 
-  def findbms(self):
+  def findbms(self,interfacesinuse):
     """Scan ports to find BMS port"""
 
     self.bmsport=""
     for dev in glob.glob(config['Ports']['bmsport']):
       for i in range(2):
-        try:
-          self.openbms(dev)
-          reply=self.getbmsdat(self.port,b'\x05\x00')
-          if reply.decode('ascii','strict')==self.sn:
-            self.bmsport=dev
-            break
-        except serial.serialutil.SerialException:
-          pass
-        finally:
-          self.port.close()
-      if self.bmsport!="":
-        break
+        if dev not in interfacesinuse:
+          print(dev)
+          try:
+            self.openbms(dev)
+            reply=self.getbmsdat(self.port,b'\x05\x00')
+            if reply.decode('ascii','strict')==self.sn:
+              self.bmsport=dev
+              break
+          except serial.serialutil.SerialException:
+            pass
+          finally:
+            self.port.close()
+        if self.bmsport!="":
+          break
     if self.bmsport=="":
       raise Exception("Couldn't find BMS hardware name {}".format(self.sn))
 
@@ -105,11 +107,11 @@ class Bms:
 
 class Rawdat(Bms):
 
-  def __init__(self,sn):
+  def __init__(self,sn,interfacesinuse):
 
     self.rawdat={'DataValid':False,'V00':0.0}
     self.sn=sn
-    self.findbms()
+    self.findbms(interfacesinuse)
     """port=self.openbms(config['files']['usbport'])
     data=self.getbmsdat(port,b'\x04\x00') # get BMS voltages
     port.close()

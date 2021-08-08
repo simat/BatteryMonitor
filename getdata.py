@@ -82,7 +82,8 @@ class Readings:
     self.vcells=""
     self.soctxt=""
     self.socadjtxt=""
-    self.sampleshr=3600/config['sampling']['sampletime'] # numder of sample / hour
+    self.sampleshr=3600/config['sampling']['sampletime']
+    self.interfacesinuse=[]# numder of sample / hour
     batpwr1hrav = 0.0
 
     for i in config['Interfaces']:
@@ -93,10 +94,11 @@ class Readings:
         sn=sn.group()
       exec("import " + interface)
       if sn==None:
-        exec('self.'+i +'='+interface+'.Rawdat()')
+#        exec('self.'+i +'='+interface+'.Rawdat(self.interfacesinuse)')
+        exec('self.{}={}.Rawdat({})'.format(i,interface,self.interfacesinuse))
       else:
-        exec('self.'+i+'='+interface+".Rawdat('"+str(sn[1:])+"')")
-
+#        exec('self.'+i+'='+interface+".Rawdat('"+str(sn[1:])+"self.interfacesinuse')")
+        exec('self.{}={}.Rawdat("{}",{})'.format(i,interface,sn[1:],self.interfacesinuse))
     self.vin = []
     for i in sorted(config['VoltageInputs']):
       self.vin = self.vin + [config['VoltageInputs'][i]]

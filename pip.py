@@ -36,14 +36,14 @@ class Rawdat():
   When class is instantiated the SN of the PIP is used to tie the instance of
   the class to the particular machine"""
 
-  def __init__(self,sn):
+  def __init__(self,sn,InterfacesInUse):
     self.rawdat = dict.copy(initrawdat)
     self.reply ='' # placeholder for reply from sendcmd
     self.pipdown=0.0
     self.sn=sn
     self.timeslaveon=0  # time slave inverter was turned on
     try:
-      self.findpip()
+      self.findpip(InterfacesInUse)
     except serial.serialutil.SerialException as err:
       self.pipdown=time.time() # flag pip is down
       log.error(err)
@@ -60,24 +60,26 @@ class Rawdat():
     self.timeoverload=0.0  #time overload started
     self.time=0.0
 
-  def findpip(self):
+  def findpip(self,InterfacesInUse):
     """Scan ports to find PIP port"""
 
     self.pipport=""
     for dev in glob.glob(config['Ports']['pipport']):
-      for i in range(2):
-        try:
-          self.openpip(dev)
-          self.sendcmd("QID",18)
-          if self.reply[1:15].decode('ascii','strict')==str(self.sn):
-            self.pipport=dev
-            break
-        except serial.serialutil.SerialException:
-          pass
-        finally:
-          self.port.close
-      if self.pipport!="":
-        break
+      if dev not in InterfacesInUse:
+        print(dev)
+        for i in range(2):
+          try:
+            self.openpip(dev)
+            self.sendcmd("QID",18)
+            if self.reply[1:15].decode('ascii','strict')==str(self.sn):
+              self.pipport=dev
+              break
+          except serial.serialutil.SerialException:
+            pass
+          finally:
+            self.port.close
+        if self.pipport!="":
+          break
     if self.pipport=="":
       raise serial.serialutil.SerialException("Couldn't find PIP sn {}".format(self.sn))
 
@@ -215,7 +217,7 @@ class Rawdat():
           self.port.close()
     else:
       downtime=time.time()-self.pipdown
-      if downtime!=0 and downtime%600<config['sampling']['sampletime']: #retry interface every 10 minutes
+      if downtime and downtime%600==0: #retry interface every 10 minutes
         try:
           self.findpip()
         except serial.serialutil.SerialException:
