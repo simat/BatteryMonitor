@@ -21,7 +21,8 @@ set_error_handler("customError");
 </style>
 
 <?php
-$time = date("YmdHis");
+setlocale(LC_TIME,"");
+$time = strftime("%Y%m%d%H%M%S");
 $pos = strpos($config,"summary");
 $pos = strpos($config,"'",$pos);
 $summary = substr($config,$pos+1);
