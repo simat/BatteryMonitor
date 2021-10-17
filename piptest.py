@@ -18,7 +18,7 @@ import sys
 import serial
 import binascii
 from re import match
-
+from time import sleep
 #commands={'QPIGS':110,'Q':74,'QFLAG':15,'QPIRI':102,'PE':7,'PD':7,'PBCV':7,  \
 #          'PCVV':7,'PBFT':7,'PCVT':7}
 #commands={}
@@ -40,8 +40,11 @@ def sendcmd(command,port='/dev/ttyUSB1'):
     crc=crccalc(cmd)
     cmd=cmd+crc.to_bytes(2, byteorder='big')+b'\r'
     openport=openpip(port)
+    openport.reset_input_buffer()
     openport.write(cmd)
 #    reply = openport.read(replylen)
+    sleep(2)
+    print ('chars in buf {}'.format(openport.in_waiting))
     reply = b''
     for i in range(200):
       char=openport.read(1)
