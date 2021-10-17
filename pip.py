@@ -105,10 +105,15 @@ class Rawdat():
     self.command=command.encode('ascii','strict')
     crc=self.crccalc(self.command)
     self.command=self.command+crc.to_bytes(2, byteorder='big')+b'\r'
-#    self.port.reset_input_buffer()
-    self.port.flushInput()
+    self.port.reset_input_buffer()
     self.port.write(self.command)
-    self.reply = self.port.read(replylen)
+    for i in range(1000):
+      self.reply=self.port.read(1)
+      print (self.reply)
+      if self.reply!=b'\r' and self.reply!=b'(':
+        break
+    self.reply = b'('+self.reply+self.port.read(replylen-2)
+    print('command {} reply {}'.format(self.command,self.reply))
     if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
       raise serial.serialutil.SerialException('CRC error in reply')
 
@@ -216,8 +221,8 @@ class Rawdat():
         finally:
           self.port.close()
     else:
-      downtime=time.time()-self.pipdown
-      if downtime and downtime%600==0: #retry interface every 10 minutes
+      missedsamples=(time.time()-self.pipdown)//config['sampling']['sampletime']
+      if missedsamples%(600/config['sampling']['sampletime'])==0:  #retry interface every 10 minutes
         try:
           self.findpip([])
         except serial.serialutil.SerialException:
