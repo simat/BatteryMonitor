@@ -219,7 +219,7 @@ class Rawdat():
       downtime=time.time()-self.pipdown
       if downtime and downtime%600==0: #retry interface every 10 minutes
         try:
-          self.findpip()
+          self.findpip([])
         except serial.serialutil.SerialException:
           pass
 #          if downtime>3600: # upgrade error if more than one hour

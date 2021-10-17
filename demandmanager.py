@@ -28,19 +28,25 @@ def solaravailable(batdata):
   batdata.ibatminute = 0.0
   batdata.ibatnuminmin = 0
 
-  iavailable=(IBatZero-ibatminuteav)
   minsoc = config['battery']['targetsoc'] -config['battery']['minsocdif']
   soc=1-batdata.socadj/config['battery']['capacity']
+
+  """  iavailable=(IBatZero-ibatminuteav)
   #iavailable=iavailable+config['battery']['maxchargerate']* \
   #           (soc-config['battery']['targetsoc'])*20
   iavailable=(soc\
              -config['battery']['targetsoc'])*config['battery']['capacity']\
              *config['DemandManager']['socfeedback'] \
-             -ibatminuteav*config['DemandManager']['currentfeedback']
+             -ibatminuteav*config['DemandManager']['currentfeedback']"""
+
+  # calcualte power available as current I plus amount to get SOC to target in one minute
+  iavailable=60*((1-config['battery']['targetsoc'])*config['battery']['capacity']-batdata.socadj)\
+             -batdata.currentav[-3]
   pwravailable=iavailable*batdata.batvoltsav[config['battery']['numcells']+1]
   if soc<minsoc:
     minmaxdemandpwr[1]=0
   elif soc>=config['battery']['targetsoc']:
     minmaxdemandpwr[1]=config['DemandManager']['maxdemandpwr']
-  print (ibatminuteav,iavailable,soc,pwravailable,minmaxdemandpwr)
+  print ("ibat {} iavailable {} soc {} sodadj {} pwravail {} minmax {}".format(batdata.currentav[-3],iavailable,soc,batdata.socadj,pwravailable,minmaxdemandpwr))
+
   return pwravailable,minmaxdemandpwr

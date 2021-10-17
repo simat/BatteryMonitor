@@ -132,6 +132,15 @@ def chgreg(reginfo):
         reginfo[reg]=float(reginfo[reg])
       bmscore.configinmem[reg]['value']=reginfo[reg]
 
+def main():
+  print (sys.argv)
+  if len(sys.argv) == 2:
+    sendcmd(sys.argv[1])
+  elif len(sys.argv) == 3:
+    sendcmd(sys.argv[1],sys.argv[2])
+  elif len(sys.argv) == 1:
+
+    print ('Enter BMS port address option [3]')
     print ('(1) /dev/ttyUSB0')
     print ('(2) /dev/ttyUSB1')
     print ('(3) other')

@@ -112,12 +112,12 @@ def mainloop():
 # check alarms
   alarms.scanalarms(batdata)
 # update summaries
+  batdata.pwravailable,batdata.minmaxdemandpwr=solaravailable(batdata)
   logsummary.update(summary, batdata)
   currenttime=str(logsummary.currenttime)
   prevtime=str(logsummary.prevtime)
   if currenttime[10:12] != prevtime[10:12]:  # new minute
     loadconfig()
-    batdata.pwravailable,batdata.minmaxdemandpwr=solaravailable(batdata)
     logsummary.updatesection(summary, 'hour', 'current')
     logsummary.updatesection(summary, 'alltime','current')
     logsummary.updatesection(summary, 'currentday','current')
