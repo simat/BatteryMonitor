@@ -30,13 +30,17 @@ log.addHandler(logger.errfile)
 from demandmanager import solaravailable
 from getdata import Readings
 from alarms import Alarms
+import mqtt
 maxtries=3 # number of error retries befor abort
 #exec(config['files']['alarms'])  # import alarm code
 #import Adafruit_BBIO.GPIO as GPIO
-
+client =''
 def initmain(soc):
   """ initialise main loop, soc is SOC to start battery DOD to"""
+  global client
   summary = logsummary.summary
+  client=mqtt.connect_mqtt()
+  client.loop_start()
   printtime = int(time.strftime("%Y%m%d%H%M%S ", time.localtime()))
 #  print (int(summary['current']['timestamp']),printtime)
   while printtime < int(summary['current']['timestamp']):
@@ -124,6 +128,10 @@ def mainloop():
     logsummary.updatesection(summary, 'monthtodate', 'current')
     logsummary.updatesection(summary, 'yeartodate', 'current')
     logsummary.writesummary()
+    mqtt.publish(client,"batpwrin",str(-summary['alltime']['power'][0]))
+    mqtt.publish(client,"batpwrout",str(summary['alltime']['power'][1]))
+    mqtt.publish(client,"solarpwr",str(-summary['alltime']['power'][2]))
+#    mqtt.publish(client,"loadpwr",str(summary['current']['power'][3]))
     batdata.ah = 0.0
     batdata.ahadj = 0.0
     batdata.inahtot = 0.0

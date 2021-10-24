@@ -1,7 +1,7 @@
 # Editor Backup files and others
 *~
 *old
-battery.cfg
+#battery.cfg
 testing
 summary
 
@@ -58,4 +58,3 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-

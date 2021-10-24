@@ -37,14 +37,11 @@ class Rawdat():
     sleep(20) # wait for second inverter to power up and syncronise
     self.gpio.output(off,0)
 
-  def swapinverter(self,batdata,on,off):
+  def swapinverter(self,on,off):
     """turns on inverter controlled by Pi pin number if on arg and turns off
        inverter controlled by Pi pin number in off arg"""
-    if batdata.pip.timeoverload==0:  # check if not in overload condition
-      threading.Thread(target=self.backgroundswapinv,args=(self,on,off)).start()
-    else:
-      for pin in self.savedinvertermap:
-        self.savedinvertermap[pin]=self.savedinvertermap[pin]^1
+    
+    threading.Thread(target=self.backgroundswapinv,args=(self,on,off)).start()
 
   def allinvon(self,batdata,pins):
     """ turn on inverters in pins list, save current inverter map"""

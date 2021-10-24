@@ -24,32 +24,35 @@ topic = "power"
 # password = 'public'
 
 def connect_mqtt():
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT Broker!")
-        else:
-            print("Failed to connect, return code %d\n", rc)
+  def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+    else:
+        print("Failed to connect, return code %d\n", rc)
 
-    client = mqtt_client.Client('karrak_power_supply')
+  client = mqtt_client.Client('karrak_power_supply')
 #    client.username_pw_set(username, password)
-    client.on_connect = on_connect
-    client.connect(broker, port)
-    return client
+  client.on_connect = on_connect
+  client.connect(broker, port)
+  return client
 
-
-def publish(client, data):
+def publish(client,topic,data):
   result = client.publish(topic, data)
+  print (result)
   # result: [0, 1]
   status = result[0]
   if status == 0:
-      print(f"Send `{msg}` to topic `{topic}`")
+      print(f"Send `{data}` to topic `{topic}`")
   else:
       print(f"Failed to send message to topic {topic}")
 
 def test():
-  client = connect_mqtt()
   client.loop_start()
   count =0
   while True:
     count+=1
-    publish(client,data=f"SOC:{count}")
+    publish(client,'batpwr',data=f"SOC:{count},powerin:{count}")
+    publish(client,'solarpwr',data=f"SOC:{count},powerin:{count}")
+    publish(client,'loadpwr',data=f"SOC:{count},powerin:{count}")
+
+    sleep(2)

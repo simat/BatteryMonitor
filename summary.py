@@ -28,6 +28,7 @@ log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
+
 summaryfile = SafeConfigParser()
 summaryfile.read(config['files']['summaryfile'])
 
@@ -103,7 +104,7 @@ class Summary:
       self.summary['current']['power'][0] = round(batdata.pwrbattot,6)
       self.summary['current']['power'][1] = 0.0
     self.summary['current']['power'][2] = round(batdata.pwrintot,6)
-    self.summary['current']['power'][3] = round(self.summary['current']['power'][0] - \
+    self.summary['current']['power'][3] = round(self.summary['current']['power'][0] + \
                                      self.summary['current']['power'][2] + \
                                      self.summary['current']['power'][1] ,6 )  # current to loads
     self.summary['current']['batpwr1hrav'][0]=round(batdata.batpwr1hrav,3)
@@ -173,6 +174,7 @@ class Summary:
     self.summary['current']['timestamp'] = str(self.currenttime)
     sys.stdout.write(eval(config['logging']['data'])+'\n')  #  + '\033[1A'
     self.logfile.write(eval(config['logging']['data'])+'\n')
+#    self.publish(data=eval(config['mqtt']['data']))
 
 #    log.info(config['logging']['data'])
 

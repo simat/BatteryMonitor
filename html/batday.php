@@ -248,7 +248,7 @@ for($x = 0; $x < $arrlength; $x++) {
 <?php
 echo ("<h2>" . $batname." Battery Data </h2>");
 echo ("<p");
-if ($timestamp < date('YmdHis') - 100) {
+if ($timestamp < date('YmdHis') - 150) {
   echo ( " style='color:red'");
 }
 echo ("><b>" . date("l jS \of F Y h:i:s A", strtotime(strval($timestamp))) . "</b></p>"); ?>
