@@ -44,7 +44,7 @@ class Rawdat():
     self.timeslaveon=0  # time slave inverter was turned on
     try:
       self.findpip(InterfacesInUse)
-    except serial.SerialException as err:
+    except IOError as err:
       self.pipdown=time.time() # flag pip is down
       log.error(err)
 
@@ -74,14 +74,14 @@ class Rawdat():
             if self.reply[1:15].decode('ascii','strict')==str(self.sn):
               self.pipport=dev
               break
-          except serial.SerialException:
+          except IOError:
             pass
           finally:
             self.port.close
         if self.pipport!="":
           break
     if self.pipport=="":
-      raise serial.SerialException("Couldn't find PIP sn {}".format(self.sn))
+      raise IOError("Couldn't find PIP sn {}".format(self.sn))
 
   def openpip(self,port):
     self.port = serial.Serial(port,baudrate=2400,timeout=1)  # open serial port
@@ -115,12 +115,12 @@ class Rawdat():
     self.reply = b'('+self.reply+self.port.read(replylen-2)
     print('command {} reply {}'.format(self.command,self.reply))
     if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
-      raise serial.SerialException('CRC error in reply')
+      raise IOError('CRC error in reply')
 
   def sendQ1(self):  #special to send Q1 command due to variable length reply
     try:
       self.sendcmd('Q1',74)
-    except serial.SerialException:
+    except IOError:
       if self.reply[-2:-1]!=b'\r': # check for different length self.reply
         self.reply=self.reply+self.port.read(17)
 
@@ -128,7 +128,7 @@ class Rawdat():
 #    time.sleep(5.0)
     self.sendcmd(command,7)
     if self.reply[1:4]!=b'ACK':
-#      raise serial.SerialException('Bad Parameters')
+#      raise IOError('Bad Parameters')
        log.error('Bad Reply {} to command {}'.format(self.reply,command))
 
 
@@ -141,7 +141,7 @@ class Rawdat():
   def setparamnoerror(self,command): # set parameter, ignore errors
     try:
       self.opensetparam(command)
-    except serial.SerialException:
+    except IOError:
       pass
 
   def backgroundswapinv(self):
@@ -150,13 +150,13 @@ class Rawdat():
 
     try:
       self.opensetparam('MNCHGC1498')
-    except serial.SerialException:
+    except IOError:
       pass
     else:
       time.sleep(20) # wait for second inverter to power up and syncronise
       try:
         self.opensetparam('MNCHGC0497')
-      except serial.SerialException:
+      except IOError:
         pass
 
   def swapinverter(self):
@@ -173,14 +173,14 @@ class Rawdat():
     self.timeoverload=time.time()
     try:
       self.opensetparam('MNCHGC1498')  # turn on slave
-    except serial.SerialException:
+    except IOError:
       pass
 
   def slaveinvoff(self):
     """turn slave inverter off"""
     try:
       self.opensetparam('MNCHGC1497')  # turn off slave
-    except serial.SerialException:
+    except IOError:
       pass
 
 
@@ -212,7 +212,7 @@ class Rawdat():
           if i==4:
             self.pipdown=time.time() # flag pip is down
             log.error("PIP sn {} interface down".format(self.sn))
-        except serial.SerialException as err:
+        except IOError as err:
           log.error('PIP interface error {}'.format(err))
           time.sleep(0.5)
           if i==4:
@@ -225,7 +225,7 @@ class Rawdat():
       if missedsamples%(600/config['sampling']['sampletime'])==0:  #retry interface every 10 minutes
         try:
           self.findpip([])
-        except serial.SerialException:
+        except IOError:
           pass
 #          if downtime>3600: # upgrade error if more than one hour
 #            raise
