@@ -131,6 +131,12 @@ def mainloop():
     mqtt.publish(client,"batpwrin",str(-summary['alltime']['power'][0]))
     mqtt.publish(client,"batpwrout",str(summary['alltime']['power'][1]))
     mqtt.publish(client,"solarpwr",str(-summary['alltime']['power'][2]))
+    mqtt.publish(client,"karrak/energy",\
+    f'{{"batpwrin":{-summary["alltime"]["power"][0]},\
+"batpwrpwrout":{summary["alltime"]["power"][1]},\
+"solarpwr":{-summary["alltime"]["power"][2]},\
+"batsoc":{round(100*(1-summary["current"]["dod"][0]/config["battery"]["capacity"]),1)}\
+}}')
 #    mqtt.publish(client,"loadpwr",str(summary['current']['power'][3]))
     batdata.ah = 0.0
     batdata.ahadj = 0.0
