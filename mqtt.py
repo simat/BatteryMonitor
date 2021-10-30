@@ -36,9 +36,11 @@ def connect_mqtt():
   client.connect(broker, port)
   return client
 
-def publish(client,topic,data):
+client=connect_mqtt()
+client.loop_start()
+
+def publish(topic,data):
   result = client.publish(topic, data)
-  print (result)
   # result: [0, 1]
   status = result[0]
   if status == 0:
