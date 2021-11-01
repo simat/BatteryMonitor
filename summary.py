@@ -155,10 +155,8 @@ class Summary:
       self.summary['current']['ioutmax'][i] = round(batdata.currentav[i],1)
       self.summary['current']['iinmax'][i] = self.summary['current']['ioutmax'][i]
       batdata.iall=batdata.iall+str(round(batdata.currentav[i],1)).ljust(5,'0')+' '
-      if batdata.currentav[i] > 0:
-        self.summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
-      else:
-        self.summary['current']['kwinmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      self.summary['current']['kwoutmax'][i] = round(batdata.currentav[i]*batdata.batvoltsav[numcells]/1000,3)
+      self.summary['current']['kwinmax'][i] = self.summary['current']['kwoutmax'][i]
       self.summary['current']['kwhin'][i] = round(batdata.kWhin[i],6)
       self.summary['current']['kwhout'][i] = round(batdata.kWhout[i],6)
 
