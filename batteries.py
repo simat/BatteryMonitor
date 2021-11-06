@@ -20,7 +20,7 @@ import sys
 #import Adafruit_ADS1x15
 import time
 from shutil import copy as filecopy
-from config import loadconfig, config
+from config import loadconfig, config, editbatconfig
 from configparser import SafeConfigParser
 numcells = config['battery']['numcells']
 import logger
@@ -63,6 +63,8 @@ def initmain(soc):
 #    logsummary.startday(summary)
 #    logsummary.starthour(summary)
 
+
+
 prevbatvoltage =0
 def mainloop():
   """ Main loop, gets battery data, gets summary.py to do logging"""
@@ -91,13 +93,7 @@ def mainloop():
       socerr=max(socerr,-0.01)
       socerr=min(socerr,0.01)
     config['battery']['ahloss']=config['battery']['ahloss']-socerr/2
-    batconfigdata=SafeConfigParser()
-    batconfigdata.read('battery.cfg')
-    batconfigdata.set('battery','ahloss',str(config['battery']['ahloss']))
-    with open('battery.cfg', 'w') as batconfig:
-      batconfigdata.write(batconfig)
-    batconfig.closed
-
+    editbatconfig('battery','ahloss',str(config['battery']['ahloss']))
     batdata.soc = config['battery']['socreset']
     batdata.socadj = batdata.soc
     summary['current']['dod'][3] = 0

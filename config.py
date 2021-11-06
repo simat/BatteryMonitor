@@ -16,6 +16,16 @@
 from ast import literal_eval
 from configparser import SafeConfigParser
 
+def editbatconfig(section,item,itemvalue):
+  """Change item in section in battery.cfg"""
+
+  batconfigdata=SafeConfigParser()
+  batconfigdata.read('battery.cfg')
+  batconfigdata.set(section,item,itemvalue)
+  with open('battery.cfg', 'w') as batconfig:
+    batconfigdata.write(batconfig)
+  batconfig.closed
+
 config ={}
 def loadconfig():
     configfile = SafeConfigParser()
@@ -26,5 +36,3 @@ def loadconfig():
         config[section][key] = literal_eval(val)
 
 loadconfig()
-
-

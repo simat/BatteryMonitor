@@ -16,12 +16,25 @@
 
 from paho.mqtt import client as mqtt_client
 from time import sleep
+from config import editbatconfig
 
 broker = '192.168.2.123'
 port = 1883
 topic = "power"
 # username = 'emqx'
 # password = 'public'
+
+def on_message(client,userata,message):
+  """Executed when any subscribed MQTT message arives
+  At present assumes payload is item to change in battery.config
+  makes change and rewrites config file"""
+
+  payload=eval(str(message.payload.decode("utf-8")))
+  print (payload)
+  for section in payload:
+    for item in payload[section]:
+#      print (section,item,payload[section][item])
+      editbatconfig(section,item,payload[section][item])
 
 def connect_mqtt():
   def on_connect(client, userdata, flags, rc):
@@ -37,6 +50,8 @@ def connect_mqtt():
   return client
 
 client=connect_mqtt()
+client.on_message=on_message
+client.subscribe("karrak/energy/settings")
 client.loop_start()
 
 def publish(topic,data):
@@ -47,6 +62,7 @@ def publish(topic,data):
       print(f"Send `{data}` to topic `{topic}`")
   else:
       print(f"Failed to send message to topic {topic}")
+
 
 def test():
   client.loop_start()
