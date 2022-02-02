@@ -17,12 +17,16 @@
 from paho.mqtt import client as mqtt_client
 from time import sleep
 from config import editbatconfig
+import logger
+log = logger.logging.getLogger(__name__)
+log.setLevel(logger.logging.DEBUG)
+log.addHandler(logger.errfile)
 
-broker = '192.168.2.123'
+broker = '192.168.1.94'
 port = 1883
 topic = "power"
-# username = 'emqx'
-# password = 'public'
+username = 'karrak'
+password = 'simat6811'
 
 def on_message(client,userata,message):
   """Executed when any subscribed MQTT message arives
@@ -36,22 +40,29 @@ def on_message(client,userata,message):
 #      print (section,item,payload[section][item])
       editbatconfig(section,item,payload[section][item])
 
+def on_disconnect(client, userdata, rc):
+  if rc:
+    log.error('MQTT server disconnect, Restart MQTT')
+
 def connect_mqtt():
   def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        print("Connected to MQTT Broker!")
+      print("Connected to MQTT Broker!")
     else:
-        print("Failed to connect, return code %d\n", rc)
+      fail=f"Failed to connect, return code {rc}"
+      print(fail)
+      log.error(fail)
 
-  client = mqtt_client.Client('karrak_power_supply')
-#    client.username_pw_set(username, password)
+  client = mqtt_client.Client('karrak_power_supply',clean_session=False)
+  client.username_pw_set(username, password)
   client.on_connect = on_connect
   client.connect(broker, port)
   return client
 
 client=connect_mqtt()
 client.on_message=on_message
-client.subscribe("karrak/energy/settings")
+client.on_disconnect=on_disconnect
+client.subscribe("karrak/energy/settings",qos=1)
 client.loop_start()
 
 def publish(topic,data):
@@ -59,9 +70,11 @@ def publish(topic,data):
   # result: [0, 1]
   status = result[0]
   if status == 0:
-      print(f"Send `{data}` to topic `{topic}`")
+    print(f"Send `{data}` to topic `{topic}`")
   else:
-      print(f"Failed to send message to topic {topic}")
+    fail=f"MQQT Failed to send message to topic {topic}"
+    print(fail)
+    log.error(fail)
 
 
 def test():
