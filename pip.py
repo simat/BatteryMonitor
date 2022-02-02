@@ -66,7 +66,7 @@ class Rawdat():
     self.pipport=""
     for dev in glob.glob(config['Ports']['pipport']):
       if dev not in InterfacesInUse:
-        print(dev)
+#        print(dev)
         for i in range(2):
           try:
             self.openpip(dev)
@@ -109,11 +109,11 @@ class Rawdat():
     self.port.write(self.command)
     for i in range(1000):
       self.reply=self.port.read(1)
-      print (self.reply)
+#      print (self.reply)
       if self.reply!=b'\r' and self.reply!=b'(':
         break
     self.reply = b'('+self.reply+self.port.read(replylen-2)
-    print('command {} reply {}'.format(self.command,self.reply))
+#    print('command {} reply {}'.format(self.command,self.reply))
     if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
       raise IOError('CRC error in reply')
 
@@ -234,7 +234,7 @@ class Rawdat():
           log.info("PIP sn {} interface back up".format(self.sn))
 
     self.acloadav = (self.acloadav*2 + self.rawdat['ACW'])/3  # running average
-    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
+#    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
     if self.timeoverload !=0.0:
       self.time=time.time()
       if self.acloadav*config['Inverters']['numinverters']>config['Inverters']['turnonslave']  \
