@@ -23,7 +23,7 @@ zerovolts=[0.0 for i in range(config['battery']['numcells']+1)]
 fivevolts=[5.0 for i in range(config['battery']['numcells']+1)]
 fivevolts[-1]=5.0*config['battery']['numcells']
 zeroamps=[0.0 for i in range(len(config['CurrentInputs']))]
-inverterstate=['Offline' for i in range(config['Inverters']['numinverters'])
+inverterstate=['Offline' for i in range(config['Inverters']['numinverters'])]
 
 section={}
 section['timestamp']=20140101000000
