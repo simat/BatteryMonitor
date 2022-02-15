@@ -16,17 +16,12 @@
 
 from paho.mqtt import client as mqtt_client
 from time import sleep
-from config import editbatconfig
+from config import editbatconfig, config
 import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
 
-broker = '192.168.1.94'
-port = 1883
-topic = "power"
-username = 'karrak'
-password = 'simat6811'
 
 def on_message(client,userata,message):
   """Executed when any subscribed MQTT message arives
@@ -53,16 +48,17 @@ def connect_mqtt():
       print(fail)
       log.error(fail)
 
-  client = mqtt_client.Client('karrak_power_supply',clean_session=False)
-  client.username_pw_set(username, password)
+  client = mqtt_client.Client(config['mqtt']['clientname'],clean_session=False)
+  if config['mqtt']['username']:
+    client.username_pw_set(config['mqtt']['username'],config['mqtt']['password'])
   client.on_connect = on_connect
-  client.connect(broker, port)
+  client.connect(config['mqtt']['brokerip'],config['mqtt']['brokerport'])
   return client
 
 client=connect_mqtt()
 client.on_message=on_message
 client.on_disconnect=on_disconnect
-client.subscribe("karrak/energy/settings",qos=1)
+client.subscribe(config['mqtt']['subscribetopic'],qos=1)
 client.loop_start()
 
 def publish(topic,data):
