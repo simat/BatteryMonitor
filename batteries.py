@@ -27,10 +27,14 @@ import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
-from demandmanager import solaravailable
+from demandmanager import solaravailable, initdemand
 from getdata import Readings
 from alarms import Alarms
 import mqtt
+"""if "telsa" in config:
+  teslaenabled=config['tesla']['enable']
+if teslaenabled:
+    import tesla"""
 maxtries=3 # number of error retries befor abort
 #exec(config['files']['alarms'])  # import alarm code
 #import Adafruit_BBIO.GPIO as GPIO
@@ -59,6 +63,7 @@ def initmain(soc):
       batdata.socadj = soc
       summary['current']['dod'][3] = 0
     summary['current']['dod'][3] = -100 # flag don't adjust leakage current
+    initdemand(1-batdata.socadj/config['battery']['capacity'])
     prevtime = logsummary.currenttime
 #    logsummary.startday(summary)
 #    logsummary.starthour(summary)
@@ -110,6 +115,8 @@ def mainloop():
   alarms.scanalarms(batdata)
 # update summaries
   batdata.pwravailable,batdata.minmaxdemandpwr=solaravailable(batdata)
+#  if teslaenabled:
+#    tesla.updatecharge(batdata)
   logsummary.update(summary, batdata)
   currenttime=str(logsummary.currenttime)
   prevtime=str(logsummary.prevtime)
