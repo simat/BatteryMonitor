@@ -42,6 +42,7 @@ class Rawdat():
     self.pipdown=0.0
     self.sn=sn
     self.timeslaveon=0  # time slave inverter was turned on
+    self.numinvon=1 # number of inverters currently on
     try:
       self.findpip(InterfacesInUse)
     except IOError as err:
@@ -173,6 +174,7 @@ class Rawdat():
     self.timeoverload=time.time()
     try:
       self.opensetparam('MNCHGC1498')  # turn on slave
+      self.numinvon=2
     except IOError:
       pass
 
@@ -180,6 +182,7 @@ class Rawdat():
     """turn slave inverter off"""
     try:
       self.opensetparam('MNCHGC1497')  # turn off slave
+      self.numinvon=1
     except IOError:
       pass
 
@@ -197,10 +200,12 @@ class Rawdat():
           self.rawdat['BOutI']=float(self.reply[77:82].decode('ascii','strict'))
           self.rawdat['PVI']=float(self.reply[60:64].decode('ascii','strict'))
           self.rawdat['BV']=float(self.reply[41:46].decode('ascii','strict'))
-          self.rawdat['ACW']=float(self.reply[28:32].decode('ascii','strict'))
+          self.rawdat['ACW']=float(self.reply[28:32].decode('ascii','strict')) \
+                             *config['MPPSolar']['acwcal']
           self.sendQ1()
           self.rawdat['ChgStat']=self.reply[69:71]
-          self.rawdat['PVW']=float(self.reply[53:56].decode('ascii','strict'))
+          self.rawdat['PVW']=float(self.reply[53:56].decode('ascii','strict')) \
+                             *config['MPPSolar']['pvwcal']
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=-self.rawdat['PVI']
           self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
@@ -234,7 +239,7 @@ class Rawdat():
           log.info("PIP sn {} interface back up".format(self.sn))
 
     self.acloadav = (self.acloadav*2 + self.rawdat['ACW'])/3  # running average
-#    print ('acloadav {} ACW1 {} '.format(self.acloadav,self.rawdat['ACW']))
+    print ('acloadav {} ACW {}'.format(self.acloadav,self.rawdat['ACW']))
     if self.timeoverload !=0.0:
       self.time=time.time()
       if self.acloadav*config['Inverters']['numinverters']>config['Inverters']['turnonslave']  \
