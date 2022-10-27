@@ -27,7 +27,7 @@ import logger
 log = logger.logging.getLogger(__name__)
 log.setLevel(logger.logging.DEBUG)
 log.addHandler(logger.errfile)
-initrawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ChgStat':b'00'}
+initrawdat ={'DataValid':False,'BInI':0.0,'BOutI':0.0,'BV':0.0,'PVI':0.0,'PVW':0,'ACW':0.0,'ACV':0.0,'ChgStat':b'00'}
 
 
 
@@ -206,10 +206,12 @@ class Rawdat():
           self.rawdat['ChgStat']=self.reply[69:71]
           self.rawdat['PVW']=float(self.reply[53:56].decode('ascii','strict')) \
                              *config['MPPSolar']['pvwcal']
+          self.rawdat['ACV']=float(self.reply[11:16].decode('ascii','strict'))
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
-          self.rawdat['ipv']=-self.rawdat['PVI']
-          self.rawdat['iload']=self.rawdat['ibat']-self.rawdat['ipv']
+          self.rawdat['ipv']=self.rawdat['PVW']/self.rawdat['BV']
+          self.rawdat['iload']=-self.rawdat['ACW']/self.rawdat['BV']
           self.rawdat['DataValid']=True
+          print (self.rawdat)
           break
         except ValueError as err:
           log.error('PIP bad response{} to command {}'.format(self.reply,self.command))
