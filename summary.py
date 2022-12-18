@@ -75,6 +75,9 @@ class Summary:
 
   def update(self, summary, batdata):
     """ Update 'current' section of summary data with 'batdata' and write realtime log """
+    self.prevtime = self.currenttime
+    self.currenttime = int(time.strftime("%Y%m%d%H%M%S ", time.localtime()))
+    self.summary['current']['timestamp'] = str(self.currenttime)
     self.summary['current']['maxvoltages'][numcells] = round(batdata.batvoltsav[numcells],2)
     self.summary['current']['minvoltages'][numcells] = self.summary['current']['maxvoltages'][numcells]
     if batdata.currentav[-3] > -config['battery']['ilowcurrent']:
@@ -88,6 +91,12 @@ class Summary:
     self.summary['current']['dod'][2] = round(batdata.socadj,2)
     self.summary['current']['dod'][0] = self.summary['current']['dod'][2]
     self.summary['current']['dod'][1] = self.summary['current']['dod'][2]
+    self.summary['current']['dod'][4] = round(\
+    100-100*(self.summary["current"]["dod"][0])/\
+    (config["battery"]["capacity"]*\
+    (1-(int(self.currenttime/10000000000)-config['battery']['yearinstalled'])\
+    *config['battery']['lossperyear']/100)),1)
+
 #    self.summary['current']['amps'][1] = round(batdata.currentav[0], 1)
 #    self.summary['current']['amps'][0] = self.summary['current']['amps'][1]
 #    self.summary['current']['amps'][2] = round(batdata.currentav[1], 1)
@@ -167,9 +176,6 @@ class Summary:
     vprint = vprint +batdata.iall
     batdata.soctxt=str(round(batdata.soc,2)).ljust(6,'0') +' '
     batdata.socadjtxt=str(round(batdata.socadj,2)).ljust(6,'0') + ' '  #  + '\033[1A'
-    self.prevtime = self.currenttime
-    self.currenttime = int(time.strftime("%Y%m%d%H%M%S ", time.localtime()))
-    self.summary['current']['timestamp'] = str(self.currenttime)
     sys.stdout.write(eval(config['logging']['data'])+'\n')  #  + '\033[1A'
     self.logfile.write(eval(config['logging']['data'])+'\n')
 #    self.publish(data=eval(config['mqtt']['data']))
