@@ -151,7 +151,7 @@ $dod = getdat("dod");
 $temp = getdat("tmax");
 $state = getdat("state");
 $batpwr1hrav = getdat("batpwr1hrav");
-$capacity = round(100*($batcapacity-$dod[0])/$batcapacity);
+$capacity = round($dod[4]);
 if  ($capacity > "75") {
    $capcolour="green";
 }  elseif ($capacity > "50") {
