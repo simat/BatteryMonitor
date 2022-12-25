@@ -205,7 +205,7 @@ class Rawdat():
                              *config['MPPSolar']['acwcal']
           self.sendQ1()
           self.rawdat['ChgStat']=self.reply[69:71]
-          self.rawdat['PVW']=float(self.reply[53:56].decode('ascii','strict')) \
+          self.rawdat['PVW']=float(self.reply[53:57].decode('ascii','strict')) \
                              *config['MPPSolar']['pvwcal']
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=self.rawdat['PVI']
