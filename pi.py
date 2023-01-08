@@ -22,7 +22,7 @@ class Rawdat():
   """class for using the raspberry Pi for IO"""
 
   savedinvertermap ={}
-  def __init__(self):
+  def __init__(self,InterfacesInUse):
     self.gpio=gpio
     self.gpio.setmode(self.gpio.BOARD)
     self.gpio.setup(11, self.gpio.OUT, initial = 1)
