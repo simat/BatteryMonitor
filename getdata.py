@@ -68,6 +68,7 @@ class Readings:
     self.inah = 0.0
     self.inahtot = 0.0
     self.ah = 0.0
+    self.prevbatvoltage = 0.0
 
     self.mincellv=100.0
     self.maxcellv=0.0
