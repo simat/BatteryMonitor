@@ -205,11 +205,11 @@ class Rawdat():
                              *config['MPPSolar']['acwcal']
           self.sendQ1()
           self.rawdat['ChgStat']=self.reply[69:71]
-          self.rawdat['PVW']=float(self.reply[53:56].decode('ascii','strict')) \
+          self.rawdat['PVW']=float(self.reply[53:57].decode('ascii','strict')) \
                              *config['MPPSolar']['pvwcal']
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
-          self.rawdat['ipv']=self.rawdat['PVI']
-          self.rawdat['iload']=self.rawdat['ipv']-self.rawdat['ibat']
+          self.rawdat['ipv']=self.rawdat['PVW']/self.rawdat['BV']
+          self.rawdat['iload']=self.rawdat['ACW']/self.rawdat['BV']
           self.rawdat['DataValid']=True
           break
         except ValueError as err:
