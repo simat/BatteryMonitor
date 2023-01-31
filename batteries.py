@@ -125,22 +125,11 @@ def mainloop():
     logsummary.updatesection(summary, 'monthtodate', 'current')
     logsummary.updatesection(summary, 'yeartodate', 'current')
     logsummary.writesummary()
-#    mqtt.publish(client,"batpwrin",str(-summary['alltime']['power'][0]))
-#    mqtt.publish(client,"batpwrout",str(summary['alltime']['power'][1]))
-#    mqtt.publish(client,"solarpwr",str(-summary['alltime']['power'][2]))
-#    print(exec("config["mqtt"]["payload"]))
     for item in config['mqtt']['payload']:
       config['mqtt']['payload'][item]=eval(config['mqtt']['payload'][item])
     mqtt.publish(config['mqtt']['topic'],f"{config['mqtt']['payload']}".replace("'",'"'))
 #    print(f'{config["mqtt"]["payload"]}')
-#    mqtt.publish(client,"broome_st/energy",\
-#    f'{{"batpwrin":{-summary["alltime"]["power"][0]},\
-#"batpwrpwrout":{summary["alltime"]["power"][1]},\
-#"solarpwr":{-summary["alltime"]["power"][2]},\
-#"batsoc":{round(100*(1-summary["current"]["dod"][0]/config["battery"]["capacity"]),1)}\
-#}}')
 
-#    mqtt.publish(client,"loadpwr",str(summary['current']['power'][3]))
     batdata.ah = 0.0
     batdata.ahadj = 0.0
     batdata.inahtot = 0.0

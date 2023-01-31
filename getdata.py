@@ -55,10 +55,9 @@ class Readings:
     self.pwravailable = 0.0  # amount of excess solar power available
     self.minmaxdemandpwr = [0.0,0.0] # min and max amount of excess power
     self.batcapresidual = config['battery']['capacity']*\
-                          (1-(int(time.strftime("%Y", time.localtime())\
+                          (1-(int(time.strftime("%Y", time.localtime()))\
                           -config['battery']['yearinstalled'])\
-                          *(config['battery']['lossperyear']/100))) # residual battery capacity factor
-
+                          *(config['battery']['lossperyear']/100)) # residual battery capacity factor
     #  rawcurrent = 0.0
     #  batcurrent = 0.0
     #  batcurrentav = 0.0
