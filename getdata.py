@@ -54,6 +54,10 @@ class Readings:
     self.chargestates = [ b'00' for i in range(len(config['Status']))]
     self.pwravailable = 0.0  # amount of excess solar power available
     self.minmaxdemandpwr = [0.0,0.0] # min and max amount of excess power
+    self.batcapresidual = config['battery']['capacity']*\
+                          (1-(int(time.strftime("%Y", time.localtime())\
+                          -config['battery']['yearinstalled'])\
+                          *(config['battery']['lossperyear']/100))) # residual battery capacity factor
 
     #  rawcurrent = 0.0
     #  batcurrent = 0.0
@@ -180,7 +184,7 @@ class Readings:
     self.pwrin = self.inah*batvoltsav/1000 # gross input energy
     self.pwrbat = self.batah*batvoltsav/1000 # battery energy in/out
     self.batpwr1hrav = self.batpwr1hrav \
-                    +(self.currentav[-3]*batvoltsav/1000-self.batpwr1hrav)/self.sampleshr # caculate battery power 1hr running av in kW
+                    +1.2*(self.currentav[-3]*batvoltsav/1000-self.batpwr1hrav)/self.sampleshr # caculate battery power 1hr running av in kW
     self.ibatminute = self.ibatminute+self.currentav[-3]
     self.ibatnuminmin += 1
     for i in range(0,self.numiins):

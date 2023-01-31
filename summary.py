@@ -92,10 +92,7 @@ class Summary:
     self.summary['current']['dod'][0] = self.summary['current']['dod'][2]
     self.summary['current']['dod'][1] = self.summary['current']['dod'][2]
     self.summary['current']['dod'][4] = round(\
-    100-100*(self.summary["current"]["dod"][0])/\
-    (config["battery"]["capacity"]*\
-    (1-(int(self.currenttime/10000000000)-config['battery']['yearinstalled'])\
-    *config['battery']['lossperyear']/100)),1)
+    100-100*(self.summary["current"]["dod"][0])/(batdata.batcapresidual),1)
 
 #    self.summary['current']['amps'][1] = round(batdata.currentav[0], 1)
 #    self.summary['current']['amps'][0] = self.summary['current']['amps'][1]
