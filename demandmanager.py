@@ -15,6 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from config import config
+from summary import summary
 IBatZero = 0.0   # 'Zero' battery current flow to calculate available power
 minmaxdemandpwr = [0,0]
 trackingsoc = -1.0  # target SOC if tracking battery SOC up and down, min=targetsoc
@@ -37,14 +38,6 @@ def solaravailable(batdata):
 
   soc=1-batdata.socadj/config['battery']['capacity']
 
-  """  iavailable=(IBatZero-ibatminuteav)
-  #iavailable=iavailable+config['battery']['maxchargerate']* \
-  #           (soc-config['battery']['targetsoc'])*20
-  iavailable=(soc\
-             -config['battery']['targetsoc'])*config['battery']['capacity']\
-             *config['DemandManager']['socfeedback'] \
-             -ibatminuteav*config['DemandManager']['currentfeedback']"""
-
   # calcualte power available as current I plus amount to get SOC to target in one minute
   iavailable=60*((1-trackingsoc)*config['battery']['capacity']-batdata.socadj)\
              -batdata.currentav[-3]
@@ -60,12 +53,14 @@ def solaravailable(batdata):
   else:
     trackingsoc=config['battery']['targetsoc']
 
-  if soc<trackingsoc - config['battery']['minsocdif']:
+  if soc<(trackingsoc - config['battery']['minsocdif'])
+     or (config['DemandManager']['float?'] and
+         summary['current']['state'][0]<>'Float'):
     minmaxdemandpwr[1]=0
   elif soc>=trackingsoc:
     minmaxdemandpwr[1]=min(config['DemandManager']['maxdemandpwr'],\
                        config['Inverters']['ratedoutput']*(batdata.pip.numinvon-1)\
                        +config['Inverters']['turnonslave']+500)
-  print ("ibat {} iavailable {} soc {} sodadj {} pwravail {} minmax {} trackSOC {}"\
-  .format(batdata.currentav[-3],iavailable,soc,batdata.socadj,pwravailable,minmaxdemandpwr,trackingsoc))
+#  print ("ibat {} iavailable {} soc {} sodadj {} pwravail {} minmax {} trackSOC {}"\
+#  .format(batdata.currentav[-3],iavailable,soc,batdata.socadj,pwravailable,minmaxdemandpwr,trackingsoc))
   return pwravailable,minmaxdemandpwr
