@@ -23,7 +23,7 @@ from time import sleep
 #          'PCVV':7,'PBFT':7,'PCVT':7}
 #commands={}
 def openpip(port):
-  openport = serial.Serial(port,baudrate=2400,timeout=1.0)  # open serial port
+  openport = serial.Serial(port,baudrate=2400,timeout=2.0)  # open serial port
   return openport
 
 def sendcmd(command,port='/dev/ttyUSB1'):
@@ -43,14 +43,8 @@ def sendcmd(command,port='/dev/ttyUSB1'):
     openport.reset_input_buffer()
     openport.write(cmd)
 #    reply = openport.read(replylen)
-    sleep(2)
+    reply=openport.readline()
     print ('chars in buf {}'.format(openport.in_waiting))
-    reply = b''
-    for i in range(200):
-      char=openport.read(1)
-      reply = reply + char
-      if char==b'\r':
-        break
     if  crccalc(reply[0:-3]) != int.from_bytes(reply[-3:-1],byteorder='big'):
       raise IOError("CRC error in Pip4048 return string")
   except IOError as err:

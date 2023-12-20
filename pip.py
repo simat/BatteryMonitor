@@ -72,7 +72,7 @@ class Rawdat():
         for i in range(2):
           try:
             self.openpip(dev)
-            self.sendcmd("QID",18)
+            self.sendcmd("QID")
             if self.reply[1:15].decode('ascii','strict')==str(self.sn):
               self.pipport=dev
               break
@@ -102,36 +102,24 @@ class Rawdat():
       crc+=1
     return crc
 
-  def sendcmd(self,command,replylen):
+  def sendcmd(self,command):
     """send command/query to Pip4048, return reply"""
     self.command=command.encode('ascii','strict')
     crc=self.crccalc(self.command)
     self.command=self.command+crc.to_bytes(2, byteorder='big')+b'\r'
     self.port.reset_input_buffer()
     self.port.write(self.command)
-    for i in range(1000):
-      self.reply=self.port.read(1)
-#      print (self.reply)
-      if self.reply!=b'\r' and self.reply!=b'(':
-        break
-    self.reply = b'('+self.reply+self.port.read(replylen-2)
-#    print('command {} reply {}'.format(self.command,self.reply))
+    self.reply=self.port.readline()
+ #    print('command {} reply {}'.format(self.command,self.reply))
     if self.crccalc(self.reply[0:-3]) != int.from_bytes(self.reply[-3:-1],byteorder='big'):
       raise IOError('CRC error in reply')
 
-  def sendQ1(self):  #special to send Q1 command due to variable length reply
-    try:
-      self.sendcmd('Q1',74)
-    except IOError:
-      if self.reply[-2:-1]!=b'\r': # check for different length self.reply
-        self.reply=self.reply+self.port.read(17)
-
   def setparam(self,command):
 #    time.sleep(5.0)
-    self.sendcmd(command,7)
+    self.sendcmd(command)
     if self.reply[1:4]!=b'ACK':
-#      raise IOError('Bad Parameters')
-       log.error('Bad Reply {} to command {}'.format(self.reply,command))
+      log.error('Bad Reply {} to command {}'.format(self.reply,command))
+      raise IOError('Bad Parameters')
 
 
   def opensetparam(self,command):
@@ -196,17 +184,18 @@ class Rawdat():
       for i in range(5):
         try:
           self.openpip(self.pipport)
-          self.sendcmd('QPIGS',110)
+          self.sendcmd('QPIGS')
           self.rawdat['BInI']=float(self.reply[47:50].decode('ascii','strict'))
           self.rawdat['BOutI']=float(self.reply[77:82].decode('ascii','strict'))
           self.rawdat['PVI']=float(self.reply[60:64].decode('ascii','strict'))
           self.rawdat['BV']=float(self.reply[41:46].decode('ascii','strict'))
           self.rawdat['ACW']=float(self.reply[28:32].decode('ascii','strict')) \
                              *config['MPPSolar']['acwcal']
-          self.sendQ1()
-          self.rawdat['ChgStat']=self.reply[69:71]
-          self.rawdat['PVW']=float(self.reply[53:57].decode('ascii','strict')) \
-                             *config['MPPSolar']['pvwcal']
+          self.sendcmd('Q1')
+          if len(self.reply) == 91:
+            self.rawdat['ChgStat']=self.reply[69:71]
+            self.rawdat['PVW']=float(self.reply[53:57].decode('ascii','strict'))
+          self.rawdat['PVW']=self.rawdat['PVW']*config['MPPSolar']['pvwcal']
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=self.rawdat['PVW']/self.rawdat['BV']
           self.rawdat['iload']=self.rawdat['ACW']/self.rawdat['BV']
