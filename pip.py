@@ -118,8 +118,8 @@ class Rawdat():
 #    time.sleep(5.0)
     self.sendcmd(command)
     if self.reply[1:4]!=b'ACK':
-      log.error('Bad Reply {} to command {}'.format(self.reply,command))
-      raise IOError('Bad Parameters')
+       log.error('Bad Reply {} to command {}'.format(self.reply,command))
+       raise IOError('Bad Parameters')
 
 
   def opensetparam(self,command):
@@ -163,17 +163,20 @@ class Rawdat():
     self.timeoverload=time.time()
     try:
       self.opensetparam('MNCHGC1498')  # turn on slave
-      self.numinvon=2
     except IOError:
       pass
+    else:
+      self.numinvon=2
 
   def slaveinvoff(self):
     """turn slave inverter off"""
     try:
       self.opensetparam('MNCHGC1497')  # turn off slave
-      self.numinvon=1
     except IOError:
       pass
+    else:
+      self.numinvon=1
+
 
 
   def getdata(self):
