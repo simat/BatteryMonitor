@@ -198,6 +198,10 @@ class Rawdat():
           if len(self.reply) == 91:
             self.rawdat['ChgStat']=self.reply[69:71]
             self.rawdat['PVW']=float(self.reply[53:57].decode('ascii','strict'))
+          elif len(self.reply) == 51:
+            self.rawdat['ChgStat']=self.reply[46:48]
+            self.rawdat['PVW']=float(self.reply[41:45].decode('ascii','strict'))
+           
           self.rawdat['PVW']=self.rawdat['PVW']*config['MPPSolar']['pvwcal']
           self.rawdat['ibat']=self.rawdat['BOutI']-self.rawdat['BInI']
           self.rawdat['ipv']=self.rawdat['PVW']/self.rawdat['BV']
