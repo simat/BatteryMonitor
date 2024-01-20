@@ -1,0 +1,12 @@
+[Unit]
+Description=Start Battery Monitor Deamon
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/startpython.sh
+#Restart=always
+
+[Install]
+WantedBy=multi-user.target
